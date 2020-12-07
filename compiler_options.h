@@ -1,0 +1,10 @@
+#ifndef COMPILER_OPTIONS
+#define COMPILER_OPTIONS
+
+enum OPERATION_CODE {
+	OPCODE_IF    = 'i',
+	OPCODE_WHILE = 'w',
+	OPCODE_FOR   = 'f'
+};
+
+#endif // COMPILER_OPTIONS
