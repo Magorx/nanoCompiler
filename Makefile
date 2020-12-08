@@ -1,4 +1,4 @@
-CUR_PROG = gr
+CUR_PROG = ncc
 
 ifndef VERBOSE
 .SILENT:
@@ -15,10 +15,10 @@ WARNINGS = -Wall -Wextra -Wno-multichar
 STANDARD =  
 CFLAGS = $(STANDARD) $(WARNINGS) -lm -std=c++17
 
-all: gr
+all: ncc
 
-gr: main.cpp compiler.h compiler_options.h recursive_parser.h lexical_parser.h lex_token.h code_node.h $(GC)/announcement.h
-	$(CPP) $(CFLAGS) main.cpp -o gr
+ncc: main.cpp compiler.h id_table_scope.h id_table.h compiler_options.h recursive_parser.h lexical_parser.h lex_token.h code_node.h $(GC)/announcement.h
+	$(CPP) $(CFLAGS) main.cpp -o ncc
 
 run: all
 	./$(CUR_PROG)

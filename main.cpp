@@ -6,7 +6,20 @@
 
 #include "compiler.h"
 
+enum MODES {
+	RUN = 1,
+	COMPILE = 2
+};
+
+int MODE = COMPILE;
+
+//#define TEST
+int test();
+
 int main() {
+#ifdef TEST
+	test();
+#else
 	const char *file_name = "prog.wzr";
 
 	File file = {};
@@ -19,11 +32,11 @@ int main() {
 	Compiler comp = {};
 	CodeNode *prog = comp.read_to_nodes(&file);
 
-	prog->space_dump();
-	printf("\n");
+	// prog->space_dump();
+	// printf("\n");
 
 	if (!prog) {
-	} else {
+	} else if (MODE == RUN) {
 		const int var_tabe_size = 257;
 		double var_table[var_tabe_size];
 		for (int i = 0; i < var_tabe_size; ++i) {
@@ -50,11 +63,21 @@ int main() {
 			}
 		}
 		printf("+---+------------+\n");
+	} else if (MODE == COMPILE) {
+		printf("compiling...\n");
+		comp.compile(prog, "out.kc");
+		system("cat out.kc");
+		printf("\n");
 	}
 
 	CodeNode::DELETE(prog, true, true);
 	file.dtor();
 
 	printf(".doned.\n");
+#endif
+	return 0;
+}
+
+int test() {
 	return 0;
 }

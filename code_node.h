@@ -24,16 +24,13 @@ union CodeNodeData {
 	StringView *id;
 };
 
-class CodeNode {
-private:
+struct CodeNode {
 // data =======================================================================
-char type;
-CodeNodeData data;
-
-CodeNode *L;
-CodeNode *R;
+	char type;
+	CodeNodeData data;
+	CodeNode *L;
+	CodeNode *R;
 //=============================================================================
-
 
 public:
 	CodeNode            (const CodeNode&) = delete;
@@ -186,39 +183,47 @@ public:
 		data.id = id_;
 	}
 
-	char get_type() {
+	char get_type() const {
 		return type;
 	}
 
-	int get_op() {
+	int get_op() const {
 		return data.op;
 	}
 
-	int get_var() {
+	int get_var() const {
 		return data.var;
 	}
 
-	double get_val() {
+	double get_val() const {
 		return data.val;
 	}
 
-	StringView *get_id() {
+	StringView *get_id() const {
 		return data.id;
 	}
 
-	bool is_op() {
+	int get_var_from_id() const {
+		return (*data.id)[0];
+	}
+
+	bool is_op() const {
 		return type == OPERATION;
 	}
 
-	bool is_var() {
+	bool is_op(const int op) const {
+		return type == OPERATION && data.op == op;
+	}
+
+	bool is_var() const {
 		return type == VARIABLE;
 	}
 
-	bool is_val() {
+	bool is_val() const {
 		return type == VALUE;
 	}
 
-	bool is_id() {
+	bool is_id() const {
 		return type == ID;
 	}
 
@@ -325,10 +330,15 @@ public:
 	
 // ============================================================================
 
-	void space_dump(FILE *file = stdout) {
+	void space_dump(FILE *file = stdout) const {
+		if (is_op(';')) {
+			//fprintf(file, ";");
+			return;
+		}
+
 		if (L) {
 			fprintf(file, "(");
-			L->space_dump();
+			L->space_dump(file);
 			fprintf(file, ")");
 		}
 
@@ -340,7 +350,7 @@ public:
 		} else if (is_val()) {
 			fprintf(file, "%lg", data.val);
 		} else if (is_id()) {
-			data.id->print();
+			data.id->print(file);
 		} else {
 			fprintf(file, "ERR");
 		}
@@ -348,7 +358,7 @@ public:
 
 		if (R) {
 			fprintf(file, "(");
-			R->space_dump();
+			R->space_dump(file);
 			fprintf(file, ")");
 		}
 	}

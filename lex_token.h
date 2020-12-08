@@ -156,7 +156,7 @@ struct Token {
 			printf("[");
 		}
 		if (type == T_END) {
-			printf("0{END}0");
+			printf("0[END]0");
 		} else if (type == T_NUMBER) {
 			printf("%lg", data.num);
 		} else if (type == T_OP) {

@@ -112,14 +112,14 @@ private:
 	}
 
 	void collect_id_or_long_op() {
-		if (StringView::starts_with(cur, "if")) {
-			cur += 2;
-			ADD_TOKEN(T_OP, OPCODE_IF);
-		} else if (StringView::starts_with(cur, "while")) {
-			cur += 5;
-			ADD_TOKEN(T_OP, OPCODE_WHILE);
-		} else if (StringView::starts_with(cur, "for")) {
+		if (StringView::starts_with(cur, "if ")) {
 			cur += 3;
+			ADD_TOKEN(T_OP, OPCODE_IF);
+		} else if (StringView::starts_with(cur, "while ")) {
+			cur += 6;
+			ADD_TOKEN(T_OP, OPCODE_WHILE);
+		} else if (StringView::starts_with(cur, "for ")) {
+			cur += 4;
 			ADD_TOKEN(T_OP, OPCODE_FOR);
 		} else {
 			collect_id();

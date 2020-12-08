@@ -1,24 +1,6 @@
 #ifndef RECURSIVE_PARSER
 #define RECURSIVE_PARSER
 
-/* Grammar ================================\
-
-G ::= PROG'\0'
-
-PROG       ::= CODE_BLOCK;{CODE_BLOCK;}*
-CODE_BLOCK ::= EXPR; | { CODE_BLOCK;{CODE_BLOCK;}* }
-
-EXPR ::= CALC{=CALC}*
-
-CALC ::= TERM{[+-]TERM}*
-TERM ::= FACT{{/|*}FACT}*
-FACT ::= [+-]FACT | UNIT^FACT | UNIT
-UNIT ::= ID(EXPR) | ID | (EXPR) | NUMB
-NUMB ::= [+-]?[0-9]+{.[0-9]+}?{[eE][0-9]+}?
-ID   ::= [a-zA-Z_][a-zA-Z_0-9]*
-
-*///=======================================/
-
 #include "general/c/announcement.h"
 #include "general/cpp/stringview.hpp"
 #include "general/cpp/vector.hpp"
@@ -52,6 +34,7 @@ private:
 	const Token   *ERRPOS;
 //=============================================================================
 	#define NEXT() ++cur_index; cur = &(*expr)[cur_index]
+	#define PREV() --cur_index; cur = &(*expr)[cur_index]
 
 	#define REQUIRE_OP(op)                                  \
 		do {                                                \
@@ -214,7 +197,7 @@ private:
 		return nullptr;
 	}
 
-	ParseNode *parse_CALC() {
+	ParseNode *parse_EXPR() {
 		IF_PARSED (cur_index, term, parse_TERM()) {
 			while (is_sign(cur)) {
 				int op = cur->get_op();
@@ -237,51 +220,41 @@ private:
 		return nullptr;
 	} 
 
-	ParseNode *parse_EXPR() {
-		IF_PARSED (cur_index, calc, parse_CALC()) {
-			while (cur->is_op('=')) {
+	ParseNode *parse_ASGN() {
+		IF_PARSED (cur_index, id, parse_ID()) {
+			if (cur->is_op('=')) {
 				int op = cur->get_op();
 				NEXT();
 
-				IF_PARSED (cur_index, next_calc, parse_EXPR()) {
-					calc = ParseNode::NEW(OPERATION, op, calc, next_calc);
-					continue;
+				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
+					return ParseNode::NEW(OPERATION, op, id, expr_node);
 				}
 
-				ParseNode::DELETE(calc, true);
+				ParseNode::DELETE(id, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			} else {
+				PREV();
+				ParseNode::DELETE(id, true);
 				SET_ERR(ERROR_SYNTAX, cur);
 				return nullptr;
 			}
-
-			return calc;
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);
 		return nullptr;		
 	}
 
-	ParseNode *parse_CODE_BLOCK() {
-		if (cur->is_op('{')) {
-			NEXT();
-			IF_PARSED (cur_index, code_block, parse_CODE_BLOCK()) {
-				while (!cur->is_op('}')) {
-					IF_PARSED(cur_index, next_block, parse_CODE_BLOCK()) {
-						code_block = ParseNode::NEW(OPERATION, ';', code_block, next_block);
-						continue;
-					}
-
-					ParseNode::DELETE(code_block, true);
-					SET_ERR(ERROR_SYNTAX, cur);
-					return nullptr;
-				}
-
+	ParseNode *parse_STATEMENT() {
+		IF_PARSED (cur_index, assign, parse_ASGN()) {
+			if (!cur->is_op(';')) {
+				ParseNode::DELETE(assign, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			} else {
 				NEXT();
-				return code_block;
+				return ParseNode::NEW(OPERATION, ';', assign, nullptr);
 			}
-
-			ParseNode::DELETE(code_block, true);
-			SET_ERR(ERROR_SYNTAX, cur);
-			return nullptr;
 		}
 
 		IF_PARSED (cur_index, expr_node, parse_EXPR()) {
@@ -289,10 +262,43 @@ private:
 				ParseNode::DELETE(expr_node, true);
 				SET_ERR(ERROR_SYNTAX, cur);
 				return nullptr;
+			} else {
+				NEXT();
+				return ParseNode::NEW(OPERATION, ';', expr_node, nullptr);
+			}
+		}
+
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
+	ParseNode *parse_BLOCK_STATEMENT() {
+		if (cur->is_op('{')) {
+			NEXT();
+			IF_PARSED (cur_index, block_stmt, parse_BLOCK_STATEMENT()) {
+				while (!cur->is_op('}')) {
+					IF_PARSED(cur_index, next_block, parse_BLOCK_STATEMENT()) {
+						next_block->R = block_stmt;
+						block_stmt = next_block;
+						continue;
+					}
+
+					ParseNode::DELETE(block_stmt, true);
+					SET_ERR(ERROR_SYNTAX, cur);
+					return nullptr;
+				}
+
+				NEXT();
+				return block_stmt;
 			}
 
-			NEXT();
-			return expr_node;
+			ParseNode::DELETE(block_stmt, true);
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
+		IF_PARSED (cur_index, statement, parse_STATEMENT()) {
+			return statement;
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);
@@ -300,7 +306,7 @@ private:
 	}
 
 	ParseNode *parse_PROG() {
-		return parse_CODE_BLOCK();
+		return parse_BLOCK_STATEMENT();
 	}      
 
 	ParseNode *parse_G() {
