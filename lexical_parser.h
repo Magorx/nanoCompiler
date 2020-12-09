@@ -16,7 +16,7 @@
 class LexicalParser {
 private:
 	#define CUR_POS (int)(cur - cur_line)
-	#define ADD_TOKEN(type, data) do {Token token = {}; token.ctor(type, data, line, CUR_POS); tokens->push_back(token);} while (0)
+	#define ADD_TOKEN(type, data) Token token = {}; token.ctor(type, data, line, CUR_POS); tokens->push_back(token)
 
 // data =======================================================================
 	const char *cur_expr;
@@ -143,6 +143,14 @@ private:
 		} else if (StringView::starts_with(cur, "!=")) {
 			cur += 2;
 			ADD_TOKEN(T_OP, OPCODE_NEQ);
+			return true;
+		} else if (StringView::starts_with(cur, "||")) {
+			cur += 2;
+			ADD_TOKEN(T_OP, OPCODE_OR);
+			return true;
+		} else if (StringView::starts_with(cur, "&&")) {
+			cur += 2;
+			ADD_TOKEN(T_OP, OPCODE_AND);
 			return true;
 		} else {
 			return false;

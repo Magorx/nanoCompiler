@@ -1,40 +1,44 @@
 
-; <a>[op_20]<1>
+; (a)[op_20]
+
+; (a)=(1)
 push  1
 pop [rvx + 103]
 
-; <b>[op_20]<2>
+; (b)[op_20](2)
 push  2
 pop [rvx + 104]
 
-; <<a>[op_7]<b>>[op_30]<<<>{>[op_31]<<>{>>
+; (1)[op_30](((){)[op_31]((){))
 if_0_cond:
-push [rvx + 103]
-push [rvx + 104]
-eq
+push  1
 
 push 0
-jne if_0_true:
+jne if_0_true
 if_0_false:
 
-; <b>=<500>
+; (b)=(500)
 push  500
 pop [rvx + 104]
 
-; <a>=<700>
+; (a)=(700)
 push  700
 pop [rvx + 103]
 
+jmp if_0_end
+
 if_0_true:
 
-; <a>=<<b>[op_7]<a>>
+; (a)=((b)[op_7](a))
 push [rvx + 104]
 push [rvx + 103]
 eq
 pop [rvx + 103]
 
-; <b>=<7>
+; (b)=((7)[op_10](11))
 push  7
+push  11
+l_or
 pop [rvx + 104]
 
-jne if_0_end:
+if_0_end:

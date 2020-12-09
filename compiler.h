@@ -124,6 +124,18 @@ private:
 				break;
 			}
 
+			case OPCODE_OR : {
+				COMPILE_LR();
+				fprintf(file, "l_or\n");
+				break;
+			}
+
+			case OPCODE_AND : {
+				COMPILE_LR();
+				fprintf(file, "l_and\n");
+				break;
+			}
+
 			case OP_VAR_DEF : {
 				if (!node->L || !node->L->is_id()) {
 					RAISE_ERROR("bad variable definition [\n");
@@ -157,9 +169,9 @@ private:
 				fprintf(file, "if_%d_cond:\n", cur_if_cnt);
 				COMPILE_L();
 				fprintf(file, "\npush 0\n");
-				fprintf(file, "jne if_%d_true:\n", cur_if_cnt);
+				fprintf(file, "jne if_%d_true\n", cur_if_cnt);
 				COMPILE_R();
-				fprintf(file, "\njne if_%d_end:\n", cur_if_cnt);
+				fprintf(file, "\nif_%d_end:\n", cur_if_cnt);
 
 				++if_cnt;
 				break;
@@ -169,6 +181,7 @@ private:
 				int cur_if_cnt = if_cnt;
 				fprintf(file, "if_%d_false:\n", cur_if_cnt);
 				COMPILE_L_COMMENT();
+				fprintf(file, "\njmp if_%d_end\n", cur_if_cnt);
 				fprintf(file, "\nif_%d_true:\n", cur_if_cnt);
 				COMPILE_R_COMMENT();
 				break;

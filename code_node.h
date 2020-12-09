@@ -1,4 +1,3 @@
-
 #ifndef CODENODE_H
 #define CODENODE_H
 
@@ -353,9 +352,9 @@ public:
 		}
 
 		if (L) {
-			fprintf(file, "<");
+			fprintf(file, "(");
 			L->space_dump(file);
-			fprintf(file, ">");
+			fprintf(file, ")");
 		}
 
 		//fprintf(file, "(");
@@ -377,9 +376,9 @@ public:
 		//fprintf(file, ")");
 
 		if (R) {
-			fprintf(file, "<");
+			fprintf(file, "(");
 			R->space_dump(file);
-			fprintf(file, ">");
+			fprintf(file, ")");
 		}
 	}
 

@@ -10,26 +10,30 @@ enum OPERATION_CODE {
 	OPCODE_GE    = 6,
 	OPCODE_EQ    = 7,
 	OPCODE_NEQ   = 8,
+	OPCODE_OR    = 10,
+	OPCODE_AND   = 11,
 };
 
 bool is_normal_op(const int op) {
-	return op == '+'   || op == '-'   ||
-		   op == '*'   || op == '/'   ||
-		   op == '^'   || op == '=';
+	return op == '+' || op == '-' ||
+		   op == '*' || op == '/' ||
+		   op == '^' || op == '=' ||
+		   op == '<' || op == '>' ||
+		   op == '?' || op == ':';
 }
 
 bool is_bracket(const int op) {
-	return op == '('   || op == ')'   ||
-		   op == '{'   || op == '}'   ||
-		   op == '['   || op == ']';
-}
-
-bool is_printable_op(const int op) {
-	return isalpha(op) || isdigit(op) || is_normal_op(op) || is_bracket(op);
+	return op == '(' || op == ')' ||
+		   op == '{' || op == '}' ||
+		   op == '[' || op == ']';
 }
 
 bool is_splitting_op(const int op) {
 	return op == '{' || op == ';';
+}
+
+bool is_printable_op(const int op) {
+	return isalpha(op) || isdigit(op) || is_normal_op(op) || is_bracket(op) || is_splitting_op(op);
 }
 
 bool is_loggable_op(const int op) {

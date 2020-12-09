@@ -23,5 +23,14 @@ ncc: main.cpp compiler.h id_table_scope.h id_table.h compiler_options.h recursiv
 run: all
 	./$(CUR_PROG)
 
+comp: all
+	kasm out.kc out.tf
+
+comp_run: comp
+	kspu out.tf
+
+crun:
+	kspu out.tf
+
 valg: all
 	valgrind --leak-check=full --show-leak-kinds=all -s ./$(CUR_PROG)

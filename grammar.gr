@@ -8,7 +8,7 @@ FUNC_DECL  ::= func ID ARGLIST BLOCK_STATEMENT
 FUNC_CALL  ::= ID ARGLIST
 
 ARGLIST    ::= ARGBLOCK*
-ARGBLOCK   ::= [ {ID | ID = EXPR} ]
+ARGBLOCK   ::= [ {ID | ID = MATH_EXPR} ]
 
 // Statements =================================================================
 
@@ -25,8 +25,11 @@ DEF_VAR ::= "var" {ID | ID = COND}
 
 // Math expression ============================================================
 
-COND ::= EXPR {{ < | <= | == | >= | > | != } EXPR}*
-EXPR ::= TERM {[+-]TERM}*
+EXPR ::= AND_EXPR {|| AND_EXPR}*
+
+AND_EXPR ::= COND {&& COND}*
+COND ::= MATH_EXPR {{ < | <= | == | >= | > | != } MATH_EXPR}*
+MATH_EXPR ::= TERM {[+-]TERM}*
 TERM ::= FACT {{/|*}FACT}*
 
 FACT ::= [+-]FACT | UNIT^FACT | UNIT

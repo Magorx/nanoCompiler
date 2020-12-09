@@ -116,7 +116,7 @@ private:
 		IF_PARSED (cur_index, unit_id, parse_ID()) {
 			if (cur->is_op('(')) {
 				NEXT();
-				IF_PARSED (cur_index, bracket_expr, parse_COND()) {
+				IF_PARSED (cur_index, bracket_expr, parse_MATH_EXPR()) {
 					if (cur->is_op(')')) {
 						NEXT();
 						unit_id->set_R(bracket_expr);
@@ -134,7 +134,7 @@ private:
 
 		if (cur->is_op('(')) {
 			NEXT();
-			IF_PARSED (cur_index, expr_in_brackets, parse_COND()) {
+			IF_PARSED (cur_index, expr_in_brackets, parse_EXPR()) {
 				if (cur->is_op(')')) {
 					NEXT();
 					return expr_in_brackets;
@@ -219,7 +219,7 @@ private:
 			if (cur->is_op('=')) {
 				NEXT();
 
-				IF_PARSED (cur_index, expr_node, parse_COND()) {
+				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
 					var_definition->R = expr_node;
 					return var_definition;
 				}
@@ -239,7 +239,7 @@ private:
 		return nullptr;
 	}
 
-	ParseNode *parse_EXPR() {
+	ParseNode *parse_MATH_EXPR() {
 		IF_PARSED (cur_index, term, parse_TERM()) {
 			while (is_sign(cur)) {
 				int op = cur->get_op();
@@ -263,14 +263,14 @@ private:
 	} 
 
 	ParseNode *parse_COND() {
-		IF_PARSED (cur_index, cur_expr, parse_EXPR()) {
+		IF_PARSED (cur_index, cur_expr, parse_MATH_EXPR()) {
 			while (cur->is_op('>') || cur->is_op('<') ||
 				   cur->is_op(OPCODE_LE) || cur->is_op(OPCODE_GE ) ||
 				   cur->is_op(OPCODE_EQ) || cur->is_op(OPCODE_NEQ)) {
 				int op = cur->get_op();
 				NEXT();
 
-				IF_PARSED (cur_index, next_expr, parse_EXPR()) {
+				IF_PARSED (cur_index, next_expr, parse_MATH_EXPR()) {
 					cur_expr = NEW_NODE(OPERATION, op, cur_expr, next_expr);
 					continue;
 				}
@@ -287,13 +287,59 @@ private:
 		return nullptr;
 	}
 
+	ParseNode *parse_AND_EXPR() {
+		IF_PARSED (cur_index, cur_cond, parse_COND()) {
+			while (cur->is_op(OPCODE_AND)) {
+				int op = cur->get_op();
+				NEXT();
+
+				IF_PARSED (cur_index, next_cond, parse_COND()) {
+					cur_cond = NEW_NODE(OPERATION, op, cur_cond, next_cond);
+					continue;
+				}
+
+				ParseNode::DELETE(cur_cond, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			}
+
+			return cur_cond;
+		}
+
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
+	ParseNode *parse_EXPR() {
+		IF_PARSED (cur_index, cur_and_node, parse_AND_EXPR()) {
+			while (cur->is_op(OPCODE_OR)) {
+				int op = cur->get_op();
+				NEXT();
+
+				IF_PARSED (cur_index, next_and_node, parse_AND_EXPR()) {
+					cur_and_node = NEW_NODE(OPERATION, op, cur_and_node, next_and_node);
+					continue;
+				}
+
+				ParseNode::DELETE(cur_and_node, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			}
+
+			return cur_and_node;
+		}
+
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
 	ParseNode *parse_ASGN() {
 		IF_PARSED (cur_index, id, parse_ID()) {
 			if (cur->is_op('=')) {
 				int op = cur->get_op();
 				NEXT();
 
-				IF_PARSED (cur_index, expr_node, parse_COND()) {
+				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
 					return NEW_NODE(OPERATION, op, id, expr_node);
 				}
 
@@ -328,7 +374,7 @@ private:
 		}
 		NEXT();
 
-		IF_PARSED (cur_index, cond_block, parse_COND()) {
+		IF_PARSED (cur_index, cond_block, parse_EXPR()) {
 			if (!cur->is_op(')')) {
 				RESET();
 				SET_ERR(ERROR_SYNTAX, cur);
@@ -389,7 +435,7 @@ private:
 			}
 		}
 
-		IF_PARSED (cur_index, expr_node, parse_COND()) {
+		IF_PARSED (cur_index, expr_node, parse_EXPR()) {
 			if (!cur->is_op(';')) {
 				ParseNode::DELETE(expr_node, true);
 				SET_ERR(ERROR_SYNTAX, cur);
