@@ -21,7 +21,9 @@ enum PARSER_ERROR {
 };
 
 enum OP_CODES {
-	OP_VAR_DEF = 20,
+	OP_VAR_DEF  = 20,
+	OP_CONDITION   = 30,
+	OP_COND_DEPENDENT = 31,
 };
 
 //=============================================================================
@@ -39,6 +41,8 @@ private:
 //=============================================================================
 	#define NEXT() ++cur_index; cur = &(*expr)[cur_index]
 	#define PREV() --cur_index; cur = &(*expr)[cur_index]
+	#define SETI(ind) cur_index = ind; cur = &(*expr)[cur_index]
+	#define RESET() SETI(enter_index)
 
 	#define REQUIRE_OP(op)                                  \
 		do {                                                \
@@ -278,7 +282,61 @@ private:
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);
-		return nullptr;		
+		return nullptr;
+	}
+
+	ParseNode *parse_IF() {
+		int enter_index = cur_index;
+
+		if (!cur->is_op('?')) {
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+		NEXT();
+
+		if (!cur->is_op('(')) {
+			RESET();
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+		NEXT();
+
+		IF_PARSED (cur_index, cond_block, parse_EXPR()) {
+			if (!cur->is_op(')')) {
+				RESET();
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			}
+			NEXT();
+
+			IF_PARSED (cur_index, true_block, parse_BLOCK_STATEMENT()) {
+				ParseNode *dep  = ParseNode::NEW(OPERATION, OP_COND_DEPENDENT, nullptr,    true_block);
+				ParseNode *cond = ParseNode::NEW(OPERATION, OP_CONDITION,      cond_block, dep);
+				if (!cur->is_op(':')) {
+					return cond;
+				}
+
+				NEXT();
+				IF_PARSED (cur_index, false_block, parse_BLOCK_STATEMENT()) {
+					dep->L = false_block;
+					return cond;
+				}
+
+				RESET();
+				ParseNode::DELETE(cond, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			}
+
+			RESET();
+			ParseNode::DELETE(cond_block, true);
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
+		RESET();
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
 	}
 
 	ParseNode *parse_STATEMENT() {
@@ -313,6 +371,10 @@ private:
 				NEXT();
 				return ParseNode::NEW(OPERATION, ';', expr_node, nullptr);
 			}
+		}
+
+		IF_PARSED (cur_index, if_node, parse_IF()) {
+			return ParseNode::NEW(OPERATION, ';', if_node, nullptr);
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);

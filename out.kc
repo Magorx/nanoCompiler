@@ -1,28 +1,38 @@
 
-; (first)[op_20]
-
-; (second)[op_20](2)
-push  2
-pop [rvx + 104]
-
-; (first)=(3)
-push  3
+; <a>[op_20]<1>
+push  1
 pop [rvx + 103]
 
-; (first)[op_20](30000)
-push  30000
-pop [rvx + 107]
-
-; (second)=((first)/(2))
-push [rvx + 107]
+; <b>[op_20]<2>
 push  2
-div
 pop [rvx + 104]
 
-; (second)=(((first)*(4))+(5))
-push [rvx + 107]
-push  4
-mul
-push  5
+; <<a>+<b>>[op_30]<<<>[op_123]>[op_31]<<>[op_123]>>
+if_0_cond:
+push [rvx + 103]
+push [rvx + 104]
 add
+
+push 0
+jne if_0_true:
+if_0_false:
+
+; <b>=<500>
+push  500
 pop [rvx + 104]
+
+; <a>=<700>
+push  700
+pop [rvx + 103]
+
+if_0_true:
+
+; <a>=<5>
+push  5
+pop [rvx + 103]
+
+; <b>=<7>
+push  7
+pop [rvx + 104]
+
+jne if_0_end:

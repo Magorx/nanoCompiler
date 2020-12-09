@@ -70,8 +70,8 @@ int main() {
 		// printf("\n");
 		printf("compiling...\n");
 		comp.compile(prog, "out.kc");
-		system("cat out.kc");
-		printf("\n");
+		//system("cat out.kc");
+		//printf("\n");
 	}
 
 	CodeNode::DELETE(prog, true, true);

@@ -7,6 +7,7 @@
 #include <cassert>
 
 #include "compiler_options.h"
+
 #include "lexical_parser.h"
 #include "recursive_parser.h"
 #include "id_table.h"
@@ -33,8 +34,8 @@ private:
 
 		#define COMPILE_L() if (node->L) compile(node->L, file)
 		#define COMPILE_R() if (node->R) compile(node->R, file)
-		#define COMPILE_L_COMMENT() if (node->L) if (!node->L->is_op(';') && !node->L->is_op('{')) { fprintf(file, "\n; "); node->L->space_dump(file); fprintf(file, "\n");} COMPILE_L()
-		#define COMPILE_R_COMMENT() if (node->R) if (!node->R->is_op(';') && !node->R->is_op('{')) { fprintf(file, "\n; "); node->R->space_dump(file); fprintf(file, "\n");} COMPILE_R()
+		#define COMPILE_L_COMMENT() if (node->L && is_compiling_loggable_op(node->L->get_op())) { fprintf(file, "\n; "); node->L->space_dump(file); fprintf(file, "\n");} COMPILE_L()
+		#define COMPILE_R_COMMENT() if (node->R && is_compiling_loggable_op(node->R->get_op())) { fprintf(file, "\n; "); node->R->space_dump(file); fprintf(file, "\n");} COMPILE_R()
 		#define COMPILE_LR() do {COMPILE_L(); COMPILE_R();} while (0)
 
 		switch (node->get_op()) {
@@ -109,6 +110,28 @@ private:
 					fprintf(file, "\n");
 				}
 
+				break;
+			}
+
+			case OP_CONDITION : {
+				int cur_if_cnt = if_cnt;
+				fprintf(file, "if_%d_cond:\n", cur_if_cnt);
+				COMPILE_L();
+				fprintf(file, "\npush 0\n");
+				fprintf(file, "jne if_%d_true:\n", cur_if_cnt);
+				COMPILE_R();
+				fprintf(file, "\njne if_%d_end:\n", cur_if_cnt);
+
+				++if_cnt;
+				break;
+			}
+
+			case OP_COND_DEPENDENT : {
+				int cur_if_cnt = if_cnt;
+				fprintf(file, "if_%d_false:\n", cur_if_cnt);
+				COMPILE_L_COMMENT();
+				fprintf(file, "\nif_%d_true:\n", cur_if_cnt);
+				COMPILE_R_COMMENT();
 				break;
 			}
 
@@ -303,6 +326,11 @@ public:
 		id_table.ctor();
 
 		compile(prog, file);
+
+		if (ANNOUNCEMENT_ERROR) {
+			fprintf(file, "AN ERROR OCCURED DURING COMPILATION IUCK\n");
+			ANNOUNCE("ERR", "compiler", "An error occured during compilation, ick\n");
+		}
 		fclose(file);
 
 		return true;

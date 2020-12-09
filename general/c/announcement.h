@@ -56,7 +56,9 @@ int         THE_LAST_CODE_LEN      = 0 ;
 
 #define ANNOUNCE(code, announcer, format, ...) ANNOUNCEMENT(stdout, code, announcer, format "\n", __VA_ARGS__)
 
-#define RAISE_ERROR(err_format, ...) ANNOUNCEMENT(stderr, "ERR", __FUNCTION__, err_format, __VA_ARGS__)
+
+const char *ANNOUNCEMENT_ERROR = nullptr;
+#define RAISE_ERROR(err_format, ...) ANNOUNCEMENT_ERROR = (const char*) err_format; ANNOUNCEMENT(stderr, "ERR", __FUNCTION__, err_format, __VA_ARGS__)
 
 #define RAISE_ERROR_SYNTAX(string, pos)                                                   \
     do {                                                                                  \

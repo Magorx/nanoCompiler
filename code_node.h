@@ -337,21 +337,14 @@ public:
 		}
 
 		if (L) {
-			fprintf(file, "(");
+			fprintf(file, "<");
 			L->space_dump(file);
-			fprintf(file, ")");
+			fprintf(file, ">");
 		}
 
 		//fprintf(file, "(");
 		if (is_op()) {
-			if (isalpha(data.op) || isdigit(data.op) || 
-				data.op == '+' || data.op == '-' ||
-				data.op == '*' || data.op == '/' ||
-				data.op == '^' || data.op == '=' ||
-				data.op == '(' || data.op == ')' ||
-				data.op == '{' || data.op == '}' ||
-				data.op == '[' || data.op == ']')
-			{
+			if (is_loggable_op(data.op)) {
 				fputc(data.op, file);
 			} else {
 				fprintf(file, "[op_%d]", data.op);
@@ -368,9 +361,9 @@ public:
 		//fprintf(file, ")");
 
 		if (R) {
-			fprintf(file, "(");
+			fprintf(file, "<");
 			R->space_dump(file);
-			fprintf(file, ")");
+			fprintf(file, ">");
 		}
 	}
 

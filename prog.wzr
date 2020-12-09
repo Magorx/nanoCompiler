@@ -1,14 +1,8 @@
 {
-	var first;
-	var second = 2;
-	first = 3;
+	var a = 1;
+	var b = 2;
 
-	{
-		var first = 30000;
-		second = first / 2;
-	}
-
-	second = first * 4 + 5;
+	? (a + b) {a = 5; b = 7;} : {b = 500; a = 700;}
 }
 
 
