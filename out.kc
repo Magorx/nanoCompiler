@@ -1,4 +1,28 @@
 
-; (a)=(3)
+; (first)[op_20]
+
+; (second)[op_20](2)
+push  2
+pop [rvx + 104]
+
+; (first)=(3)
 push  3
-pop [97]
+pop [rvx + 103]
+
+; (first)[op_20](30000)
+push  30000
+pop [rvx + 107]
+
+; (second)=((first)/(2))
+push [rvx + 107]
+push  2
+div
+pop [rvx + 104]
+
+; (second)=(((first)*(4))+(5))
+push [rvx + 107]
+push  4
+mul
+push  5
+add
+pop [rvx + 104]

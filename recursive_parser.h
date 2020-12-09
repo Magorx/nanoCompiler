@@ -20,6 +20,10 @@ enum PARSER_ERROR {
 	ERROR_SYNTAX = 100,
 };
 
+enum OP_CODES {
+	OP_VAR_DEF = 20,
+};
+
 //=============================================================================
 // RecursiveParser ============================================================
 
@@ -197,6 +201,38 @@ private:
 		return nullptr;
 	}
 
+	ParseNode *parse_DEF_VAR() {
+		if (!cur->is_id() || !cur->get_id()->equal("var")) {
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
+		NEXT();
+		IF_PARSED (cur_index, id, parse_ID()) {
+			ParseNode *var_definition = ParseNode::NEW(OPERATION, OP_VAR_DEF, id, nullptr);
+			if (cur->is_op('=')) {
+				NEXT();
+
+				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
+					var_definition->R = expr_node;
+					return var_definition;
+				}
+
+				PREV();
+				PREV();
+				ParseNode::DELETE(var_definition, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			} else {
+				return var_definition;
+			}
+		}
+
+		PREV();
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
 	ParseNode *parse_EXPR() {
 		IF_PARSED (cur_index, term, parse_TERM()) {
 			while (is_sign(cur)) {
@@ -246,6 +282,17 @@ private:
 	}
 
 	ParseNode *parse_STATEMENT() {
+		IF_PARSED (cur_index, var_def, parse_DEF_VAR()) {
+			if (!cur->is_op(';')) {
+				ParseNode::DELETE(var_def, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			} else {
+				NEXT();
+				return ParseNode::NEW(OPERATION, ';', var_def, nullptr);
+			}
+		}
+
 		IF_PARSED (cur_index, assign, parse_ASGN()) {
 			if (!cur->is_op(';')) {
 				ParseNode::DELETE(assign, true);
@@ -275,24 +322,26 @@ private:
 	ParseNode *parse_BLOCK_STATEMENT() {
 		if (cur->is_op('{')) {
 			NEXT();
+			ParseNode *block_node = ParseNode::NEW(OPERATION, '{', nullptr, nullptr);
 			IF_PARSED (cur_index, block_stmt, parse_BLOCK_STATEMENT()) {
+				block_node->L = block_stmt;
 				while (!cur->is_op('}')) {
 					IF_PARSED(cur_index, next_block, parse_BLOCK_STATEMENT()) {
-						next_block->R = block_stmt;
+						block_stmt->R = next_block;
 						block_stmt = next_block;
 						continue;
 					}
 
-					ParseNode::DELETE(block_stmt, true);
+					ParseNode::DELETE(block_node, true);
 					SET_ERR(ERROR_SYNTAX, cur);
 					return nullptr;
 				}
 
 				NEXT();
-				return block_stmt;
+				return block_node;
 			}
 
-			ParseNode::DELETE(block_stmt, true);
+			ParseNode::DELETE(block_node, true);
 			SET_ERR(ERROR_SYNTAX, cur);
 			return nullptr;
 		}
@@ -384,7 +433,6 @@ public:
 		if (!ERROR) {
 			return res;
 		} else {
-			//RAISE_ERROR_SYNTAX(init_expr_ptr, ERRPOS - init_expr_ptr);
 			ANNOUNCE("ERR", "parser", "grammar unfit expression, check pos [%ld]", ERRPOS - expr->get_buffer());
 			printf(">>> ");
 			ERRPOS->dump();

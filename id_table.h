@@ -79,9 +79,17 @@ public:
 		return 0;
 	}
 
+	int find_in_upper_scope(const int type, const StringView *id) const {
+		if (!data.size()) {
+			return 0;
+		}
+
+		return data[data.size() - 1]->find(type, id);
+	}
+
 	bool declare(const int type, const StringView *id) {
 		if (!data.size()) {
-			printf("No scope!\n");
+			RAISE_ERROR("no scope to declare a variable in\n");
 			return false;
 		}
 
@@ -92,7 +100,17 @@ public:
 		if (!data.size()) {
 			add_scope(100);
 		} else {
-			add_scope(data[data.size() - 1]->offset + 1);
+			add_scope(data[data.size() - 1]->offset + data[data.size() - 1]->size() + 1);
+		}
+	}
+
+	void remove_scope() {
+		if (!data.size()) {
+			RAISE_ERROR("removing unexistant scope\n");
+			return;
+		} else {
+			data[data.size() - 1]->dtor();
+			data.pop_back();
 		}
 	}
 

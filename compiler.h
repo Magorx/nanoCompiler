@@ -9,6 +9,7 @@
 #include "compiler_options.h"
 #include "lexical_parser.h"
 #include "recursive_parser.h"
+#include "id_table.h"
 
 //=============================================================================
 // Compiler ==================================================================
@@ -19,6 +20,8 @@ private:
 	char *prog_text;
 	RecursiveParser rec_parser;
 	LexicalParser   lex_parser;
+	IdTable 		id_table;
+
 
 	int if_cnt;
 	int while_cnt;
@@ -28,8 +31,10 @@ private:
 		assert(node);
 		assert(file);
 
-		#define COMPILE_L() compile(node->L, file)
-		#define COMPILE_R() compile(node->R, file)
+		#define COMPILE_L() if (node->L) compile(node->L, file)
+		#define COMPILE_R() if (node->R) compile(node->R, file)
+		#define COMPILE_L_COMMENT() if (node->L) if (!node->L->is_op(';') && !node->L->is_op('{')) { fprintf(file, "\n; "); node->L->space_dump(file); fprintf(file, "\n");} COMPILE_L()
+		#define COMPILE_R_COMMENT() if (node->R) if (!node->R->is_op(';') && !node->R->is_op('{')) { fprintf(file, "\n; "); node->R->space_dump(file); fprintf(file, "\n");} COMPILE_R()
 		#define COMPILE_LR() do {COMPILE_L(); COMPILE_R();} while (0)
 
 		switch (node->get_op()) {
@@ -75,34 +80,56 @@ private:
 			case '=' : {
 				COMPILE_R();
 				fprintf(file, "pop ");
-				compile_id(node->L, file);
+				compile_variable(node->L, file);
 				fprintf(file, "\n");
+
+				break;
+			}
+
+			case OP_VAR_DEF : {
+				if (!node->L || !node->L->is_id()) {
+					RAISE_ERROR("bad variable definition [");
+					node->space_dump();
+					printf("\n");
+					break;
+				}
+
+				bool ret = id_table.declare(ID_TYPE_VAR, node->L->get_id());
+				if (!ret) {
+					RAISE_ERROR("Redefinition of the id [");
+					node->L->get_id()->print();
+					printf("]\n");
+					break;
+				}
+
+				if (node->R) {
+					COMPILE_R();
+					fprintf(file, "pop ");
+					compile_variable(node->L, file);
+					fprintf(file, "\n");
+				}
+
+				break;
+			}
+
+			case '{' : {
+				id_table.add_scope();
+				COMPILE_L_COMMENT();
+				COMPILE_R_COMMENT();
+				id_table.remove_scope();
+
 				break;
 			}
 
 			case ';' : {
-				if (node->R) {
-					if (!node->R->is_op(';')) {
-						fprintf(file, "\n; ");
-						node->R->space_dump(file);
-						fprintf(file, "\n");
-					}
-					COMPILE_R();
-				}
+				COMPILE_L_COMMENT();
+				COMPILE_R_COMMENT();
 
-				if (node->L) {
-					if (!node->L->is_op(';')) {
-						fprintf(file, "\n; ");
-						node->L->space_dump(file);
-						fprintf(file, "\n");
-					}
-					COMPILE_L();
-				}
 				break;
 			}
 
 			default : {
-				printf("A strange operation detected... [");
+				RAISE_ERROR("bad operation: [");
 				node->space_dump();
 				printf("]\n");
 				break;
@@ -118,7 +145,7 @@ private:
 		if (node->type == VALUE) {
 			compile_value(node, file);
 		} else if (node->type == ID) {
-			compile_id(node, file);
+			compile_variable(node, file);
 		}
 		fprintf(file, "\n");
 	}
@@ -134,7 +161,20 @@ private:
 		assert(node);
 		assert(file);
 
-		fprintf(file, "[%d]", node->get_var_from_id());
+		if (!node->is_id()) {
+			RAISE_ERROR("bad compiling type, node is [%d]\n", node->get_type());
+			return;
+		}
+
+		int offset = id_table.find(ID_TYPE_VAR, node->get_id());
+		if (!offset) {
+			RAISE_ERROR("variable does not exist [");
+			node->get_id()->print();
+			printf("]\n");
+			return;
+		}
+
+		fprintf(file, "[rvx + %d]", offset);
 	}
 
 	void compile_id(const CodeNode *node, FILE *file) {
@@ -188,6 +228,7 @@ public:
 	prog_text(nullptr),
 	rec_parser(),
 	lex_parser(),
+	id_table(),
 	if_cnt(0),
 	while_cnt(0),
 	for_cnt(0)
@@ -197,8 +238,6 @@ public:
 
 	void ctor() {
 		prog_text = nullptr;
-		rec_parser.ctor();
-		lex_parser.ctor();
 
 		if_cnt    = 0;
 		while_cnt = 0;
@@ -247,7 +286,7 @@ public:
 
 	bool compile(const CodeNode *prog, const char *filename) {
 		if (filename == nullptr) {
-			RAISE_ERROR("[filename](nullptr)");
+			RAISE_ERROR("[filename](nullptr)\n");
 			return false;
 		}
 
@@ -260,6 +299,8 @@ public:
 		if_cnt    = 0;
 		while_cnt = 0;
 		for_cnt   = 0;
+		id_table.dtor();
+		id_table.ctor();
 
 		compile(prog, file);
 		fclose(file);

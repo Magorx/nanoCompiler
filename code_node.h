@@ -344,7 +344,46 @@ public:
 
 		//fprintf(file, "(");
 		if (is_op()) {
-			fputc(data.op, file);
+			if (isalpha(data.op) || isdigit(data.op) || 
+				data.op == '+' || data.op == '-' ||
+				data.op == '*' || data.op == '/' ||
+				data.op == '^' || data.op == '=' ||
+				data.op == '(' || data.op == ')' ||
+				data.op == '{' || data.op == '}' ||
+				data.op == '[' || data.op == ']')
+			{
+				fputc(data.op, file);
+			} else {
+				fprintf(file, "[op_%d]", data.op);
+			}
+		} else if (is_var()) {
+			fprintf(file, "{%d}", data.var);
+		} else if (is_val()) {
+			fprintf(file, "%lg", data.val);
+		} else if (is_id()) {
+			data.id->print(file);
+		} else {
+			fprintf(file, ">ERR<");
+		}
+		//fprintf(file, ")");
+
+		if (R) {
+			fprintf(file, "(");
+			R->space_dump(file);
+			fprintf(file, ")");
+		}
+	}
+
+	void full_dump(FILE *file = stdout) const {
+		if (L) {
+			fprintf(file, "(");
+			L->full_dump(file);
+			fprintf(file, ")");
+		}
+
+		//fprintf(file, "(");
+		if (is_op()) {
+			fprintf(file, "[%d_%c]\n", data.op, data.op);
 		} else if (is_var()) {
 			fprintf(file, "{%d}", data.var);
 		} else if (is_val()) {
@@ -358,7 +397,7 @@ public:
 
 		if (R) {
 			fprintf(file, "(");
-			R->space_dump(file);
+			R->full_dump(file);
 			fprintf(file, ")");
 		}
 	}

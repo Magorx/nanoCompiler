@@ -131,6 +131,10 @@ struct Token {
 		return data.op;
 	}
 
+	StringView *get_id() const {
+		return data.id;
+	}
+
 	bool is_op() const {
 		return type == T_OP;
 	}

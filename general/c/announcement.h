@@ -51,11 +51,10 @@ int         THE_LAST_CODE_LEN      = 0 ;
         }                                                                                                 \
                                                                                                           \
         fprintf((fileptr), (format) __VA_OPT__(,) __VA_ARGS__);                                           \
-        fprintf((fileptr), "\n");                                                                         \
                                                                                                           \
     } while (0)
 
-#define ANNOUNCE(code, announcer, format, ...) ANNOUNCEMENT(stdout, code, announcer, format, __VA_ARGS__)
+#define ANNOUNCE(code, announcer, format, ...) ANNOUNCEMENT(stdout, code, announcer, format "\n", __VA_ARGS__)
 
 #define RAISE_ERROR(err_format, ...) ANNOUNCEMENT(stderr, "ERR", __FUNCTION__, err_format, __VA_ARGS__)
 

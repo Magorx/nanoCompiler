@@ -127,6 +127,10 @@ public:
 		}
 	}
 
+	int size() {
+		return (int)data.size();
+	}
+
 };
 
 #endif // ID_TABLE_SCOPE

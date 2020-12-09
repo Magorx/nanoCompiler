@@ -194,6 +194,21 @@ public:
 	bool equal(const StringView *other) const {
 		return (*this) == (*other);
 	}
+
+	bool equal(const char *other) const {
+		size_t len = strlen(other);
+		if (len != size) {
+			return false;
+		}
+
+		for (size_t i = 0; i < len; ++i) {
+			if (buffer[i] != other[i]) {
+				return false;
+			}
+		}
+
+		return true;
+	}
 };
 
 #endif // GENERAL_STRINGVIEW

@@ -1,6 +1,8 @@
 #include <cstdlib>
 #include <cstdio>
 
+#include "general/c/debug.h"
+
 #include "general/constants.h"
 #include "general/warnings.h"
 
@@ -29,7 +31,7 @@ int main() {
 		return 0;
 	}
 
-	Compiler comp = {};
+	Compiler comp;
 	CodeNode *prog = comp.read_to_nodes(&file);
 
 	// prog->space_dump();
@@ -64,6 +66,8 @@ int main() {
 		}
 		printf("+---+------------+\n");
 	} else if (MODE == COMPILE) {
+		// prog->full_dump();
+		// printf("\n");
 		printf("compiling...\n");
 		comp.compile(prog, "out.kc");
 		system("cat out.kc");

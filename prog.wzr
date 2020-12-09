@@ -1,5 +1,14 @@
 {
-	a = 3;
+	var first;
+	var second = 2;
+	first = 3;
+
+	{
+		var first = 30000;
+		second = first / 2;
+	}
+
+	second = first * 4 + 5;
 }
 
 
