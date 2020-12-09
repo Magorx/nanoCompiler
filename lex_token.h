@@ -43,30 +43,35 @@ struct Token {
 		type = 0;
 		data.num = 0;
 		line = 0;
+		pos = 0;
 	}
 
-	void ctor(int type_, int line_) {
+	void ctor(int type_, int line_, int pos_) {
 		type = type_;
 		data.num = 0;
 		line = line_;
+		pos = pos_;
 	}
 
-	void ctor(int type_, int op_, int line_) {
+	void ctor(int type_, int op_, int line_, int pos_) {
 		type = type_;
 		data.op = op_;
 		line = line_;
+		pos = pos_;
 	}
 
-	void ctor(int type_, double num_, int line_) {
+	void ctor(int type_, double num_, int line_, int pos_) {
 		type = type_;
 		data.num = num_;
 		line = line_;
+		pos = pos_;
 	}
 
-	void ctor(int type_, StringView *id_, int line_) {
+	void ctor(int type_, StringView *id_, int line_, int pos_) {
 		type = type_;
 		data.id = id_;
 		line = line_;
+		pos = pos_;
 	}
 
 	static Token *NEW() {
@@ -79,43 +84,43 @@ struct Token {
 		return cake;
 	}
 
-	static Token *NEW(int type_, int line_) {
+	static Token *NEW(int type_, int line_, int pos_) {
 		Token *cake = (Token*) calloc(1, sizeof(Token));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, line_);
+		cake->ctor(type_, line_, pos_);
 		return cake;
 	}
 
-	static Token *NEW(int type_, int op_, int line_) {
+	static Token *NEW(int type_, int op_, int line_, int pos_) {
 		Token *cake = (Token*) calloc(1, sizeof(Token));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, op_, line_);
+		cake->ctor(type_, op_, line_, pos_);
 		return cake;
 	}
 
-	static Token *NEW(int type_, double num_, int line_) {
+	static Token *NEW(int type_, double num_, int line_, int pos_) {
 		Token *cake = (Token*) calloc(1, sizeof(Token));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, num_, line_);
+		cake->ctor(type_, num_, line_, pos_);
 		return cake;
 	}
 
-	static Token *NEW(int type_, StringView *id_, int line_) {
+	static Token *NEW(int type_, StringView *id_, int line_, int pos_) {
 		Token *cake = (Token*) calloc(1, sizeof(Token));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, id_, line_);
+		cake->ctor(type_, id_, line_, pos_);
 		return cake;
 	}
 
@@ -164,41 +169,25 @@ struct Token {
 		return type == T_END;
 	}
 
-	void dump(bool bracked = true) const {
+	void dump(FILE *file = stdout, bool bracked = true) const {
 		if (bracked) {
-			printf("[");
+			fprintf(file, "[");
 		}
 		if (type == T_END) {
-			printf("0[END]0");
+			fprintf(file, "0[END]0");
 		} else if (type == T_NUMBER) {
-			printf("%lg", data.num);
+			fprintf(file, "%lg", data.num);
 		} else if (type == T_OP) {
-			switch (data.op) {
-				case OPCODE_IF : {
-					printf("if");
-					break;
-				}
-
-				case OPCODE_WHILE : {
-					printf("while");
-					break;
-				}
-
-				case OPCODE_FOR : {
-					printf("for");
-					break;
-				}
-
-				default: {
-					printf("%c", data.op);
-					break;
-				}
+			if (is_printable_op(data.op)) {
+				fputc(data.op, file);
+			} else {
+				fprintf(file, "[op_%d]", data.op);
 			}
 		} else {
 			data.id->print();
 		}
 		if (bracked) {
-			printf("]");
+			fprintf(file, "]");
 		}
 	}
 };

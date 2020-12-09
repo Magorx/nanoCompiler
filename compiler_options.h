@@ -4,7 +4,12 @@
 enum OPERATION_CODE {
 	OPCODE_IF    = 'i',
 	OPCODE_WHILE = 'w',
-	OPCODE_FOR   = 'f'
+	OPCODE_FOR   = 'f',
+
+	OPCODE_LE    = 5,
+	OPCODE_GE    = 6,
+	OPCODE_EQ    = 7,
+	OPCODE_NEQ   = 8,
 };
 
 bool is_normal_op(const int op) {

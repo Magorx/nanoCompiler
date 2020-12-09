@@ -13,15 +13,15 @@ ARGBLOCK   ::= [ {ID | ID = EXPR} ]
 // Statements =================================================================
 
 BLOCK_STATEMENT ::= STATEMENT | { BLOCK_STATEMENT* }
-STATEMENT       ::= {DEF_VAR | EXPR | ASGN | FUNC_CALL} ; | IF | WHILE
+STATEMENT       ::= {DEF_VAR | COND | ASGN | FUNC_CALL} ; | IF | WHILE
 
 IF    ::= ? (COND) BLOCK_STATEMENT {: BLOCK_STATEMENT}?
 WHILE ::= while (COND) BLOCK_STATEMENT
-ASGN  ::= ID = EXPR
+ASGN  ::= ID = COND
 
 // Variables ==================================================================
 
-DEF_VAR ::= "var" {ID | ID = EXPR}
+DEF_VAR ::= "var" {ID | ID = COND}
 
 // Math expression ============================================================
 

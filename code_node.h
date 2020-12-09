@@ -1,3 +1,4 @@
+
 #ifndef CODENODE_H
 #define CODENODE_H
 
@@ -34,6 +35,7 @@ struct CodeNode {
 
 public:
 	int line;
+	int pos;
 	CodeNode            (const CodeNode&) = delete;
 	CodeNode &operator= (const CodeNode&) = delete;
 
@@ -42,7 +44,8 @@ public:
 	data(),
 	L(nullptr),
 	R(nullptr),
-	line(0)
+	line(0),
+	pos(0)
 	{}
 
 	~CodeNode() {}
@@ -52,7 +55,9 @@ public:
 		data.val = 0;
 		L        = nullptr;
 		R        = nullptr;
+
 		line = 0;
+		pos  = 0;
 	}
 
 	static CodeNode *NEW() {
@@ -65,7 +70,7 @@ public:
 		return cake;
 	}
 
-	void ctor(const char type_, const int op_or_var, CodeNode *L_, CodeNode *R_, const int line_) {
+	void ctor(const char type_, const int op_or_var, CodeNode *L_, CodeNode *R_, const int line_, const int pos_) {
 		type = type_;
 		if (type == OPERATION) {
 			data.op = op_or_var;
@@ -75,51 +80,54 @@ public:
 		L = L_;
 		R = R_;
 		line = line_;
+		pos  = pos_;
 	}
 
-	static CodeNode *NEW(const char type_, const int op_or_var, CodeNode *L_, CodeNode *R_, const int line_) {
+	static CodeNode *NEW(const char type_, const int op_or_var, CodeNode *L_, CodeNode *R_, const int line_, const int pos_) {
 		CodeNode *cake = (CodeNode*) calloc(1, sizeof(CodeNode));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, op_or_var, L_, R_, line_);
+		cake->ctor(type_, op_or_var, L_, R_, line_, pos_);
 		return cake;
 	}
 
-	void ctor(const char type_, const double val_, CodeNode *L_, CodeNode *R_, const int line_) {
+	void ctor(const char type_, const double val_, CodeNode *L_, CodeNode *R_, const int line_, const int pos_) {
 		type     = type_;
 		data.val = val_;
 		L        = L_;
 		R        = R_;
 		line     = line_;
+		pos      = pos_;
 	}
 
-	static CodeNode *NEW(const char type_, const double val_, CodeNode *L_, CodeNode *R_, const int line_) {
+	static CodeNode *NEW(const char type_, const double val_, CodeNode *L_, CodeNode *R_, const int line_, const int pos_) {
 		CodeNode *cake = (CodeNode*) calloc(1, sizeof(CodeNode));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, val_, L_, R_, line_);
+		cake->ctor(type_, val_, L_, R_, line_, pos_);
 		return cake;
 	}
 
-	void ctor(const char type_, StringView *id_, CodeNode *L_, CodeNode *R_, const int line_) {
+	void ctor(const char type_, StringView *id_, CodeNode *L_, CodeNode *R_, const int line_, const int pos_) {
 		type    = type_;
 		data.id = id_;
 		L       = L_;
 		R       = R_;
 		line    = line_;
+		pos     = pos_;
 	}
 
-	static CodeNode *NEW(const char type_, StringView *id_, CodeNode *L_, CodeNode *R_, const int line_) {
+	static CodeNode *NEW(const char type_, StringView *id_, CodeNode *L_, CodeNode *R_, const int line_, const int pos_) {
 		CodeNode *cake = (CodeNode*) calloc(1, sizeof(CodeNode));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, id_, L_, R_, line_);
+		cake->ctor(type_, id_, L_, R_, line_, pos_);
 		return cake;
 	}
 
@@ -129,6 +137,7 @@ public:
 		L        = nullptr;
 		R        = nullptr;
 		line     = 0;
+		pos      = 0;
 	}
 
 	static void DELETE(CodeNode *node, bool recursive = false, bool to_delete_id = false) {
@@ -351,7 +360,7 @@ public:
 
 		//fprintf(file, "(");
 		if (is_op()) {
-			if (is_loggable_op(data.op)) {
+			if (is_printable_op(data.op)) {
 				fputc(data.op, file);
 			} else {
 				fprintf(file, "[op_%d]", data.op);
@@ -383,7 +392,11 @@ public:
 
 		//fprintf(file, "(");
 		if (is_op()) {
-			fprintf(file, "[%d_%c]\n", data.op, data.op);
+			if (is_printable_op(data.op)) {
+				fputc(data.op, file);
+			} else {
+				fprintf(file, "[op_%d]", data.op);
+			}
 		} else if (is_var()) {
 			fprintf(file, "{%d}", data.var);
 		} else if (is_val()) {

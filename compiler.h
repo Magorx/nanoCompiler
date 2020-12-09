@@ -32,6 +32,8 @@ private:
 		assert(node);
 		assert(file);
 
+		#define LOG_ERROR_LINE_POS(node) RAISE_ERROR("line [%d] | pos [%d]\n", node->line, node->pos);
+
 		#define COMPILE_L() if (node->L) compile(node->L, file)
 		#define COMPILE_R() if (node->R) compile(node->R, file)
 		#define COMPILE_L_COMMENT() if (node->L && is_compiling_loggable_op(node->L->get_op())) { fprintf(file, "\n; "); node->L->space_dump(file); fprintf(file, "\n");} COMPILE_L()
@@ -87,12 +89,47 @@ private:
 				break;
 			}
 
+			case '<' : {
+				COMPILE_LR();
+				fprintf(file, "lt\n");
+				break;
+			}
+
+			case '>' : {
+				COMPILE_LR();
+				fprintf(file, "gt\n");
+				break;
+			}
+
+			case OPCODE_LE  : {
+				COMPILE_LR();
+				fprintf(file, "le\n");
+				break;
+			}
+			case OPCODE_GE  : {
+				COMPILE_LR();
+				fprintf(file, "ge\n");
+				break;
+			}
+
+			case OPCODE_EQ  : {
+				COMPILE_LR();
+				fprintf(file, "eq\n");
+				break;
+			}
+
+			case OPCODE_NEQ : {
+				COMPILE_LR();
+				fprintf(file, "neq\n");
+				break;
+			}
+
 			case OP_VAR_DEF : {
 				if (!node->L || !node->L->is_id()) {
 					RAISE_ERROR("bad variable definition [\n");
 					node->space_dump();
 					printf("]\n");
-					RAISE_ERROR("line [%d]\n", node->line);
+					LOG_ERROR_LINE_POS(node);
 					break;
 				}
 
@@ -101,7 +138,7 @@ private:
 					RAISE_ERROR("Redefinition of the id [\n");
 					node->L->get_id()->print();
 					printf("]\n");
-					RAISE_ERROR("line [%d]\n", node->line);
+					LOG_ERROR_LINE_POS(node);
 					break;
 				}
 
@@ -157,7 +194,7 @@ private:
 				RAISE_ERROR("bad operation: [");
 				node->space_dump();
 				printf("]\n");
-				RAISE_ERROR("line [%d]\n", node->line);
+				LOG_ERROR_LINE_POS(node);
 				break;
 			}
 		}
@@ -189,7 +226,7 @@ private:
 
 		if (!node->is_id()) {
 			RAISE_ERROR("bad compiling type, node is [%d]\n", node->get_type());
-			RAISE_ERROR("line [%d]\n", node->line);
+			LOG_ERROR_LINE_POS(node);
 			return;
 		}
 
@@ -198,7 +235,7 @@ private:
 			RAISE_ERROR("variable does not exist [");
 			node->get_id()->print();
 			printf("]\n");
-			RAISE_ERROR("line [%d]\n", node->line);
+			LOG_ERROR_LINE_POS(node);
 			return;
 		}
 
@@ -301,11 +338,11 @@ public:
 
 	CodeNode *read_to_nodes(const File *file) {
 		Vector<Token> *tokens = lex_parser.parse(file->data);
-		// for (size_t i = 0; i < tokens->size(); ++i) {
-		// 	(*tokens)[i].dump(false);
-		// 	printf(" ");
-		// }
-		// printf("\n");
+		for (size_t i = 0; i < tokens->size(); ++i) {
+			(*tokens)[i].dump(stdout, false);
+			printf(" ");
+		}
+		printf("\n");
 
 		CodeNode *ret = rec_parser.parse(tokens);
 
@@ -336,7 +373,7 @@ public:
 
 		if (ANNOUNCEMENT_ERROR) {
 			fprintf(file, "AN ERROR OCCURED DURING COMPILATION IUCK\n");
-			ANNOUNCE("ERR", "compiler", "An error occured during compilation, ick\n");
+			ANNOUNCE("ERR", "compiler", "An error occured during compilation\n");
 		}
 		fclose(file);
 

@@ -15,9 +15,12 @@
 
 class LexicalParser {
 private:
-	#define ADD_TOKEN(type, data) do {Token token = {}; token.ctor(type, data, line); tokens->push_back(token);} while (0)
+	#define CUR_POS (int)(cur - cur_line)
+	#define ADD_TOKEN(type, data) do {Token token = {}; token.ctor(type, data, line, CUR_POS); tokens->push_back(token);} while (0)
 
 // data =======================================================================
+	const char *cur_expr;
+	const char *cur_line;
 	const char *cur;
 	Vector<Token> *tokens;
 	char skip_mode;
@@ -42,7 +45,7 @@ private:
 
 	void collect_number() {
 		Token token = {};
-		token.ctor(T_NUMBER, 0);
+		token.ctor(T_NUMBER, 0, line, CUR_POS);
 
 		char sign = '+';
 		if (is_sign(*cur)) {
@@ -112,25 +115,47 @@ private:
 		ADD_TOKEN(T_ID, id);
 	}
 
-	void collect_id_or_long_op() {
+	bool try_collect_long_op() {
 		if (StringView::starts_with(cur, "if ")) {
 			cur += 3;
 			ADD_TOKEN(T_OP, OPCODE_IF);
+			return true;
 		} else if (StringView::starts_with(cur, "while ")) {
 			cur += 6;
 			ADD_TOKEN(T_OP, OPCODE_WHILE);
+			return true;
 		} else if (StringView::starts_with(cur, "for ")) {
 			cur += 4;
 			ADD_TOKEN(T_OP, OPCODE_FOR);
+			return true;
+		} else if (StringView::starts_with(cur, "<=")) {
+			cur += 2;
+			ADD_TOKEN(T_OP, OPCODE_LE);
+			return true;
+		} else if (StringView::starts_with(cur, ">=")) {
+			cur += 2;
+			ADD_TOKEN(T_OP, OPCODE_GE);
+			return true;
+		} else if (StringView::starts_with(cur, "==")) {
+			cur += 2;
+			ADD_TOKEN(T_OP, OPCODE_EQ);
+			return true;
+		} else if (StringView::starts_with(cur, "!=")) {
+			cur += 2;
+			ADD_TOKEN(T_OP, OPCODE_NEQ);
+			return true;
 		} else {
-			collect_id();
+			return false;
 		}
 	}
 
 	void parse() {
 		while(*cur) {
 			if (isspace(*cur)) { // skip spaces
-				line += *cur == '\n'; 
+				if (*cur == '\n') {
+					++line;
+					cur_line = cur + 1;
+				}
 				++cur;
 				continue;
 			}
@@ -159,8 +184,12 @@ private:
 				continue;
 			}
 
+			if (try_collect_long_op()) {
+				continue;
+			}
+
 			if (is_id_char(*cur)) {
-				collect_id_or_long_op();
+				collect_id();
 				continue;
 			}
 
@@ -174,6 +203,8 @@ public:
 	LexicalParser &operator= (const LexicalParser&) = delete;
 
 	LexicalParser():
+	cur_expr(nullptr),
+	cur_line(nullptr),
 	cur(nullptr),
 	tokens(nullptr),
 	skip_mode(0),
@@ -183,10 +214,12 @@ public:
 	~LexicalParser() {}
 
 	void ctor() {
-		cur = nullptr;
-		tokens = nullptr;
+		cur_expr  = nullptr;
+		cur_line  = nullptr;
+		cur       = nullptr;
+		tokens    = nullptr;
 		skip_mode = 0;
-		line = 1;
+		line      = 1;
 	}
 
 	static LexicalParser *NEW() {
@@ -215,7 +248,10 @@ public:
 //=============================================================================
 
 	Vector<Token> *parse(const char *expression) {
-		cur    = expression;
+		cur_expr = expression;
+		cur_line = expression;
+		cur      = expression;
+
 		tokens = Vector<Token>::NEW();
 		parse();
 		ADD_TOKEN(T_END, 0);

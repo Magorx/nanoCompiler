@@ -44,6 +44,8 @@ private:
 	#define SETI(ind) cur_index = ind; cur = &(*expr)[cur_index]
 	#define RESET() SETI(enter_index)
 
+	#define NEW_NODE(type, data, l, r) ParseNode::NEW(type, data, l, r, cur->line, cur->pos)
+
 	#define REQUIRE_OP(op)                                  \
 		do {                                                \
 			if (cur->type != T_OP || cur->data.op != op) {  \
@@ -95,7 +97,7 @@ private:
 			return nullptr;
 		}
 
-		CodeNode *ret = ParseNode::NEW(ID, cur->data.id, nullptr, nullptr, cur->line);
+		CodeNode *ret = NEW_NODE(ID, cur->data.id, nullptr, nullptr);
 		NEXT();
 		return ret;
 	}
@@ -105,7 +107,7 @@ private:
 			SET_ERR(ERROR_SYNTAX, cur);
 			return nullptr;
 		}
-		CodeNode *ret = ParseNode::NEW(VALUE, cur->data.num, nullptr, nullptr, cur->line);
+		CodeNode *ret = NEW_NODE(VALUE, cur->data.num, nullptr, nullptr);
 		NEXT();
 		return ret;
 	}
@@ -114,7 +116,7 @@ private:
 		IF_PARSED (cur_index, unit_id, parse_ID()) {
 			if (cur->is_op('(')) {
 				NEXT();
-				IF_PARSED (cur_index, bracket_expr, parse_EXPR()) {
+				IF_PARSED (cur_index, bracket_expr, parse_COND()) {
 					if (cur->is_op(')')) {
 						NEXT();
 						unit_id->set_R(bracket_expr);
@@ -132,7 +134,7 @@ private:
 
 		if (cur->is_op('(')) {
 			NEXT();
-			IF_PARSED (cur_index, expr_in_brackets, parse_EXPR()) {
+			IF_PARSED (cur_index, expr_in_brackets, parse_COND()) {
 				if (cur->is_op(')')) {
 					NEXT();
 					return expr_in_brackets;
@@ -158,7 +160,7 @@ private:
 			int sign = cur->get_op();
 			NEXT();
 			IF_PARSED (cur_index, fact, parse_FACT()) {
-				return ParseNode::NEW(OPERATION, sign, nullptr, fact, cur->line);
+				return NEW_NODE(OPERATION, sign, nullptr, fact);
 			}
 			SET_ERR(ERROR_SYNTAX, cur);
 			return nullptr;
@@ -168,7 +170,7 @@ private:
 			if (cur->is_op('^')) {
 				NEXT();
 				IF_PARSED (cur_index, fact, parse_FACT()) {
-					return ParseNode::NEW(OPERATION, '^', unit, fact, cur->line);
+					return NEW_NODE(OPERATION, '^', unit, fact);
 				}
 				ParseNode::DELETE(unit);
 				SET_ERR(ERROR_SYNTAX, cur);
@@ -189,7 +191,7 @@ private:
 				NEXT();
 
 				IF_PARSED (cur_index, next_fact, parse_FACT()) {
-					fact = ParseNode::NEW(OPERATION, op, fact, next_fact, cur->line);
+					fact = NEW_NODE(OPERATION, op, fact, next_fact);
 					continue;
 				}
 
@@ -213,11 +215,11 @@ private:
 
 		NEXT();
 		IF_PARSED (cur_index, id, parse_ID()) {
-			ParseNode *var_definition = ParseNode::NEW(OPERATION, OP_VAR_DEF, id, nullptr, cur->line);
+			ParseNode *var_definition = NEW_NODE(OPERATION, OP_VAR_DEF, id, nullptr);
 			if (cur->is_op('=')) {
 				NEXT();
 
-				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
+				IF_PARSED (cur_index, expr_node, parse_COND()) {
 					var_definition->R = expr_node;
 					return var_definition;
 				}
@@ -244,7 +246,7 @@ private:
 				NEXT();
 
 				IF_PARSED (cur_index, next_term, parse_TERM()) {
-					term = ParseNode::NEW(OPERATION, op, term, next_term, cur->line);
+					term = NEW_NODE(OPERATION, op, term, next_term);
 					continue;
 				}
 
@@ -260,14 +262,39 @@ private:
 		return nullptr;
 	} 
 
+	ParseNode *parse_COND() {
+		IF_PARSED (cur_index, cur_expr, parse_EXPR()) {
+			while (cur->is_op('>') || cur->is_op('<') ||
+				   cur->is_op(OPCODE_LE) || cur->is_op(OPCODE_GE ) ||
+				   cur->is_op(OPCODE_EQ) || cur->is_op(OPCODE_NEQ)) {
+				int op = cur->get_op();
+				NEXT();
+
+				IF_PARSED (cur_index, next_expr, parse_EXPR()) {
+					cur_expr = NEW_NODE(OPERATION, op, cur_expr, next_expr);
+					continue;
+				}
+
+				ParseNode::DELETE(cur_expr, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			}
+
+			return cur_expr;
+		}
+
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
 	ParseNode *parse_ASGN() {
 		IF_PARSED (cur_index, id, parse_ID()) {
 			if (cur->is_op('=')) {
 				int op = cur->get_op();
 				NEXT();
 
-				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
-					return ParseNode::NEW(OPERATION, op, id, expr_node, cur->line);
+				IF_PARSED (cur_index, expr_node, parse_COND()) {
+					return NEW_NODE(OPERATION, op, id, expr_node);
 				}
 
 				ParseNode::DELETE(id, true);
@@ -301,7 +328,7 @@ private:
 		}
 		NEXT();
 
-		IF_PARSED (cur_index, cond_block, parse_EXPR()) {
+		IF_PARSED (cur_index, cond_block, parse_COND()) {
 			if (!cur->is_op(')')) {
 				RESET();
 				SET_ERR(ERROR_SYNTAX, cur);
@@ -310,8 +337,8 @@ private:
 			NEXT();
 
 			IF_PARSED (cur_index, true_block, parse_BLOCK_STATEMENT()) {
-				ParseNode *dep  = ParseNode::NEW(OPERATION, OP_COND_DEPENDENT, nullptr,    true_block, cur->line);
-				ParseNode *cond = ParseNode::NEW(OPERATION, OP_CONDITION,      cond_block, dep       , cur->line);
+				ParseNode *dep  = NEW_NODE(OPERATION, OP_COND_DEPENDENT, nullptr,    true_block);
+				ParseNode *cond = NEW_NODE(OPERATION, OP_CONDITION,      cond_block, dep       );
 				if (!cur->is_op(':')) {
 					return cond;
 				}
@@ -347,7 +374,7 @@ private:
 				return nullptr;
 			} else {
 				NEXT();
-				return ParseNode::NEW(OPERATION, ';', var_def, nullptr, cur->line);
+				return NEW_NODE(OPERATION, ';', var_def, nullptr);
 			}
 		}
 
@@ -358,23 +385,23 @@ private:
 				return nullptr;
 			} else {
 				NEXT();
-				return ParseNode::NEW(OPERATION, ';', assign, nullptr, cur->line);
+				return NEW_NODE(OPERATION, ';', assign, nullptr);
 			}
 		}
 
-		IF_PARSED (cur_index, expr_node, parse_EXPR()) {
+		IF_PARSED (cur_index, expr_node, parse_COND()) {
 			if (!cur->is_op(';')) {
 				ParseNode::DELETE(expr_node, true);
 				SET_ERR(ERROR_SYNTAX, cur);
 				return nullptr;
 			} else {
 				NEXT();
-				return ParseNode::NEW(OPERATION, ';', expr_node, nullptr, cur->line);
+				return NEW_NODE(OPERATION, ';', expr_node, nullptr);
 			}
 		}
 
 		IF_PARSED (cur_index, if_node, parse_IF()) {
-			return ParseNode::NEW(OPERATION, ';', if_node, nullptr, cur->line);
+			return NEW_NODE(OPERATION, ';', if_node, nullptr);
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);
@@ -384,7 +411,7 @@ private:
 	ParseNode *parse_BLOCK_STATEMENT() {
 		if (cur->is_op('{')) {
 			NEXT();
-			ParseNode *block_node = ParseNode::NEW(OPERATION, '{', nullptr, nullptr, cur->line);
+			ParseNode *block_node = NEW_NODE(OPERATION, '{', nullptr, nullptr);
 			IF_PARSED (cur_index, block_stmt, parse_BLOCK_STATEMENT()) {
 				block_node->L = block_stmt;
 				while (!cur->is_op('}')) {
@@ -495,8 +522,8 @@ public:
 		if (!ERROR) {
 			return res;
 		} else {
-			ANNOUNCE("ERR", "parser", "an error occured during grammar parcing");
-			ANNOUNCE("ERR", "parser", "line [%d]", ERRPOS->line);
+			ANNOUNCE("ERR", "parser", "an error occured during grammar parsing");
+			ANNOUNCE("ERR", "parser", "line [%d] | pos [%d]", ERRPOS->line, ERRPOS->pos);
 			//ERRPOS->dump();
 			return nullptr;
 		}

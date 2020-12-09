@@ -7,11 +7,11 @@ pop [rvx + 103]
 push  2
 pop [rvx + 104]
 
-; <<c>+<b>>[op_30]<<<>[op_123]>[op_31]<<>[op_123]>>
+; <<a>[op_7]<b>>[op_30]<<<>{>[op_31]<<>{>>
 if_0_cond:
-push 
+push [rvx + 103]
 push [rvx + 104]
-add
+eq
 
 push 0
 jne if_0_true:
@@ -27,8 +27,10 @@ pop [rvx + 103]
 
 if_0_true:
 
-; <a>=<5>
-push  5
+; <a>=<<b>[op_7]<a>>
+push [rvx + 104]
+push [rvx + 103]
+eq
 pop [rvx + 103]
 
 ; <b>=<7>
@@ -36,4 +38,3 @@ push  7
 pop [rvx + 104]
 
 jne if_0_end:
-AN ERROR OCCURED DURING COMPILATION IUCK
