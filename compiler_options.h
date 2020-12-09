@@ -2,7 +2,7 @@
 #define COMPILER_OPTIONS
 
 enum OPERATION_CODE {
-	OPCODE_IF    = 'i',
+	OPCODE_IF    = '?',
 	OPCODE_WHILE = 'w',
 	OPCODE_FOR   = 'f',
 
@@ -12,6 +12,18 @@ enum OPERATION_CODE {
 	OPCODE_NEQ   = 8,
 	OPCODE_OR    = 10,
 	OPCODE_AND   = 11,
+
+	OPCODE_VAR_DEF  = 20,
+
+	OPCODE_IF_CONDITION   = 30,
+	OPCODE_COND_DEPENDENT = 31,
+
+	OPCODE_WHILE_CONDITION   = 34,
+	OPCODE_WHILE_BODY = 35,
+
+	OPCODE_ELEM_PUTN  = 100,
+	OPCODE_ELEM_PUTC  = 101,
+	OPCODE_ELEM_INPUT = 102,
 };
 
 bool is_normal_op(const int op) {

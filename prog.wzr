@@ -1,14 +1,15 @@
 {
-	var a;
-	a = 1;
-	var b = 2;
+	var a = 1;
+	input c;
+	var b = 0;
 
-	? (1) {
-		a = b == a;
-		b = 7 || 11;
-	} : {
-		b = 500;
-		a = 700;
+	>| (a < 97) {
+		a = a + (97 - a) / 2;
+		b = b + 1;
+		putn b;
+		putn;
 	}
-}
 
+	putc a;
+	putn;
+}

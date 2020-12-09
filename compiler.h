@@ -136,7 +136,7 @@ private:
 				break;
 			}
 
-			case OP_VAR_DEF : {
+			case OPCODE_VAR_DEF : {
 				if (!node->L || !node->L->is_id()) {
 					RAISE_ERROR("bad variable definition [\n");
 					node->space_dump();
@@ -164,7 +164,21 @@ private:
 				break;
 			}
 
-			case OP_CONDITION : {
+			case OPCODE_WHILE : {
+				int cur_while_cnt = while_cnt;
+				fprintf(file, "while_%d_cond:\n", cur_while_cnt);
+				COMPILE_L();
+				fprintf(file, "\npush 0\n");
+				fprintf(file, "je while_%d_end\n", cur_while_cnt);
+				COMPILE_R();
+				fprintf(file, "jmp while_%d_cond\n", cur_while_cnt);
+				fprintf(file, "\nwhile_%d_end:\n", cur_while_cnt);
+
+				++if_cnt;
+				break;
+			}
+
+			case OPCODE_IF : {
 				int cur_if_cnt = if_cnt;
 				fprintf(file, "if_%d_cond:\n", cur_if_cnt);
 				COMPILE_L();
@@ -177,13 +191,42 @@ private:
 				break;
 			}
 
-			case OP_COND_DEPENDENT : {
+			case OPCODE_COND_DEPENDENT : {
 				int cur_if_cnt = if_cnt;
 				fprintf(file, "if_%d_false:\n", cur_if_cnt);
 				COMPILE_L_COMMENT();
 				fprintf(file, "\njmp if_%d_end\n", cur_if_cnt);
 				fprintf(file, "\nif_%d_true:\n", cur_if_cnt);
 				COMPILE_R_COMMENT();
+				break;
+			}
+
+			case OPCODE_ELEM_PUTN : {
+				if (node->R) {
+					COMPILE_R();
+					fprintf(file, "out\n");
+				} else {
+					fprintf(file, "push %d\n", '\n');
+					fprintf(file, "out_c\n");
+				}
+
+				break;
+			}
+
+			case OPCODE_ELEM_PUTC : {
+				if (node->R) {
+					COMPILE_R();
+				} else {
+					fprintf(file, "push %d\n", ' ');
+				}
+				fprintf(file, "out_c\n");
+
+				break;
+			}
+
+			case OPCODE_ELEM_INPUT : {
+				fprintf(file, "in\n");
+
 				break;
 			}
 

@@ -20,12 +20,6 @@ enum PARSER_ERROR {
 	ERROR_SYNTAX = 100,
 };
 
-enum OP_CODES {
-	OP_VAR_DEF  = 20,
-	OP_CONDITION   = 30,
-	OP_COND_DEPENDENT = 31,
-};
-
 //=============================================================================
 // RecursiveParser ============================================================
 
@@ -42,7 +36,9 @@ private:
 	#define NEXT() ++cur_index; cur = &(*expr)[cur_index]
 	#define PREV() --cur_index; cur = &(*expr)[cur_index]
 	#define SETI(ind) cur_index = ind; cur = &(*expr)[cur_index]
-	#define RESET() SETI(enter_index)
+
+	#define RESET_POINT int ENTER_INDEX
+	#define RESET() SETI(ENTER_INDEX)
 
 	#define NEW_NODE(type, data, l, r) ParseNode::NEW(type, data, l, r, cur->line, cur->pos)
 
@@ -215,7 +211,7 @@ private:
 
 		NEXT();
 		IF_PARSED (cur_index, id, parse_ID()) {
-			ParseNode *var_definition = NEW_NODE(OPERATION, OP_VAR_DEF, id, nullptr);
+			ParseNode *var_definition = NEW_NODE(OPERATION, OPCODE_VAR_DEF, id, nullptr);
 			if (cur->is_op('=')) {
 				NEXT();
 
@@ -359,9 +355,9 @@ private:
 	}
 
 	ParseNode *parse_IF() {
-		int enter_index = cur_index;
+		RESET_POINT = cur_index;
 
-		if (!cur->is_op('?')) {
+		if (!cur->is_op(OPCODE_IF)) {
 			SET_ERR(ERROR_SYNTAX, cur);
 			return nullptr;
 		}
@@ -376,15 +372,14 @@ private:
 
 		IF_PARSED (cur_index, cond_block, parse_EXPR()) {
 			if (!cur->is_op(')')) {
-				RESET();
 				SET_ERR(ERROR_SYNTAX, cur);
 				return nullptr;
 			}
 			NEXT();
 
 			IF_PARSED (cur_index, true_block, parse_BLOCK_STATEMENT()) {
-				ParseNode *dep  = NEW_NODE(OPERATION, OP_COND_DEPENDENT, nullptr,    true_block);
-				ParseNode *cond = NEW_NODE(OPERATION, OP_CONDITION,      cond_block, dep       );
+				ParseNode *dep  = NEW_NODE(OPERATION, OPCODE_COND_DEPENDENT, nullptr,    true_block);
+				ParseNode *cond = NEW_NODE(OPERATION, OPCODE_IF,             cond_block, dep       );
 				if (!cur->is_op(':')) {
 					return cond;
 				}
@@ -395,13 +390,50 @@ private:
 					return cond;
 				}
 
-				RESET();
 				ParseNode::DELETE(cond, true);
 				SET_ERR(ERROR_SYNTAX, cur);
 				return nullptr;
 			}
 
+			ParseNode::DELETE(cond_block, true);
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
+		RESET();
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
+	ParseNode *parse_WHILE() {
+		RESET_POINT = cur_index;
+
+		if (!cur->is_op(OPCODE_WHILE)) {
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+		NEXT();
+
+		if (!cur->is_op('(')) {
 			RESET();
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+		NEXT();
+
+		IF_PARSED (cur_index, cond_block, parse_EXPR()) {
+			if (!cur->is_op(')')) {
+				ParseNode::DELETE(cond_block, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			}
+			NEXT();
+
+			IF_PARSED (cur_index, body_block, parse_BLOCK_STATEMENT()) {
+				ParseNode *whil  = NEW_NODE(OPERATION, OPCODE_WHILE, cond_block, body_block);
+				return whil;
+			}
+
 			ParseNode::DELETE(cond_block, true);
 			SET_ERR(ERROR_SYNTAX, cur);
 			return nullptr;
@@ -448,6 +480,21 @@ private:
 
 		IF_PARSED (cur_index, if_node, parse_IF()) {
 			return NEW_NODE(OPERATION, ';', if_node, nullptr);
+		}
+
+		IF_PARSED (cur_index, while_node, parse_WHILE()) {
+			return NEW_NODE(OPERATION, ';', while_node, nullptr);
+		}
+
+		IF_PARSED (cur_index, elem_func, parse_ELEM_FUNC()) {
+			if (!cur->is_op(';')) {
+				ParseNode::DELETE(elem_func, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			} else {
+				NEXT();
+				return NEW_NODE(OPERATION, ';', elem_func, nullptr);
+			}
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);
@@ -503,7 +550,35 @@ private:
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
 
+	ParseNode *parse_ELEM_FUNC() {
+		if (cur->is_op(OPCODE_ELEM_PUTN) || cur->is_op(OPCODE_ELEM_PUTC)) {
+			int op = cur->get_op();
+			NEXT();
+
+			IF_PARSED (cur_index, arg, parse_EXPR()) {
+				return NEW_NODE(OPERATION, op, nullptr, arg);
+			}
+
+			return NEW_NODE(OPERATION, op, nullptr, nullptr);
+		}
+
+		if (cur->is_op(OPCODE_ELEM_INPUT)) {
+			int op = cur->get_op();
+			NEXT();
+
+			IF_PARSED (cur_index, id, parse_ID()) {
+				return NEW_NODE(OPERATION, '=', id, NEW_NODE(OPERATION, op, nullptr, nullptr));
+			}
+
+			PREV();
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
+		SET_ERR(ERROR_SYNTAX, cur);
 		return nullptr;
 	}
 

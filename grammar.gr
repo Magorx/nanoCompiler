@@ -13,11 +13,13 @@ ARGBLOCK   ::= [ {ID | ID = MATH_EXPR} ]
 // Statements =================================================================
 
 BLOCK_STATEMENT ::= STATEMENT | { BLOCK_STATEMENT* }
-STATEMENT       ::= {DEF_VAR | COND | ASGN | FUNC_CALL} ; | IF | WHILE
+STATEMENT       ::= {DEF_VAR | COND | ASGN | FUNC_CALL} ; | IF | WHILE | ELEM_FUNC
+
+ELEM_FUNC ::= {putn EXPR | putc EXPR | input ID}
 
 IF    ::= ? (COND) BLOCK_STATEMENT {: BLOCK_STATEMENT}?
-WHILE ::= while (COND) BLOCK_STATEMENT
-ASGN  ::= ID = COND
+WHILE ::= >| (COND) BLOCK_STATEMENT
+ASGN  ::= ID = EXPR
 
 // Variables ==================================================================
 

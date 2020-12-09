@@ -116,12 +116,12 @@ private:
 	}
 
 	bool try_collect_long_op() {
-		if (StringView::starts_with(cur, "if ")) {
-			cur += 3;
+		if (StringView::starts_with(cur, "?")) {
+			cur += 1;
 			ADD_TOKEN(T_OP, OPCODE_IF);
 			return true;
-		} else if (StringView::starts_with(cur, "while ")) {
-			cur += 6;
+		} else if (StringView::starts_with(cur, ">|")) {
+			cur += 2;
 			ADD_TOKEN(T_OP, OPCODE_WHILE);
 			return true;
 		} else if (StringView::starts_with(cur, "for ")) {
@@ -151,6 +151,18 @@ private:
 		} else if (StringView::starts_with(cur, "&&")) {
 			cur += 2;
 			ADD_TOKEN(T_OP, OPCODE_AND);
+			return true;
+		} else if (StringView::starts_with(cur, "putn ") || StringView::starts_with(cur, "putn;")) {
+			cur += 4;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTN);
+			return true;
+		} else if (StringView::starts_with(cur, "putc ") || StringView::starts_with(cur, "putc;")) {
+			cur += 4;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTC);
+			return true;
+		} else if (StringView::starts_with(cur, "input ") || StringView::starts_with(cur, "input;")) {
+			cur += 5;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_INPUT);
 			return true;
 		} else {
 			return false;

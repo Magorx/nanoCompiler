@@ -1,44 +1,57 @@
 
-; (a)[op_20]
-
-; (a)=(1)
+; (a)[op_20](1)
 push  1
 pop [rvx + 103]
 
-; (b)[op_20](2)
-push  2
+; (c)=(f)
+in
+pop 
+
+; (b)[op_20](0)
+push  0
 pop [rvx + 104]
 
-; (1)[op_30](((){)[op_31]((){))
-if_0_cond:
-push  1
+; ((a)<(97))w((){)
+while_0_cond:
+push [rvx + 103]
+push  97
+lt
 
 push 0
-jne if_0_true
-if_0_false:
+je while_0_end
 
-; (b)=(500)
-push  500
-pop [rvx + 104]
-
-; (a)=(700)
-push  700
-pop [rvx + 103]
-
-jmp if_0_end
-
-if_0_true:
-
-; (a)=((b)[op_7](a))
-push [rvx + 104]
+; (a)=((a)+(((97)-(a))/(2)))
 push [rvx + 103]
-eq
+push  97
+push [rvx + 103]
+sub
+push  2
+div
+add
 pop [rvx + 103]
 
-; (b)=((7)[op_10](11))
-push  7
-push  11
-l_or
+; (b)=((b)+(1))
+push [rvx + 104]
+push  1
+add
 pop [rvx + 104]
 
-if_0_end:
+; d(b)
+push [rvx + 104]
+out
+
+; d
+push 10
+out_c
+jmp while_0_cond
+
+while_0_end:
+
+; e(a)
+push [rvx + 103]
+out_c
+
+; d
+push 10
+out_c
+AN ERROR OCCURED DURING COMPILATION IUCK
