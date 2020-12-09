@@ -15,12 +15,13 @@
 
 class LexicalParser {
 private:
-	#define ADD_TOKEN(type, data) do {Token token = {}; token.ctor(type, data); tokens->push_back(token);} while (0)
+	#define ADD_TOKEN(type, data) do {Token token = {}; token.ctor(type, data, line); tokens->push_back(token);} while (0)
 
 // data =======================================================================
 	const char *cur;
 	Vector<Token> *tokens;
 	char skip_mode;
+	int line;
 //=============================================================================
 
 	bool is_id_char(const char c) {
@@ -129,6 +130,7 @@ private:
 	void parse() {
 		while(*cur) {
 			if (isspace(*cur)) { // skip spaces
+				line += *cur == '\n'; 
 				++cur;
 				continue;
 			}
@@ -174,7 +176,8 @@ public:
 	LexicalParser():
 	cur(nullptr),
 	tokens(nullptr),
-	skip_mode(0)
+	skip_mode(0),
+	line(0)
 	{}
 
 	~LexicalParser() {}
@@ -183,6 +186,7 @@ public:
 		cur = nullptr;
 		tokens = nullptr;
 		skip_mode = 0;
+		line = 1;
 	}
 
 	static LexicalParser *NEW() {

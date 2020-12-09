@@ -33,6 +33,7 @@ struct CodeNode {
 //=============================================================================
 
 public:
+	int line;
 	CodeNode            (const CodeNode&) = delete;
 	CodeNode &operator= (const CodeNode&) = delete;
 
@@ -40,7 +41,8 @@ public:
 	type(0),
 	data(),
 	L(nullptr),
-	R(nullptr)
+	R(nullptr),
+	line(0)
 	{}
 
 	~CodeNode() {}
@@ -50,6 +52,7 @@ public:
 		data.val = 0;
 		L        = nullptr;
 		R        = nullptr;
+		line = 0;
 	}
 
 	static CodeNode *NEW() {
@@ -62,7 +65,7 @@ public:
 		return cake;
 	}
 
-	void ctor(const char type_, const int op_or_var, CodeNode *L_=nullptr, CodeNode *R_=nullptr) {
+	void ctor(const char type_, const int op_or_var, CodeNode *L_, CodeNode *R_, const int line_) {
 		type = type_;
 		if (type == OPERATION) {
 			data.op = op_or_var;
@@ -71,49 +74,52 @@ public:
 		}
 		L = L_;
 		R = R_;
+		line = line_;
 	}
 
-	static CodeNode *NEW(const char type_, const int op_or_var, CodeNode *L_=nullptr, CodeNode *R_=nullptr) {
+	static CodeNode *NEW(const char type_, const int op_or_var, CodeNode *L_, CodeNode *R_, const int line_) {
 		CodeNode *cake = (CodeNode*) calloc(1, sizeof(CodeNode));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, op_or_var, L_, R_);
+		cake->ctor(type_, op_or_var, L_, R_, line_);
 		return cake;
 	}
 
-	void ctor(const char type_, const double val_, CodeNode *L_=nullptr, CodeNode *R_=nullptr) {
+	void ctor(const char type_, const double val_, CodeNode *L_, CodeNode *R_, const int line_) {
 		type     = type_;
 		data.val = val_;
 		L        = L_;
 		R        = R_;
+		line     = line_;
 	}
 
-	static CodeNode *NEW(const char type_, const double val_, CodeNode *L_=nullptr, CodeNode *R_=nullptr) {
+	static CodeNode *NEW(const char type_, const double val_, CodeNode *L_, CodeNode *R_, const int line_) {
 		CodeNode *cake = (CodeNode*) calloc(1, sizeof(CodeNode));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, val_, L_, R_);
+		cake->ctor(type_, val_, L_, R_, line_);
 		return cake;
 	}
 
-	void ctor(const char type_, StringView *id_, CodeNode *L_=nullptr, CodeNode *R_=nullptr) {
+	void ctor(const char type_, StringView *id_, CodeNode *L_, CodeNode *R_, const int line_) {
 		type    = type_;
 		data.id = id_;
 		L       = L_;
 		R       = R_;
+		line    = line_;
 	}
 
-	static CodeNode *NEW(const char type_, StringView *id_, CodeNode *L_=nullptr, CodeNode *R_=nullptr) {
+	static CodeNode *NEW(const char type_, StringView *id_, CodeNode *L_, CodeNode *R_, const int line_) {
 		CodeNode *cake = (CodeNode*) calloc(1, sizeof(CodeNode));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, id_, L_, R_);
+		cake->ctor(type_, id_, L_, R_, line_);
 		return cake;
 	}
 
@@ -122,6 +128,7 @@ public:
 		data.val = 0;
 		L        = nullptr;
 		R        = nullptr;
+		line     = 0;
 	}
 
 	static void DELETE(CodeNode *node, bool recursive = false, bool to_delete_id = false) {

@@ -89,17 +89,19 @@ private:
 
 			case OP_VAR_DEF : {
 				if (!node->L || !node->L->is_id()) {
-					RAISE_ERROR("bad variable definition [");
+					RAISE_ERROR("bad variable definition [\n");
 					node->space_dump();
-					printf("\n");
+					printf("]\n");
+					RAISE_ERROR("line [%d]\n", node->line);
 					break;
 				}
 
 				bool ret = id_table.declare(ID_TYPE_VAR, node->L->get_id());
 				if (!ret) {
-					RAISE_ERROR("Redefinition of the id [");
+					RAISE_ERROR("Redefinition of the id [\n");
 					node->L->get_id()->print();
 					printf("]\n");
+					RAISE_ERROR("line [%d]\n", node->line);
 					break;
 				}
 
@@ -155,6 +157,7 @@ private:
 				RAISE_ERROR("bad operation: [");
 				node->space_dump();
 				printf("]\n");
+				RAISE_ERROR("line [%d]\n", node->line);
 				break;
 			}
 		}
@@ -186,6 +189,7 @@ private:
 
 		if (!node->is_id()) {
 			RAISE_ERROR("bad compiling type, node is [%d]\n", node->get_type());
+			RAISE_ERROR("line [%d]\n", node->line);
 			return;
 		}
 
@@ -194,6 +198,7 @@ private:
 			RAISE_ERROR("variable does not exist [");
 			node->get_id()->print();
 			printf("]\n");
+			RAISE_ERROR("line [%d]\n", node->line);
 			return;
 		}
 
@@ -261,6 +266,8 @@ public:
 
 	void ctor() {
 		prog_text = nullptr;
+		rec_parser.ctor();
+		lex_parser.ctor();
 
 		if_cnt    = 0;
 		while_cnt = 0;
@@ -294,11 +301,11 @@ public:
 
 	CodeNode *read_to_nodes(const File *file) {
 		Vector<Token> *tokens = lex_parser.parse(file->data);
-		for (size_t i = 0; i < tokens->size(); ++i) {
-			(*tokens)[i].dump(false);
-			printf(" ");
-		}
-		printf("\n");
+		// for (size_t i = 0; i < tokens->size(); ++i) {
+		// 	(*tokens)[i].dump(false);
+		// 	printf(" ");
+		// }
+		// printf("\n");
 
 		CodeNode *ret = rec_parser.parse(tokens);
 

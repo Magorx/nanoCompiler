@@ -95,7 +95,7 @@ private:
 			return nullptr;
 		}
 
-		CodeNode *ret = ParseNode::NEW(ID, cur->data.id);
+		CodeNode *ret = ParseNode::NEW(ID, cur->data.id, nullptr, nullptr, cur->line);
 		NEXT();
 		return ret;
 	}
@@ -105,7 +105,7 @@ private:
 			SET_ERR(ERROR_SYNTAX, cur);
 			return nullptr;
 		}
-		CodeNode *ret = ParseNode::NEW(VALUE, cur->data.num);
+		CodeNode *ret = ParseNode::NEW(VALUE, cur->data.num, nullptr, nullptr, cur->line);
 		NEXT();
 		return ret;
 	}
@@ -158,7 +158,7 @@ private:
 			int sign = cur->get_op();
 			NEXT();
 			IF_PARSED (cur_index, fact, parse_FACT()) {
-				return ParseNode::NEW(OPERATION, sign, nullptr, fact);
+				return ParseNode::NEW(OPERATION, sign, nullptr, fact, cur->line);
 			}
 			SET_ERR(ERROR_SYNTAX, cur);
 			return nullptr;
@@ -168,7 +168,7 @@ private:
 			if (cur->is_op('^')) {
 				NEXT();
 				IF_PARSED (cur_index, fact, parse_FACT()) {
-					return ParseNode::NEW(OPERATION, '^', unit, fact);
+					return ParseNode::NEW(OPERATION, '^', unit, fact, cur->line);
 				}
 				ParseNode::DELETE(unit);
 				SET_ERR(ERROR_SYNTAX, cur);
@@ -189,7 +189,7 @@ private:
 				NEXT();
 
 				IF_PARSED (cur_index, next_fact, parse_FACT()) {
-					fact = ParseNode::NEW(OPERATION, op, fact, next_fact);
+					fact = ParseNode::NEW(OPERATION, op, fact, next_fact, cur->line);
 					continue;
 				}
 
@@ -213,7 +213,7 @@ private:
 
 		NEXT();
 		IF_PARSED (cur_index, id, parse_ID()) {
-			ParseNode *var_definition = ParseNode::NEW(OPERATION, OP_VAR_DEF, id, nullptr);
+			ParseNode *var_definition = ParseNode::NEW(OPERATION, OP_VAR_DEF, id, nullptr, cur->line);
 			if (cur->is_op('=')) {
 				NEXT();
 
@@ -244,7 +244,7 @@ private:
 				NEXT();
 
 				IF_PARSED (cur_index, next_term, parse_TERM()) {
-					term = ParseNode::NEW(OPERATION, op, term, next_term);
+					term = ParseNode::NEW(OPERATION, op, term, next_term, cur->line);
 					continue;
 				}
 
@@ -267,7 +267,7 @@ private:
 				NEXT();
 
 				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
-					return ParseNode::NEW(OPERATION, op, id, expr_node);
+					return ParseNode::NEW(OPERATION, op, id, expr_node, cur->line);
 				}
 
 				ParseNode::DELETE(id, true);
@@ -310,8 +310,8 @@ private:
 			NEXT();
 
 			IF_PARSED (cur_index, true_block, parse_BLOCK_STATEMENT()) {
-				ParseNode *dep  = ParseNode::NEW(OPERATION, OP_COND_DEPENDENT, nullptr,    true_block);
-				ParseNode *cond = ParseNode::NEW(OPERATION, OP_CONDITION,      cond_block, dep);
+				ParseNode *dep  = ParseNode::NEW(OPERATION, OP_COND_DEPENDENT, nullptr,    true_block, cur->line);
+				ParseNode *cond = ParseNode::NEW(OPERATION, OP_CONDITION,      cond_block, dep       , cur->line);
 				if (!cur->is_op(':')) {
 					return cond;
 				}
@@ -347,7 +347,7 @@ private:
 				return nullptr;
 			} else {
 				NEXT();
-				return ParseNode::NEW(OPERATION, ';', var_def, nullptr);
+				return ParseNode::NEW(OPERATION, ';', var_def, nullptr, cur->line);
 			}
 		}
 
@@ -358,7 +358,7 @@ private:
 				return nullptr;
 			} else {
 				NEXT();
-				return ParseNode::NEW(OPERATION, ';', assign, nullptr);
+				return ParseNode::NEW(OPERATION, ';', assign, nullptr, cur->line);
 			}
 		}
 
@@ -369,12 +369,12 @@ private:
 				return nullptr;
 			} else {
 				NEXT();
-				return ParseNode::NEW(OPERATION, ';', expr_node, nullptr);
+				return ParseNode::NEW(OPERATION, ';', expr_node, nullptr, cur->line);
 			}
 		}
 
 		IF_PARSED (cur_index, if_node, parse_IF()) {
-			return ParseNode::NEW(OPERATION, ';', if_node, nullptr);
+			return ParseNode::NEW(OPERATION, ';', if_node, nullptr, cur->line);
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);
@@ -384,7 +384,7 @@ private:
 	ParseNode *parse_BLOCK_STATEMENT() {
 		if (cur->is_op('{')) {
 			NEXT();
-			ParseNode *block_node = ParseNode::NEW(OPERATION, '{', nullptr, nullptr);
+			ParseNode *block_node = ParseNode::NEW(OPERATION, '{', nullptr, nullptr, cur->line);
 			IF_PARSED (cur_index, block_stmt, parse_BLOCK_STATEMENT()) {
 				block_node->L = block_stmt;
 				while (!cur->is_op('}')) {
@@ -495,10 +495,9 @@ public:
 		if (!ERROR) {
 			return res;
 		} else {
-			ANNOUNCE("ERR", "parser", "grammar unfit expression, check pos [%ld]", ERRPOS - expr->get_buffer());
-			printf(">>> ");
-			ERRPOS->dump();
-			printf(" <<<\n");
+			ANNOUNCE("ERR", "parser", "an error occured during grammar parcing");
+			ANNOUNCE("ERR", "parser", "line [%d]", ERRPOS->line);
+			//ERRPOS->dump();
 			return nullptr;
 		}
 	}

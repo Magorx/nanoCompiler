@@ -31,7 +31,8 @@ int main() {
 		return 0;
 	}
 
-	Compiler comp;
+	Compiler comp = {};
+	comp.ctor();
 	CodeNode *prog = comp.read_to_nodes(&file);
 
 	// prog->space_dump();

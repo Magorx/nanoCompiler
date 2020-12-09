@@ -23,6 +23,8 @@ struct Token {
 // data =======================================================================
 	int type;
 	TokenData data;
+	int line;
+	int pos;
 //=============================================================================
 
 	// Token            (const Token&) = delete;
@@ -30,7 +32,9 @@ struct Token {
 
 	Token():
 	type(0),
-	data()
+	data(),
+	line(0),
+	pos(0)
 	{}
 
 	~Token() {}
@@ -38,26 +42,31 @@ struct Token {
 	void ctor() {
 		type = 0;
 		data.num = 0;
+		line = 0;
 	}
 
-	void ctor(int type_) {
+	void ctor(int type_, int line_) {
 		type = type_;
 		data.num = 0;
+		line = line_;
 	}
 
-	void ctor(int type_, int op_) {
+	void ctor(int type_, int op_, int line_) {
 		type = type_;
 		data.op = op_;
+		line = line_;
 	}
 
-	void ctor(int type_, double num_) {
+	void ctor(int type_, double num_, int line_) {
 		type = type_;
 		data.num = num_;
+		line = line_;
 	}
 
-	void ctor(int type_, StringView *id_) {
+	void ctor(int type_, StringView *id_, int line_) {
 		type = type_;
 		data.id = id_;
+		line = line_;
 	}
 
 	static Token *NEW() {
@@ -70,43 +79,43 @@ struct Token {
 		return cake;
 	}
 
-	static Token *NEW(int type_) {
+	static Token *NEW(int type_, int line_) {
 		Token *cake = (Token*) calloc(1, sizeof(Token));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_);
+		cake->ctor(type_, line_);
 		return cake;
 	}
 
-	static Token *NEW(int type_, int op_) {
+	static Token *NEW(int type_, int op_, int line_) {
 		Token *cake = (Token*) calloc(1, sizeof(Token));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, op_);
+		cake->ctor(type_, op_, line_);
 		return cake;
 	}
 
-	static Token *NEW(int type_, double num_) {
+	static Token *NEW(int type_, double num_, int line_) {
 		Token *cake = (Token*) calloc(1, sizeof(Token));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, num_);
+		cake->ctor(type_, num_, line_);
 		return cake;
 	}
 
-	static Token *NEW(int type_, StringView *id_) {
+	static Token *NEW(int type_, StringView *id_, int line_) {
 		Token *cake = (Token*) calloc(1, sizeof(Token));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(type_, id_);
+		cake->ctor(type_, id_, line_);
 		return cake;
 	}
 

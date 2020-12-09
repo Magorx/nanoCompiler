@@ -7,9 +7,9 @@ pop [rvx + 103]
 push  2
 pop [rvx + 104]
 
-; <<a>+<b>>[op_30]<<<>[op_123]>[op_31]<<>[op_123]>>
+; <<c>+<b>>[op_30]<<<>[op_123]>[op_31]<<>[op_123]>>
 if_0_cond:
-push [rvx + 103]
+push 
 push [rvx + 104]
 add
 
@@ -36,3 +36,4 @@ push  7
 pop [rvx + 104]
 
 jne if_0_end:
+AN ERROR OCCURED DURING COMPILATION IUCK
