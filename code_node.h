@@ -425,17 +425,20 @@ public:
 		fprintf(file, "\"node_%p\" [label=\"", this);
 
 		if (type == VALUE) {
-			fprintf(file, "%lg\" shape=circle color=violet", get_val());
+			fprintf(file, "%lg\" shape=circle style=filled fillcolor=\"#FFFFCC\"", get_val());
 		} else if (type == OPERATION) {
 			const char *opname = OPERATION_NAME(get_op());
 			if (opname) {
-				fprintf(file, "%d\n[%s]\" shape=box", get_op(), opname);
+				fprintf(file, "%s\" shape=invhouse style=filled fillcolor=\"#CCCCFF\"", opname);
 			} else {
-				fprintf(file, "%d [%c]\" shape=box", get_op(), get_op());
+				if (is_printable_op(get_op()))
+					fprintf(file, "%c\" shape=invhouse style=filled fillcolor=\"#CCCCCC\" fontsize=16", get_op());
+				else
+					fprintf(file, "[OP_%d]\" shape=invhouse style=filled fillcolor=\"#CCCCCC\"", get_op());
 			}
 		} else if (type == ID) {
 			get_id()->print(file);
-			fprintf(file, "\" shape=box color=green");
+			fprintf(file, "\" shape=circle style=filled fillcolor=\"#CCFFFF\"");
 		}
 
 		fprintf(file, "]\n");
