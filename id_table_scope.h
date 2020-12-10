@@ -131,6 +131,14 @@ public:
 		return (int)data.size();
 	}
 
+	void dump() {
+		for (size_t i = 1; i < data.size(); ++i) {
+			printf("[%lu] ", i);
+			data[i].id->print();
+			printf("\n");
+		}
+	}
+
 };
 
 #endif // ID_TABLE_SCOPE

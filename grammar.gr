@@ -8,12 +8,12 @@ FUNC_DECL  ::= func ID ARGLIST BLOCK_STATEMENT
 FUNC_CALL  ::= ID ARGLIST
 
 ARGLIST    ::= ARGBLOCK*
-ARGBLOCK   ::= [ {ID | ID = MATH_EXPR} ]
+ARGBLOCK   ::= [ {ID | ID = EXPR} ]
 
 // Statements =================================================================
 
 BLOCK_STATEMENT ::= STATEMENT | { BLOCK_STATEMENT* }
-STATEMENT       ::= {DEF_VAR | COND | ASGN | FUNC_CALL} ; | IF | WHILE | ELEM_FUNC
+STATEMENT       ::= {DEF_VAR | COND | ASGN | FUNC_CALL | ELEM_FUNC} ; | IF | WHILE
 
 ELEM_FUNC ::= {putn EXPR | putc EXPR | input ID}
 

@@ -34,10 +34,12 @@ private:
 
 		#define LOG_ERROR_LINE_POS(node) RAISE_ERROR("line [%d] | pos [%d]\n", node->line, node->pos);
 
+		#define DUMP_L() if (node->L) {printf("L] "); node->L->full_dump(); printf("\n");}
+		#define DUMP_R() if (node->R) {printf("R] "); node->R->full_dump(); printf("\n");}
 		#define COMPILE_L() if (node->L) compile(node->L, file)
 		#define COMPILE_R() if (node->R) compile(node->R, file)
-		#define COMPILE_L_COMMENT() if (node->L && is_compiling_loggable_op(node->L->get_op())) { fprintf(file, "\n; "); node->L->space_dump(file); fprintf(file, "\n");} COMPILE_L()
-		#define COMPILE_R_COMMENT() if (node->R && is_compiling_loggable_op(node->R->get_op())) { fprintf(file, "\n; "); node->R->space_dump(file); fprintf(file, "\n");} COMPILE_R()
+		#define COMPILE_L_COMMENT() if (node->L && (is_compiling_loggable_op(node->L->get_op()))) { fprintf(file, "\n; "); node->L->space_dump(file); fprintf(file, "\n");} COMPILE_L()
+		#define COMPILE_R_COMMENT() if (node->R && (is_compiling_loggable_op(node->R->get_op()))) { fprintf(file, "\n; "); node->R->space_dump(file); fprintf(file, "\n");} COMPILE_R()
 		#define COMPILE_LR() do {COMPILE_L(); COMPILE_R();} while (0)
 
 		switch (node->get_op()) {
@@ -229,8 +231,8 @@ private:
 			case '{' : {
 				id_table.add_scope();
 				COMPILE_L_COMMENT();
-				COMPILE_R_COMMENT();
 				id_table.remove_scope();
+				COMPILE_R_COMMENT();
 
 				break;
 			}

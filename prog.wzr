@@ -1,65 +1,11 @@
 {
-	var goal = 13;
-	var ans  = 0;
-
-	putc 'G';
-	putc 'u';
-	putc 'e';
-	putc 's';
-	putc 's';
-	putc ' ';
-	putc 'a';
-	putc ' ';
-	putc 'n';
-	putc 'u';
-	putc 'm';
-	putc 'b';
-	putc 'e';
-	putc 'r';
-	putn;
-
-	>| (ans != goal) {
-		putc '>';
-		putc ' ';
-
-		input ans;
-
-		? (ans < goal) {
-			putc 'T';
-			putc 'a';
-			putc 'k';
-			putc 'e';
-			putc ' ';
-			putc 'm';
-			putc 'o';
-			putc 'r';
-			putc 'e';
-			putc '!';
-			putn;
-		} : ? (ans > goal) {
-			putc 'T';
-			putc 'a';
-			putc 'k';
-			putc 'e';
-			putc ' ';
-			putc 'l';
-			putc 'e';
-			putc 's';
-			putc 's';
-			putc '!';
-			putn;
-		}
+	{
+		putc 'X';
+		var a = 1;
 	}
-
-	putc 'G';
-	putc 'o';
-	putc 'o';
-	putc 'd';
-	putc ' ';
-	putc 'j';
-	putc 'o';
-	putc 'b';
-	putc '!';
-	putn;
+	{
+		putc 'Y';
+		putn a;
+		putn;
+	}
 }
-

@@ -109,7 +109,7 @@ public:
 			RAISE_ERROR("removing unexistant scope\n");
 			return;
 		} else {
-			data[data.size() - 1]->dtor();
+			IdTableScope::DELETE(data[data.size() - 1]);
 			data.pop_back();
 		}
 	}
