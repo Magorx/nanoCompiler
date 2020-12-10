@@ -88,14 +88,6 @@ out_c
 in
 pop [rvx + 104]
 
-; d(ans)
-push [rvx + 104]
-out
-
-; d
-push 10
-out_c
-
 ; ((ans)<(goal))?(()[op_31]((){))
 if_1_cond:
 push [rvx + 104]

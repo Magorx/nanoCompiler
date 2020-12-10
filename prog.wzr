@@ -23,8 +23,6 @@
 		putc ' ';
 
 		input ans;
-		putn  ans;
-		putn;
 
 		? (ans < goal) {
 			putc 'T';
