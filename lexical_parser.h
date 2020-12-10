@@ -116,7 +116,11 @@ private:
 	}
 
 	bool try_collect_long_op() {
-		if (StringView::starts_with(cur, "?")) {
+		if (StringView::starts_with(cur, "'") && three_available() && (*(cur + 2) == '\'')) {
+			ADD_TOKEN(T_NUMBER, (double) *(cur + 1));
+			cur += 3;
+			return true;
+		} else if (StringView::starts_with(cur, "?")) {
 			cur += 1;
 			ADD_TOKEN(T_OP, OPCODE_IF);
 			return true;
@@ -152,7 +156,7 @@ private:
 			cur += 2;
 			ADD_TOKEN(T_OP, OPCODE_AND);
 			return true;
-		} else if (StringView::starts_with(cur, "putn ") || StringView::starts_with(cur, "putn;")) {
+		} else  if (StringView::starts_with(cur, "putn ") || StringView::starts_with(cur, "putn;")) {
 			cur += 4;
 			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTN);
 			return true;

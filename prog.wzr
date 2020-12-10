@@ -1,15 +1,67 @@
 {
-	var a = 1;
-	input c;
-	var b = 0;
+	var goal = 13;
+	var ans  = 0;
 
-	>| (a < 97) {
-		a = a + (97 - a) / 2;
-		b = b + 1;
-		putn b;
+	putc 'G';
+	putc 'u';
+	putc 'e';
+	putc 's';
+	putc 's';
+	putc ' ';
+	putc 'a';
+	putc ' ';
+	putc 'n';
+	putc 'u';
+	putc 'm';
+	putc 'b';
+	putc 'e';
+	putc 'r';
+	putn;
+
+	>| (ans != goal) {
+		putc '>';
+		putc ' ';
+
+		input ans;
+		putn  ans;
 		putn;
+
+		? (ans < goal) {
+			putc 'T';
+			putc 'a';
+			putc 'k';
+			putc 'e';
+			putc ' ';
+			putc 'm';
+			putc 'o';
+			putc 'r';
+			putc 'e';
+			putc '!';
+			putn;
+		} : ? (ans > goal) {
+			putc 'T';
+			putc 'a';
+			putc 'k';
+			putc 'e';
+			putc ' ';
+			putc 'l';
+			putc 'e';
+			putc 's';
+			putc 's';
+			putc '!';
+			putn;
+		}
 	}
 
-	putc a;
+	putc 'G';
+	putc 'o';
+	putc 'o';
+	putc 'd';
+	putc ' ';
+	putc 'j';
+	putc 'o';
+	putc 'b';
+	putc '!';
 	putn;
 }
+

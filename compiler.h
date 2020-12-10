@@ -179,15 +179,13 @@ private:
 			}
 
 			case OPCODE_IF : {
-				int cur_if_cnt = if_cnt;
+				int cur_if_cnt = ++if_cnt;
 				fprintf(file, "if_%d_cond:\n", cur_if_cnt);
 				COMPILE_L();
 				fprintf(file, "\npush 0\n");
 				fprintf(file, "jne if_%d_true\n", cur_if_cnt);
 				COMPILE_R();
 				fprintf(file, "\nif_%d_end:\n", cur_if_cnt);
-
-				++if_cnt;
 				break;
 			}
 
@@ -262,7 +260,18 @@ private:
 
 		fprintf(file, "push ");
 		if (node->type == VALUE) {
-			compile_value(node, file);
+			if (node->get_val() < 0) {
+				fprintf(file, "0\npush ");
+				
+				CodeNode tmp = {};
+				tmp.ctor(VALUE, fabs(node->get_val()), nullptr, nullptr, node->line, node->pos);
+				compile_value(&tmp, file);
+				tmp.dtor();
+
+				fprintf(file, "\nsub\n");
+			} else {
+				compile_value(node, file);
+			}
 		} else if (node->type == ID) {
 			compile_variable(node, file);
 		}
@@ -394,11 +403,11 @@ public:
 
 	CodeNode *read_to_nodes(const File *file) {
 		Vector<Token> *tokens = lex_parser.parse(file->data);
-		for (size_t i = 0; i < tokens->size(); ++i) {
-			(*tokens)[i].dump(stdout, false);
-			printf(" ");
-		}
-		printf("\n");
+		// for (size_t i = 0; i < tokens->size(); ++i) {
+		// 	(*tokens)[i].dump(stdout, false);
+		// 	printf(" ");
+		// }
+		// printf("\n");
 
 		CodeNode *ret = rec_parser.parse(tokens);
 
