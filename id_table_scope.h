@@ -53,6 +53,7 @@ class IdTableScope {
 private:
 // data =======================================================================
 	Vector<IdData> data;
+	int var_cnt;
 //=============================================================================
 
 
@@ -61,6 +62,7 @@ public:
 
 	IdTableScope():
 	data(),
+	var_cnt(0),
 	offset(0)
 	{}
 
@@ -69,6 +71,7 @@ public:
 	void ctor(const int offset_ = 0) {
 		data.ctor();
 		offset = offset_;
+		var_cnt = 0;
 	}
 
 	static IdTableScope *NEW(const int offset_ = 0) {
@@ -112,22 +115,30 @@ public:
 		idat.ctor(type, id, 0);
 
 		size_t data_size = data.size();
+		int func_cnt = 0;
 		for (size_t i = 0; i < data_size; ++i) {
 			if (idat.equal(data[i])) {
-				return data[i].offset;
+				return data[i].offset - func_cnt;
+			} else if (data[i].type == ID_TYPE_FUNC) {
+				++func_cnt;
 			}
 		}
 
 		return NOT_FOUND;
 	}
 
+	int get_var_cnt() const {
+		return var_cnt;
+	}
+
 	bool declare(const int type, const StringView *id, const CodeNode *arglist_ = nullptr) {
 		IdData idat = {};
-		idat.ctor(type, id, offset + (int)data.size(), arglist_);
+		idat.ctor(type, id, (int)data.size(), arglist_);
 
 		if (find_id(id)) {
 			return false;
 		} else {
+			var_cnt += type == ID_TYPE_VAR;
 			data.push_back(idat);
 			return true;
 		}

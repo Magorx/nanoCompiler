@@ -90,6 +90,10 @@ private:
 				compile_variable(node->L, file);
 				fprintf(file, "\n");
 
+				fprintf(file, "push ");
+				compile_variable(node->L, file);
+				fprintf(file, "\n");
+
 				break;
 			}
 
@@ -137,6 +141,12 @@ private:
 			case OPCODE_AND : {
 				COMPILE_LR();
 				fprintf(file, "l_and\n");
+				break;
+			}
+
+			case OPCODE_EXPR : {
+				COMPILE_L();
+				fprintf(file, "pop rzx\n");
 				break;
 			}
 
@@ -212,9 +222,11 @@ private:
 			case OPCODE_ELEM_PUTN : {
 				if (node->R) {
 					COMPILE_R();
+					fprintf(file, "dup\n");
 					fprintf(file, "out\n");
 				} else {
 					fprintf(file, "push %d\n", '\n');
+					fprintf(file, "dup\n");
 					fprintf(file, "out_c\n");
 				}
 
@@ -227,6 +239,7 @@ private:
 				} else {
 					fprintf(file, "push %d\n", ' ');
 				}
+				fprintf(file, "dup\n");
 				fprintf(file, "out_c\n");
 
 				break;
@@ -234,6 +247,19 @@ private:
 
 			case OPCODE_ELEM_INPUT : {
 				fprintf(file, "in\n");
+
+				break;
+			}
+
+			case OPCODE_RET : {
+				if (!node->R) {
+					fprintf(file, "push 0\n");
+				} else {
+					COMPILE_R();
+				}
+
+				fprintf(file, "swp\n");
+				fprintf(file, "ret\n");
 
 				break;
 			}
@@ -251,13 +277,24 @@ private:
 					break;
 				}
 
-				id_table.declare(ID_TYPE_FUNC, node->L->R->get_id(), node->L->L);
+				StringView *id = node->L->R->get_id();
+				fprintf(file, "jmp _func_");
+				id->print(file);
+				fprintf(file, "_END\n");
+				fprintf(file, "_func_");
+				id->print(file);
+				fprintf(file, "_BEGIN:\n");
+
+				id_table.declare(ID_TYPE_FUNC, id, node->L->L);
 
 				id_table.add_scope();
 				COMPILE_L();
 				COMPILE_R();
 				id_table.remove_scope();
 				fprintf(file, "ret\n");
+				fprintf(file, "_func_");
+				id->print(file);
+				fprintf(file, "_END:\n");
 				break;
 			}
 
@@ -419,8 +456,6 @@ private:
 			CHECK_ERROR();
 		}
 
-		id_table.dump();
-
 		id_table.remove_scope();
 
 		fprintf(file, "push rvx\n");
@@ -515,7 +550,7 @@ private:
 		assert(node);
 		assert(file);
 
-		fprintf(file, "%lg", node->get_val());
+		fprintf(file, "%lf", node->get_val());
 	}
 
 	void compile_variable(const CodeNode *node, FILE *file) {
@@ -528,9 +563,12 @@ private:
 			return;
 		}
 
-		//node->get_id()->print();
-		//printf("|\n");
 		int offset = id_table.find(ID_TYPE_VAR, node->get_id());
+
+		// node->get_id()->print();
+		// printf("| finding\n");
+		// id_table.dump();
+
 		if (offset == NOT_FOUND) {
 			RAISE_ERROR("variable does not exist [");
 			node->get_id()->print();

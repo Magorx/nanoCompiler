@@ -124,6 +124,10 @@ private:
 			cur += 1;
 			ADD_TOKEN(T_OP, OPCODE_IF);
 			return true;
+		} else if (*cur == '@') {
+			cur += 1;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_INPUT);
+			return true;
 		} else if (StringView::starts_with(cur, ">|")) {
 			cur += 2;
 			ADD_TOKEN(T_OP, OPCODE_WHILE);
@@ -164,21 +168,21 @@ private:
 			cur += 5;
 			ADD_TOKEN(T_OP, OPCODE_FUNC);
 			return true;
-		} else if (StringView::starts_with(cur, "exit")) {
+		} else if (StringView::starts_with(cur, "ret ")|| StringView::starts_with(cur, "ret;")) {
+			cur += 3;
+			ADD_TOKEN(T_OP, OPCODE_RET);
+			return true;
+		} else if (StringView::starts_with(cur, "exit ")|| StringView::starts_with(cur, "exit;")) {
 			cur += 4;
 			ADD_TOKEN(T_OP, OPCODE_ELEM_EXIT);
 			return true;
-		} else if (StringView::starts_with(cur, "putn ") || StringView::starts_with(cur, "putn;")) {
-			cur += 4;
+		} else if (StringView::starts_with(cur, "__PUT_NUMBER__ ") || StringView::starts_with(cur, "__PUT_NUMBER__;")) {
+			cur += 14;
 			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTN);
 			return true;
-		} else if (StringView::starts_with(cur, "putc ") || StringView::starts_with(cur, "putc;")) {
-			cur += 4;
+		} else if (StringView::starts_with(cur, "__PUT_CHAR__ ") || StringView::starts_with(cur, "__PUT_CHAR__;")) {
+			cur += 12;
 			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTC);
-			return true;
-		} else if (StringView::starts_with(cur, "input ") || StringView::starts_with(cur, "input;")) {
-			cur += 5;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_INPUT);
 			return true;
 		} else {
 			return false;

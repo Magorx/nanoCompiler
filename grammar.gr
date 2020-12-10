@@ -18,7 +18,7 @@ ARG_CALL     ::= \nothing | . | EXPR
 BLOCK_STATEMENT ::= STATEMENT | { BLOCK_STATEMENT* }
 STATEMENT       ::= {DEF_VAR | ASGN | ELEM_FUNC | EXPR} ; | IF | WHILE | FUNC_DECL
 
-ELEM_FUNC ::= {putn EXPR | putc EXPR | input ID}
+ELEM_FUNC ::= {putn EXPR | putc EXPR | @}
 
 IF    ::= ? (EXPR) BLOCK_STATEMENT {: BLOCK_STATEMENT}?
 WHILE ::= >| (EXPR) BLOCK_STATEMENT
@@ -29,7 +29,7 @@ DEF_VAR ::= "var" {ID | ID = EXPR}
 
 // Math expression ============================================================
 
-EXPR ::= {ID =}* RVALUE
+EXPR ::= LOGIC_EXPR | ID = EXPR
 
 LOGIC_EXPR ::= AND_EXPR {|| AND_EXPR}*
 AND_EXPR ::= COND {&& COND}*
@@ -38,7 +38,7 @@ MATH_EXPR ::= TERM {[+-]TERM}*
 TERM ::= FACT {{/|*}FACT}*
 
 FACT ::= [+-]FACT | UNIT^FACT | UNIT
-UNIT ::= FUNC_CALL | ID | (EXPR) | NUMB
+UNIT ::= FUNC_CALL | ID | (EXPR) | ELEM_FUNC |NUMB
 
 // Number & Id ================================================================
 

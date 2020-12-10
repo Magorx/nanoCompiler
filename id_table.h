@@ -106,7 +106,7 @@ public:
 			return NOT_FOUND;
 		}
 
-		return data[data.size() - 1]->offset + data[data.size() - 1]->size();
+		return data[data.size() - 1]->get_var_cnt();
 	}
 
 	const CodeNode *get_arglist(const StringView *id) {

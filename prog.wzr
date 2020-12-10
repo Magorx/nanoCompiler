@@ -1,24 +1,47 @@
 {
 
-	var glob;
+	var P;
 
-func sum[var a = 1][b] {
-	putc 'X';
-	var c = a + b;
-	putn c;
-	putn;
+	/*===========================================*\
+	|=============== STL LIBRARY =================|
+	\*===========================================*/
 
-	glob = c; /* return */
-	1;
-}
+	func printn[var A = -7777.777][var B = -7777.777][var C = -7777.777] {
+		? (A != -7777.777) {
+			__PUT_NUMBER__ A;
+			__PUT_CHAR__ ' ';
+		}
 
-func MAIN[var a][var c] {
-	a = 100;
-	var b = 10;
-	sum[][999];
+		? (B != -7777.777) {
+			__PUT_NUMBER__ B;
+			__PUT_CHAR__ ' ';
+		}
 
-	putn glob;
-	putn;
-}
+		? (C != -7777.777) {
+			__PUT_NUMBER__ C;
+			__PUT_CHAR__ ' ';
+		}
+
+		__PUT_NUMBER__;
+
+		ret 4;
+	}
+
+	/*===========================================*\
+	|=============== STL LIBRARY =================|
+	\*===========================================*/
+
+	func sum[var a][var b] {
+		ret a + b;
+	}
+
+	func MAIN {
+
+		func factor[var x] {
+			? (x <= 1) {ret x;} : {ret x * factor[x - 1];}
+		}
+
+		printn[factor[@]];
+	}
 
 }

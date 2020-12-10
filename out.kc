@@ -1,61 +1,209 @@
 call MAIN
 halt
 
-; (glob)[op_20]
+; (P)[op_20]
 
-; ((((a)[op_20](1))[op_305]((b)[op_305]([op_305])))[op_300](sum))[op_301]((){)
+; ((((A)[op_20](-7777.78))[op_305](((B)[op_20](-7777.78))[op_305](((C)[op_20](-7777.78))[op_305]([op_305]))))[op_300](printn))[op_301]((){)
+jmp _func_printn_END
+_func_printn_BEGIN:
+printn:
+
+; ((A)[op_8](-7777.78))[op_15]([op_31]((){))
+if_1_cond:
+push [rvx + 0]
+push 0
+push 7777.777000
+sub
+
+neq
+
+push 0
+jne if_1_true
+if_1_false:
+
+jmp if_1_end
+
+if_1_true:
+
+; (d(A))[op_202]
+push [rvx + 0]
+dup
+out
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+if_1_end:
+
+; ((B)[op_8](-7777.78))[op_15]([op_31]((){))
+if_2_cond:
+push [rvx + 1]
+push 0
+push 7777.777000
+sub
+
+neq
+
+push 0
+jne if_2_true
+if_2_false:
+
+jmp if_2_end
+
+if_2_true:
+
+; (d(B))[op_202]
+push [rvx + 1]
+dup
+out
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+if_2_end:
+
+; ((C)[op_8](-7777.78))[op_15]([op_31]((){))
+if_3_cond:
+push [rvx + 2]
+push 0
+push 7777.777000
+sub
+
+neq
+
+push 0
+jne if_3_true
+if_3_false:
+
+jmp if_3_end
+
+if_3_true:
+
+; (d(C))[op_202]
+push [rvx + 2]
+dup
+out
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+if_3_end:
+
+; (d)[op_202]
+push 10
+dup
+out_c
+pop rzx
+
+; ([op_18](4))[op_202]
+push 4.000000
+swp
+ret
+pop rzx
+ret
+_func_printn_END:
+
+; ((((a)[op_20])[op_305](((b)[op_20])[op_305]([op_305])))[op_300](sum))[op_301]((){)
+jmp _func_sum_END
+_func_sum_BEGIN:
 sum:
 
-; e(88)
-push 88
-out_c
-
-; (c)[op_20]((a)+(b))
+; ([op_18]((a)+(b)))[op_202]
 push [rvx + 0]
 push [rvx + 1]
 add
-pop [rvx + 2]
-
-; d(c)
-push [rvx + 2]
-out
-
-; d
-push 10
-out_c
-
-; (glob)=(c)
-push [rvx + 2]
-pop [rvx + 0]
+swp
 ret
+pop rzx
+ret
+_func_sum_END:
 
-; ((((a)[op_20])[op_305](((c)[op_20])[op_305]([op_305])))[op_300](MAIN))[op_301]((){)
+; (([op_305])[op_300](MAIN))[op_301]((){)
+jmp _func_MAIN_END
+_func_MAIN_BEGIN:
 MAIN:
 
-; (a)=(100)
-push 100
+; ((((x)[op_20])[op_305]([op_305]))[op_300](factor))[op_301]((){)
+jmp _func_factor_END
+_func_factor_BEGIN:
+factor:
+
+; ((x)[op_5](1))[op_15](((){)[op_31]((){))
+if_4_cond:
+push [rvx + 0]
+push 1.000000
+le
+
+push 0
+jne if_4_true
+if_4_false:
+
+; ([op_18]((x)*(((((x)-(1))[op_202])[op_306]([op_306]))[op_302](factor))))[op_202]
+push [rvx + 0]
+push [rvx + 0]
+push 1.000000
+sub
 pop [rvx + 0]
-
-; (b)[op_20](10)
-push 10
-pop [rvx + 2]
-
-; (([op_203])[op_306](((999)[op_202])[op_306]([op_306])))[op_302](sum)
-push 1
-pop [rvx + 3]
-push 999
-pop [rvx + 4]
 push rvx
-push 3
+push 0
 add
 pop rvx
-call sum
-
-; d(glob)
-push [rvx + 0]
-out
-
-; d
-push 10
-out_c
+call factor
+mul
+swp
 ret
+pop rzx
+
+jmp if_4_end
+
+if_4_true:
+
+; ([op_18](x))[op_202]
+push [rvx + 0]
+swp
+ret
+pop rzx
+
+if_4_end:
+ret
+_func_factor_END:
+
+; (((((((f)[op_202])[op_306]([op_306]))[op_302](factor))[op_202])[op_306]([op_306]))[op_302](printn))[op_202]
+in
+pop [rvx + 0]
+push rvx
+push 0
+add
+pop rvx
+call factor
+pop [rvx + 0]
+push 0
+push 7777.777000
+sub
+
+pop [rvx + 1]
+push 0
+push 7777.777000
+sub
+
+pop [rvx + 2]
+push rvx
+push 0
+add
+pop rvx
+call printn
+pop rzx
+ret
+_func_MAIN_END:
