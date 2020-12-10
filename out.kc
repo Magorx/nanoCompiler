@@ -1,7 +1,9 @@
 call MAIN
 halt
 
-; (P)[op_20]
+; (P)[op_20](1)
+push 1.000000
+pop [rvx + 0]
 
 ; ((((A)[op_20](-7777.78))[op_305](((B)[op_20](-7777.78))[op_305](((C)[op_20](-7777.78))[op_305]([op_305]))))[op_300](printn))[op_301]((){)
 jmp _func_printn_END

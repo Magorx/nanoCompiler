@@ -1,6 +1,11 @@
 #include <cstdlib>
 #include <cstdio>
 
+// TODO GLOBAL VARIABLES
+// TODO ARRAYS
+// TODO FOR
+// TODO 
+
 #include "general/c/debug.h"
 
 #include "general/constants.h"

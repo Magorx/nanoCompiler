@@ -12,6 +12,7 @@ private:
 // data =======================================================================
 	Vector<IdTableScope*> data;
 	int cur_scope;
+	int var_cnt;
 //=============================================================================
 
 	void add_scope(const int offset) {
@@ -22,7 +23,8 @@ private:
 public:
 	IdTable():
 	data(),
-	cur_scope(0)
+	cur_scope(0),
+	var_cnt(0)
 	{}
 
 	~IdTable() {}
@@ -30,6 +32,7 @@ public:
 	void ctor() {
 		data.ctor();
 		cur_scope = 0;
+		var_cnt = 0;
 	}
 
 	static IdTable *NEW() {
@@ -132,7 +135,7 @@ public:
 		if (!data.size()) {
 			add_scope(0);
 		} else {
-			add_scope(data[data.size() - 1]->offset + data[data.size() - 1]->size() * (data.size() != 1));
+			add_scope(data[data.size() - 1]->offset + data[data.size() - 1]->size());
 		}
 		cur_scope = (int)data.size() - 1;
 	}
