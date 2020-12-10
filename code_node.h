@@ -432,7 +432,7 @@ public:
 				fprintf(file, "%s\" shape=invhouse style=filled fillcolor=\"#CCCCFF\"", opname);
 			} else {
 				if (is_printable_op(get_op()))
-					fprintf(file, "%c\" shape=invhouse style=filled fillcolor=\"#CCCCCC\" fontsize=16", get_op());
+					fprintf(file, "%c\" shape=invhouse style=filled fillcolor=\"#FFCCCC\" fontsize=16", get_op());
 				else
 					fprintf(file, "[OP_%d]\" shape=invhouse style=filled fillcolor=\"#CCCCCC\"", get_op());
 			}

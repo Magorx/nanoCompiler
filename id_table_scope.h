@@ -4,34 +4,41 @@
 #include "general/cpp/stringview.hpp"
 #include "general/cpp/vector.hpp"
 
+#include "code_node.h"
+
 enum ID_TYPE {
 	ID_TYPE_VAR  = 1,
-	ID_TYPE_FUNC = 2
+	ID_TYPE_FUNC = 2,
+	NOT_FOUND    = -999999999,
 };
 
 struct IdData {
 	int type;
 	const StringView *id;
 	int offset;
+	const CodeNode *arglist;
 
 	IdData():
 	type(0),
 	id(nullptr),
-	offset(0)
+	offset(0),
+	arglist(nullptr)
 	{}
 
 	IdData& operator=(const IdData& other) {
-		type   = other.type;
-		id     = other.id;
-		offset = other.offset;
+		type    = other.type;
+		id      = other.id;
+		offset  = other.offset;
+		arglist = other.arglist;
 
 		return *this;
 	}
 
-	void ctor(int type_, const StringView *id_, const int offset_) {
-		type   = type_;
-		id     = id_;
-		offset = offset_;
+	void ctor(int type_, const StringView *id_, const int offset_, const CodeNode *arglist_ = nullptr) {
+		type    = type_;
+		id      = id_;
+		offset  = offset_;
+		arglist = arglist_;
 	}
 
 	bool equal(const IdData &other) {
@@ -61,7 +68,6 @@ public:
 
 	void ctor(const int offset_ = 0) {
 		data.ctor();
-		data.push_back(IdData());
 		offset = offset_;
 	}
 
@@ -92,7 +98,7 @@ public:
 
 	bool find_id(const StringView *id) const {
 		size_t data_size = data.size();
-		for (size_t i = 1; i < data_size; ++i) {
+		for (size_t i = 0; i < data_size; ++i) {
 			if (id->equal(data[i].id)) {
 				return true;
 			}
@@ -106,18 +112,18 @@ public:
 		idat.ctor(type, id, 0);
 
 		size_t data_size = data.size();
-		for (size_t i = 1; i < data_size; ++i) {
+		for (size_t i = 0; i < data_size; ++i) {
 			if (idat.equal(data[i])) {
 				return data[i].offset;
 			}
 		}
 
-		return 0;
+		return NOT_FOUND;
 	}
 
-	bool declare(const int type, const StringView *id) {
+	bool declare(const int type, const StringView *id, const CodeNode *arglist_ = nullptr) {
 		IdData idat = {};
-		idat.ctor(type, id, offset + (int)data.size());
+		idat.ctor(type, id, offset + (int)data.size(), arglist_);
 
 		if (find_id(id)) {
 			return false;
@@ -127,12 +133,26 @@ public:
 		}
 	}
 
+	const CodeNode *get_arglist(const StringView *id) {
+		IdData idat = {};
+		idat.ctor(ID_TYPE_FUNC, id, 0);
+
+		size_t data_size = data.size();
+		for (size_t i = 0; i < data_size; ++i) {
+			if (idat.equal(data[i])) {
+				return data[i].arglist;
+			}
+		}
+
+		return nullptr;
+	}
+
 	int size() {
 		return (int)data.size();
 	}
 
 	void dump() {
-		for (size_t i = 1; i < data.size(); ++i) {
+		for (size_t i = 0; i < data.size(); ++i) {
 			printf("[%lu] ", i);
 			data[i].id->print();
 			printf("\n");

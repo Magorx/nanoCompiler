@@ -123,6 +123,17 @@ private:
 				SET_ERR(ERROR_SYNTAX, cur);
 				ParseNode::DELETE(unit_id);
 				return nullptr;
+			} else if (cur->is_op('[')) {
+				ParseNode *func_call = NEW_NODE(OPERATION, OPCODE_FUNC_CALL, nullptr, unit_id);
+
+				IF_PARSED (cur_index, args, parse_ARGLIST_CALL()) {
+					func_call->L = args;
+					return func_call;
+				}
+
+				ParseNode::DELETE(func_call, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
 			} else {
 				return unit_id;
 			}
@@ -456,6 +467,29 @@ private:
 			}
 		}
 
+		IF_PARSED (cur_index, elem_func, parse_ELEM_FUNC()) {
+			if (!cur->is_op(';')) {
+				ParseNode::DELETE(elem_func, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			} else {
+				NEXT();
+				return NEW_NODE(OPERATION, ';', elem_func, nullptr);
+			}
+		}
+
+		IF_PARSED (cur_index, func_decl, parse_FUNC_DECL()) {
+			return NEW_NODE(OPERATION, ';', func_decl, nullptr);
+		}
+
+		IF_PARSED (cur_index, if_node, parse_IF()) {
+			return NEW_NODE(OPERATION, ';', if_node, nullptr);
+		}
+
+		IF_PARSED (cur_index, while_node, parse_WHILE()) {
+			return NEW_NODE(OPERATION, ';', while_node, nullptr);
+		}
+
 		IF_PARSED (cur_index, assign, parse_ASGN()) {
 			if (!cur->is_op(';')) {
 				ParseNode::DELETE(assign, true);
@@ -476,29 +510,6 @@ private:
 				NEXT();
 				return NEW_NODE(OPERATION, ';', expr_node, nullptr);
 			}
-		}
-
-		IF_PARSED (cur_index, elem_func, parse_ELEM_FUNC()) {
-			if (!cur->is_op(';')) {
-				ParseNode::DELETE(elem_func, true);
-				SET_ERR(ERROR_SYNTAX, cur);
-				return nullptr;
-			} else {
-				NEXT();
-				return NEW_NODE(OPERATION, ';', elem_func, nullptr);
-			}
-		}
-
-		IF_PARSED (cur_index, if_node, parse_IF()) {
-			return NEW_NODE(OPERATION, ';', if_node, nullptr);
-		}
-
-		IF_PARSED (cur_index, while_node, parse_WHILE()) {
-			return NEW_NODE(OPERATION, ';', while_node, nullptr);
-		}
-
-		IF_PARSED (cur_index, func_decl, parse_FUNC_DECL()) {
-			return NEW_NODE(OPERATION, ';', func_decl, nullptr);
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);
@@ -582,6 +593,11 @@ private:
 			return nullptr;
 		}
 
+		if (cur->is_op(OPCODE_ELEM_EXIT)) {
+			NEXT();
+			return NEW_NODE(OPERATION, OPCODE_ELEM_EXIT, nullptr, nullptr);
+		}
+
 		SET_ERR(ERROR_SYNTAX, cur);
 		return nullptr;
 	}
@@ -589,10 +605,6 @@ private:
 	ParseNode *parse_ARG_DECL() {
 		IF_PARSED (cur_index, var_def, parse_DEF_VAR()) {
 			return var_def;
-		}
-
-		IF_PARSED (cur_index, assign, parse_ASGN()) {
-			return assign;
 		}
 
 		IF_PARSED (cur_index, id, parse_ID()) {
@@ -665,6 +677,77 @@ private:
 		}
 
 		RESET();
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
+	ParseNode *parse_ARG_CALL() {
+		if (cur->is_op('.')) {
+			NEXT();
+			return NEW_NODE(OPERATION, OPCODE_CONTEXT_ARG, nullptr, nullptr);
+		}
+
+		if (cur->is_op(']')) {
+			return NEW_NODE(OPERATION, OPCODE_DEFAULT_ARG, nullptr, nullptr);
+		}
+
+		IF_PARSED (cur_index, expr_node, parse_EXPR()) {
+			return NEW_NODE(OPERATION, OPCODE_EXPR, expr_node, nullptr);
+		}
+
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
+	ParseNode *parse_ARGLIST_CALL() {
+		ParseNode *arglist = NEW_NODE(OPERATION, OPCODE_FUNC_ARG_CALL, nullptr, nullptr);
+		ParseNode *cur_arg = arglist;
+
+		while (cur->is_op('[')) {
+			NEXT();
+
+			IF_PARSED (cur_index, arg, parse_ARG_CALL()) {
+				cur_arg->L = arg;
+				cur_arg->R = NEW_NODE(OPERATION, OPCODE_FUNC_ARG_CALL, nullptr, nullptr);
+				cur_arg = cur_arg->R;
+
+				if (!cur->is_op(']')) {
+					ParseNode::DELETE(arglist, true);
+					SET_ERR(ERROR_SYNTAX, cur);
+					return nullptr;
+				} else {
+					NEXT();
+					continue;
+				}
+			}
+
+			PREV();
+			ParseNode::DELETE(arglist, true);
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
+		return arglist;
+	}
+
+	ParseNode *parse_FUNC_CALL() {
+		cur->dump();
+		printf("| ");
+		printf("%d %d\n", cur->line, cur->pos);
+		IF_PARSED (cur_index, id, parse_ID()) {
+			ParseNode *func_call = NEW_NODE(OPERATION, OPCODE_FUNC_CALL, nullptr, id);
+
+			IF_PARSED (cur_index, args, parse_ARGLIST_CALL()) {
+				func_call->L = args;
+				return func_call;
+			}
+
+			PREV();
+			ParseNode::DELETE(func_call, true);
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
 		SET_ERR(ERROR_SYNTAX, cur);
 		return nullptr;
 	}

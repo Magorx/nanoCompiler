@@ -1,35 +1,61 @@
+call MAIN
+halt
 
-; ((((a)[op_20])[op_302]([op_302]))[op_300](main))[op_301]((){)
-main:
+; (glob)[op_20]
 
-; (a)=(5)
-push  5
-pop [rvx + 103]
+; ((((a)[op_20](1))[op_305]((b)[op_305]([op_305])))[op_300](sum))[op_301]((){)
+sum:
 
 ; e(88)
-push  88
+push 88
 out_c
 
-; (a)[op_20](1)
-push  1
-pop [rvx + 108]
+; (c)[op_20]((a)+(b))
+push [rvx + 0]
+push [rvx + 1]
+add
+pop [rvx + 2]
 
-; d(a)
-push [rvx + 108]
+; d(c)
+push [rvx + 2]
 out
 
 ; d
 push 10
 out_c
 
-; e(89)
-push  89
-out_c
+; (glob)=(c)
+push [rvx + 2]
+pop [rvx + 0]
+ret
 
-; d(a)
-push [rvx + 103]
+; ((((a)[op_20])[op_305](((c)[op_20])[op_305]([op_305])))[op_300](MAIN))[op_301]((){)
+MAIN:
+
+; (a)=(100)
+push 100
+pop [rvx + 0]
+
+; (b)[op_20](10)
+push 10
+pop [rvx + 2]
+
+; (([op_203])[op_306](((999)[op_202])[op_306]([op_306])))[op_302](sum)
+push 1
+pop [rvx + 3]
+push 999
+pop [rvx + 4]
+push rvx
+push 3
+add
+pop rvx
+call sum
+
+; d(glob)
+push [rvx + 0]
 out
 
 ; d
 push 10
 out_c
+ret

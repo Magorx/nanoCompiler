@@ -116,7 +116,7 @@ private:
 	}
 
 	bool try_collect_long_op() {
-		if (StringView::starts_with(cur, "'") && three_available() && (*(cur + 2) == '\'')) {
+		if (*cur == '\'' && three_available() && (*(cur + 2) == '\'')) {
 			ADD_TOKEN(T_NUMBER, (double) *(cur + 1));
 			cur += 3;
 			return true;
@@ -163,6 +163,10 @@ private:
 		} else if (StringView::starts_with(cur, "func ")) {
 			cur += 5;
 			ADD_TOKEN(T_OP, OPCODE_FUNC);
+			return true;
+		} else if (StringView::starts_with(cur, "exit")) {
+			cur += 4;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_EXIT);
 			return true;
 		} else if (StringView::starts_with(cur, "putn ") || StringView::starts_with(cur, "putn;")) {
 			cur += 4;

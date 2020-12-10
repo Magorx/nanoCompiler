@@ -1,15 +1,24 @@
-func main[var a]
 {
-	a = 5;
-	{
-		putc 'X';
-		var a = 1;
-		putn a;
-		putn;
-	}
-	{
-		putc 'Y';
-		putn a;
-		putn;
-	}
+
+	var glob;
+
+func sum[var a = 1][b] {
+	putc 'X';
+	var c = a + b;
+	putn c;
+	putn;
+
+	glob = c; /* return */
+	1;
+}
+
+func MAIN[var a][var c] {
+	a = 100;
+	var b = 10;
+	sum[][999];
+
+	putn glob;
+	putn;
+}
+
 }

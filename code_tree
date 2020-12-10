@@ -1,71 +1,13 @@
 digraph list {rankdir="UD";
-"node_0x5583c27a1180" [label=";" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a1180" -> "node_0x5583c27a1150"
-"node_0x5583c27a1150" [label="FUNC_DECL" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a1150" -> "node_0x5583c27a0c10"
-"node_0x5583c27a0c10" [label="FUNC_INFO" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a0c10" -> "node_0x5583c27a0b50"
-"node_0x5583c27a0b50" [label="FUNC_ARG_DECL" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a0b50" -> "node_0x5583c27a0bb0"
-"node_0x5583c27a0bb0" [label="VAR_DEF" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a0bb0" -> "node_0x5583c27a0b80"
-"node_0x5583c27a0b80" [label="a" shape=circle style=filled fillcolor="#CCFFFF"]
-"node_0x5583c27a0b50" -> "node_0x5583c27a0be0"
-"node_0x5583c27a0be0" [label="FUNC_ARG_DECL" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a0c10" -> "node_0x5583c27a0b20"
-"node_0x5583c27a0b20" [label="main" shape=circle style=filled fillcolor="#CCFFFF"]
-"node_0x5583c27a1150" -> "node_0x5583c27a0c40"
-"node_0x5583c27a0c40" [label="{" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a0c40" -> "node_0x5583c27a0d00"
-"node_0x5583c27a0d00" [label=";" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a0d00" -> "node_0x5583c27a0cd0"
-"node_0x5583c27a0cd0" [label="=" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a0cd0" -> "node_0x5583c27a0c70"
-"node_0x5583c27a0c70" [label="a" shape=circle style=filled fillcolor="#CCFFFF"]
-"node_0x5583c27a0cd0" -> "node_0x5583c27a0ca0"
-"node_0x5583c27a0ca0" [label="5" shape=circle style=filled fillcolor="#FFFFCC"]
-"node_0x5583c27a0d00" -> "node_0x5583c27a0d30"
-"node_0x5583c27a0d30" [label="{" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a0d30" -> "node_0x5583c27a0dc0"
-"node_0x5583c27a0dc0" [label=";" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a0dc0" -> "node_0x5583c27a0d90"
-"node_0x5583c27a0d90" [label="ELEM_PUTC" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a0d90" -> "node_0x5583c27a0d60"
-"node_0x5583c27a0d60" [label="88" shape=circle style=filled fillcolor="#FFFFCC"]
-"node_0x5583c27a0dc0" -> "node_0x5583c27a0e80"
-"node_0x5583c27a0e80" [label=";" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a0e80" -> "node_0x5583c27a0e20"
-"node_0x5583c27a0e20" [label="VAR_DEF" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a0e20" -> "node_0x5583c27a0df0"
-"node_0x5583c27a0df0" [label="a" shape=circle style=filled fillcolor="#CCFFFF"]
-"node_0x5583c27a0e20" -> "node_0x5583c27a0e50"
-"node_0x5583c27a0e50" [label="1" shape=circle style=filled fillcolor="#FFFFCC"]
-"node_0x5583c27a0e80" -> "node_0x5583c27a0f10"
-"node_0x5583c27a0f10" [label=";" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a0f10" -> "node_0x5583c27a0ee0"
-"node_0x5583c27a0ee0" [label="ELEM_PUTN" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a0ee0" -> "node_0x5583c27a0eb0"
-"node_0x5583c27a0eb0" [label="a" shape=circle style=filled fillcolor="#CCFFFF"]
-"node_0x5583c27a0f10" -> "node_0x5583c27a0f70"
-"node_0x5583c27a0f70" [label=";" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a0f70" -> "node_0x5583c27a0f40"
-"node_0x5583c27a0f40" [label="ELEM_PUTN" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a0d30" -> "node_0x5583c27a0fa0"
-"node_0x5583c27a0fa0" [label="{" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a0fa0" -> "node_0x5583c27a1030"
-"node_0x5583c27a1030" [label=";" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a1030" -> "node_0x5583c27a1000"
-"node_0x5583c27a1000" [label="ELEM_PUTC" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a1000" -> "node_0x5583c27a0fd0"
-"node_0x5583c27a0fd0" [label="89" shape=circle style=filled fillcolor="#FFFFCC"]
-"node_0x5583c27a1030" -> "node_0x5583c27a10c0"
-"node_0x5583c27a10c0" [label=";" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a10c0" -> "node_0x5583c27a1090"
-"node_0x5583c27a1090" [label="ELEM_PUTN" shape=invhouse style=filled fillcolor="#CCCCFF"]
-"node_0x5583c27a1090" -> "node_0x5583c27a1060"
-"node_0x5583c27a1060" [label="a" shape=circle style=filled fillcolor="#CCFFFF"]
-"node_0x5583c27a10c0" -> "node_0x5583c27a1120"
-"node_0x5583c27a1120" [label=";" shape=invhouse style=filled fillcolor="#CCCCCC" fontsize=16]
-"node_0x5583c27a1120" -> "node_0x5583c27a10f0"
-"node_0x5583c27a10f0" [label="ELEM_PUTN" shape=invhouse style=filled fillcolor="#CCCCFF"]
+"node_0x563f1a88a570" [label="FUNC_CALL" shape=invhouse style=filled fillcolor="#CCCCFF"]
+"node_0x563f1a88a570" -> "node_0x563f1a88a5a0"
+"node_0x563f1a88a5a0" [label="FUNC_ARG_CALL" shape=invhouse style=filled fillcolor="#CCCCFF"]
+"node_0x563f1a88a5a0" -> "node_0x563f1a88a600"
+"node_0x563f1a88a600" [label="EXPR" shape=invhouse style=filled fillcolor="#CCCCFF"]
+"node_0x563f1a88a600" -> "node_0x563f1a88a5d0"
+"node_0x563f1a88a5d0" [label="a" shape=circle style=filled fillcolor="#CCFFFF"]
+"node_0x563f1a88a5a0" -> "node_0x563f1a88a630"
+"node_0x563f1a88a630" [label="FUNC_ARG_CALL" shape=invhouse style=filled fillcolor="#CCCCFF"]
+"node_0x563f1a88a570" -> "node_0x563f1a88a540"
+"node_0x563f1a88a540" [label="sum" shape=circle style=filled fillcolor="#CCFFFF"]
 }

@@ -7,22 +7,21 @@ G ::= {FUNC_DECL}+
 FUNC_DECL  ::= func ID ARGLIST_DECL BLOCK_STATEMENT
 FUNC_CALL  ::= ID ARGLIST_CALL
 
-ARGLIST_DECL ::= ARG_DECL*
-ARG_DECL     ::= [ {DEF_VAR | ASGN | ID} ]
+ARGLIST_DECL ::= {[ ARG_DECL ]}*
+ARG_DECL     ::= DEF_VAR | ID
 
-ARGLIST_DECL ::= ARG_CALL*
-ARG_CALL     ::= [ {\nothing | . | EXPR} ]
+ARGLIST_DECL ::= {[ ARG_CALL ]}*
+ARG_CALL     ::= \nothing | . | EXPR
 
 // Statements =================================================================
 
 BLOCK_STATEMENT ::= STATEMENT | { BLOCK_STATEMENT* }
-STATEMENT       ::= {DEF_VAR | EXPR | ASGN | FUNC_CALL | ELEM_FUNC} ; | IF | WHILE | FUNC_DECL
+STATEMENT       ::= {DEF_VAR | ASGN | ELEM_FUNC | EXPR} ; | IF | WHILE | FUNC_DECL
 
 ELEM_FUNC ::= {putn EXPR | putc EXPR | input ID}
 
 IF    ::= ? (EXPR) BLOCK_STATEMENT {: BLOCK_STATEMENT}?
 WHILE ::= >| (EXPR) BLOCK_STATEMENT
-ASGN  ::= ID = EXPR
 
 // Variables ==================================================================
 
@@ -30,8 +29,9 @@ DEF_VAR ::= "var" {ID | ID = EXPR}
 
 // Math expression ============================================================
 
-EXPR ::= AND_EXPR {|| AND_EXPR}*
+EXPR ::= {ID =}* RVALUE
 
+LOGIC_EXPR ::= AND_EXPR {|| AND_EXPR}*
 AND_EXPR ::= COND {&& COND}*
 COND ::= MATH_EXPR {{ < | <= | == | >= | > | != } MATH_EXPR}*
 MATH_EXPR ::= TERM {[+-]TERM}*

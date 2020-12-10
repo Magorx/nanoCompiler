@@ -42,6 +42,8 @@ private:
 		#define COMPILE_R_COMMENT() if (node->R && (is_compiling_loggable_op(node->R->get_op()))) { fprintf(file, "\n; "); node->R->space_dump(file); fprintf(file, "\n");} COMPILE_R()
 		#define COMPILE_LR() do {COMPILE_L(); COMPILE_R();} while (0)
 
+		#define CHECK_ERROR() do {if (ANNOUNCEMENT_ERROR) {return;}} while (0)
+
 		switch (node->get_op()) {
 			case '+' : {
 				if (node->L) {
@@ -149,17 +151,18 @@ private:
 
 				if (node->R) {
 					COMPILE_R();
+				}
 
-					bool ret = id_table.declare(ID_TYPE_VAR, node->L->get_id());
-					if (!ret) {
-						RAISE_ERROR("Redefinition of the id [\n");
-						node->L->get_id()->print();
-						printf("]\n");
-						LOG_ERROR_LINE_POS(node);
-						break;
-					}
+				bool ret = id_table.declare(ID_TYPE_VAR, node->L->get_id());
+				if (!ret) {
+					RAISE_ERROR("Redefinition of the id [");
+					node->L->get_id()->print();
+					printf("]\n");
+					LOG_ERROR_LINE_POS(node);
+					break;
+				}
 
-
+				if (node->R) {
 					fprintf(file, "pop ");
 					compile_variable(node->L, file);
 					fprintf(file, "\n");
@@ -201,6 +204,11 @@ private:
 				break;
 			}
 
+			case OPCODE_ELEM_EXIT : {
+				fprintf(file, "halt\n");
+				break;
+			}
+
 			case OPCODE_ELEM_PUTN : {
 				if (node->R) {
 					COMPILE_R();
@@ -231,20 +239,30 @@ private:
 			}
 
 			case OPCODE_FUNC_DECL : {
+				if (!node->L) {
+					RAISE_ERROR("bad func decl node, func info node id is absent\n");
+					LOG_ERROR_LINE_POS(node);
+					break;
+				}
+
+				if (!node->L->R) {
+					RAISE_ERROR("bad func info node, func id id is absent\n");
+					LOG_ERROR_LINE_POS(node);
+					break;
+				}
+
+				id_table.declare(ID_TYPE_FUNC, node->L->R->get_id(), node->L->L);
+
 				id_table.add_scope();
 				COMPILE_L();
 				COMPILE_R();
 				id_table.remove_scope();
+				fprintf(file, "ret\n");
 				break;
 			}
 
 			case OPCODE_FUNC_INFO : {
 				COMPILE_L();
-
-				if (!node->R->is_id()) {
-					RAISE_ERROR("bad func info node, func id is absent\n");
-					LOG_ERROR_LINE_POS(node);
-				}
 
 				node->R->get_id()->print(file);
 				fprintf(file, ":\n");
@@ -276,6 +294,11 @@ private:
 				break;
 			}
 
+			case OPCODE_FUNC_CALL : {
+				compile_func_call(node, file);
+				break;
+			}
+
 			case '{' : {
 				id_table.add_scope();
 				COMPILE_L_COMMENT();
@@ -299,6 +322,168 @@ private:
 				LOG_ERROR_LINE_POS(node);
 				break;
 			}
+		}
+	}
+
+	void compile_func_call(const CodeNode *node, FILE *file) {
+		assert(node);
+		assert(file);
+
+		if (false && !node->L) {
+			RAISE_ERROR("bad func call, arglist is absent\n");
+			LOG_ERROR_LINE_POS(node);
+			return;
+		}
+
+		const StringView *id = nullptr;
+		if (!node->R) {
+			if (node->is_id()) {
+				id = node->get_id();
+			} else {
+				RAISE_ERROR("bad func call, func name is absent\n");
+				LOG_ERROR_LINE_POS(node);
+				return;
+			}
+		} else {
+			if (!node->R->is_id()) {
+				RAISE_ERROR("bad func call, func name is not a name lol\n");
+				LOG_ERROR_LINE_POS(node);
+				return;
+			}
+			id = node->R->get_id();
+		}
+
+		const CodeNode *arglist = node->L;
+
+		if (id_table.find(ID_TYPE_FUNC, id) == NOT_FOUND) {
+			RAISE_ERROR("bad func call, func not declared [");
+			id->print();
+			printf("]\n");
+			LOG_ERROR_LINE_POS(node);
+			return;
+		}
+
+		const CodeNode *func_arglist = id_table.get_arglist(id);
+		if (!func_arglist) {
+			RAISE_ERROR("bad func call, declared func arglist is absent\n");
+			LOG_ERROR_LINE_POS(node);
+			return;
+		}
+
+		//=====================================================================
+		// here we definetly will compile a function
+
+		id_table.add_scope();
+
+		while (arglist && func_arglist && arglist->L && func_arglist->L) {
+			const CodeNode *arg  = arglist->L;
+			const CodeNode *prot = func_arglist->L;
+
+			if (arg->is_op(OPCODE_DEFAULT_ARG)) {
+				compile_default_arg(prot, file);
+			} else if (arg->is_op(OPCODE_CONTEXT_ARG)) {
+				compile_context_arg(prot, file);
+			} else if (arg->is_op(OPCODE_EXPR)) {
+				if (!arg->L) {
+					RAISE_ERROR("bad func call, expr node has no expression inside\n");
+					LOG_ERROR_LINE_POS(node);
+					return;
+				}
+				CodeNode *expr = arg->L;
+				id_table.shift_backward();
+				compile(expr, file);
+				id_table.shift_forward();
+
+				if (prot->is_id()) {
+					id_table.declare(ID_TYPE_VAR, prot->get_id());
+					fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->get_id()));
+				} else if (prot->is_op(OPCODE_VAR_DEF)) {
+					id_table.declare(ID_TYPE_VAR, prot->L->get_id());
+					fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->L->get_id()));
+				} else {
+					RAISE_ERROR("bad func call, unexpected PROT type [");
+					printf("%d]\n", prot->get_op());
+					LOG_ERROR_LINE_POS(node);
+					return;
+				}
+			}
+
+			arglist = arglist->R;
+			func_arglist = func_arglist->R;
+			CHECK_ERROR();
+		}
+
+		while (func_arglist && func_arglist->L) {
+			compile_default_arg(func_arglist->L, file);
+			func_arglist = func_arglist->R;
+			CHECK_ERROR();
+		}
+
+		id_table.dump();
+
+		id_table.remove_scope();
+
+		fprintf(file, "push rvx\n");
+		fprintf(file, "push %d\n", id_table.get_upper_offset());
+		fprintf(file, "add\n");
+		fprintf(file, "pop rvx\n");
+
+		fprintf(file, "call ");
+		id->print(file);
+		fprintf(file, "\n");
+	}
+
+	void compile_default_arg(const CodeNode *prot, FILE *file) {
+		if (prot->is_id()) {
+			id_table.shift_backward();
+			compile_push(prot, file);
+			id_table.shift_forward();
+
+			id_table.declare(ID_TYPE_VAR, prot->get_id());
+			fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->get_id()));
+		} else if (prot->is_op(OPCODE_VAR_DEF)) {
+			if (!prot->R) {
+				RAISE_ERROR("bad func call, required arg [");
+				prot->L->get_id()->print();
+				printf("] has no default set\n");
+				LOG_ERROR_LINE_POS(prot);
+				return;
+			}
+
+			id_table.shift_backward();
+			compile(prot->R, file);
+			id_table.shift_forward();
+
+			id_table.declare(ID_TYPE_VAR, prot->L->get_id());
+			fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->L->get_id()));
+		} else {
+			RAISE_ERROR("bad func call, unexpected PROT type [");
+			printf("%d]\n", prot->get_op());
+			LOG_ERROR_LINE_POS(prot);
+			return;
+		}
+	}
+
+	void compile_context_arg(const CodeNode *prot, FILE *file) {
+		if (prot->is_id()) {
+			id_table.shift_backward();
+			compile_push(prot, file);
+			id_table.shift_forward();
+
+			id_table.declare(ID_TYPE_VAR, prot->get_id());
+			fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->get_id()));
+		} else if (prot->is_op(OPCODE_VAR_DEF)) {
+			id_table.shift_backward();
+			compile_push(prot->L, file);
+			id_table.shift_forward();
+
+			id_table.declare(ID_TYPE_VAR, prot->L->get_id());
+			fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->L->get_id()));
+		} else {
+			RAISE_ERROR("bad func call, unexpected PROT type [");
+			printf("%d]\n", prot->get_op());
+			LOG_ERROR_LINE_POS(prot);
+			return;
 		}
 	}
 
@@ -330,7 +515,7 @@ private:
 		assert(node);
 		assert(file);
 
-		fprintf(file, " %lg", node->get_val());
+		fprintf(file, "%lg", node->get_val());
 	}
 
 	void compile_variable(const CodeNode *node, FILE *file) {
@@ -346,7 +531,7 @@ private:
 		//node->get_id()->print();
 		//printf("|\n");
 		int offset = id_table.find(ID_TYPE_VAR, node->get_id());
-		if (!offset) {
+		if (offset == NOT_FOUND) {
 			RAISE_ERROR("variable does not exist [");
 			node->get_id()->print();
 			printf("]\n");
@@ -369,6 +554,8 @@ private:
 			return;
 		}
 
+		//node->gv_dump();
+
 		switch (node->type) {
 			case VALUE : {
 				compile_push(node, file);
@@ -386,7 +573,11 @@ private:
 			}
 
 			case ID : {
-				compile_push(node, file);
+				if (id_table.find(ID_TYPE_FUNC, node->get_id()) != NOT_FOUND) {
+					compile_func_call(node, file);
+				} else {
+					compile_push(node, file);
+				}
 				break;
 			}
 
@@ -483,6 +674,9 @@ public:
 		for_cnt   = 0;
 		id_table.dtor();
 		id_table.ctor();
+
+		fprintf(file, "call MAIN\n");
+		fprintf(file, "halt\n");
 
 		compile(prog, file);
 
