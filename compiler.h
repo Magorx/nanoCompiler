@@ -165,7 +165,7 @@ private:
 			}
 
 			case OPCODE_WHILE : {
-				int cur_while_cnt = while_cnt;
+				int cur_while_cnt = ++while_cnt;
 				fprintf(file, "while_%d_cond:\n", cur_while_cnt);
 				COMPILE_L();
 				fprintf(file, "\npush 0\n");
@@ -173,8 +173,6 @@ private:
 				COMPILE_R();
 				fprintf(file, "jmp while_%d_cond\n", cur_while_cnt);
 				fprintf(file, "\nwhile_%d_end:\n", cur_while_cnt);
-
-				++if_cnt;
 				break;
 			}
 
