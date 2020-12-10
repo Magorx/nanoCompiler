@@ -414,6 +414,56 @@ public:
 		}
 	}
 
+	void gv_dump(FILE *file = nullptr, const char *name = (const char*) "code_tree") const {
+		bool call_show = false;
+		if (!file) {
+			call_show = true;
+			file = fopen(name, "w");
+			fprintf(file, "digraph list {rankdir=\"UD\";\n");
+		}
+
+		fprintf(file, "\"node_%p\" [label=\"", this);
+
+		if (type == VALUE) {
+			fprintf(file, "%lg\" shape=circle color=violet", get_val());
+		} else if (type == OPERATION) {
+			const char *opname = OPERATION_NAME(get_op());
+			if (opname) {
+				fprintf(file, "%d\n[%s]\" shape=box", get_op(), opname);
+			} else {
+				fprintf(file, "%d [%c]\" shape=box", get_op(), get_op());
+			}
+		} else if (type == ID) {
+			get_id()->print(file);
+			fprintf(file, "\" shape=box color=green");
+		}
+
+		fprintf(file, "]\n");
+
+		if (L) {
+			fprintf(file, "\"node_%p\" -> \"node_%p\"\n", this, L);
+			L->gv_dump(file);
+		}
+
+		if (R) {
+			fprintf(file, "\"node_%p\" -> \"node_%p\"\n", this, R);
+			R->gv_dump(file);
+		}
+
+		if (call_show) {
+			fprintf(file, "}\n");
+			fclose(file);
+			char generate_picture_command[100];
+			sprintf(generate_picture_command, "dot %s -T%s -o%s.svg", name, "svg", name);
+
+			char view_picture_command[100];
+			sprintf(view_picture_command, "eog %s.%s", name, "svg");
+			
+			system(generate_picture_command);
+			system(view_picture_command);
+		}
+	}
+
 };
 
 #endif // CODENODE_H

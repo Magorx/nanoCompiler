@@ -28,6 +28,8 @@ int main() {
 	comp.ctor();
 	CodeNode *prog = comp.read_to_nodes(&file);
 
+	prog->gv_dump();
+
 	comp.compile(prog, "out.kc");
 
 	CodeNode::DELETE(prog, true, true);

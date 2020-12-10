@@ -1,7 +1,11 @@
+func main[var a]
 {
+	a = 5;
 	{
 		putc 'X';
 		var a = 1;
+		putn a;
+		putn;
 	}
 	{
 		putc 'Y';

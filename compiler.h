@@ -147,17 +147,19 @@ private:
 					break;
 				}
 
-				bool ret = id_table.declare(ID_TYPE_VAR, node->L->get_id());
-				if (!ret) {
-					RAISE_ERROR("Redefinition of the id [\n");
-					node->L->get_id()->print();
-					printf("]\n");
-					LOG_ERROR_LINE_POS(node);
-					break;
-				}
-
 				if (node->R) {
 					COMPILE_R();
+
+					bool ret = id_table.declare(ID_TYPE_VAR, node->L->get_id());
+					if (!ret) {
+						RAISE_ERROR("Redefinition of the id [\n");
+						node->L->get_id()->print();
+						printf("]\n");
+						LOG_ERROR_LINE_POS(node);
+						break;
+					}
+
+
 					fprintf(file, "pop ");
 					compile_variable(node->L, file);
 					fprintf(file, "\n");
@@ -228,6 +230,52 @@ private:
 				break;
 			}
 
+			case OPCODE_FUNC_DECL : {
+				id_table.add_scope();
+				COMPILE_L();
+				COMPILE_R();
+				id_table.remove_scope();
+				break;
+			}
+
+			case OPCODE_FUNC_INFO : {
+				COMPILE_L();
+
+				if (!node->R->is_id()) {
+					RAISE_ERROR("bad func info node, func id is absent\n");
+					LOG_ERROR_LINE_POS(node);
+				}
+
+				node->R->get_id()->print(file);
+				fprintf(file, ":\n");
+				break;
+			}
+
+			case OPCODE_FUNC_ARG_DECL : {
+				if (!node->L) {
+					if (node->R) {
+						RAISE_ERROR("bad argument node, arg is absent\n");
+						LOG_ERROR_LINE_POS(node);
+					}
+					break;
+				}
+
+				if (node->L->is_op(OPCODE_VAR_DEF)) {
+					if (!node->L->L) {
+						RAISE_ERROR("bad argument node, name of arg is absent\n");
+						LOG_ERROR_LINE_POS(node);
+						break;
+					}
+
+					id_table.declare(ID_TYPE_VAR, node->L->L->get_id());
+				} else if (node->L->is_id()) {
+					id_table.declare(ID_TYPE_VAR, node->L->get_id());
+				} 
+
+				COMPILE_R();
+				break;
+			}
+
 			case '{' : {
 				id_table.add_scope();
 				COMPILE_L_COMMENT();
@@ -295,6 +343,8 @@ private:
 			return;
 		}
 
+		//node->get_id()->print();
+		//printf("|\n");
 		int offset = id_table.find(ID_TYPE_VAR, node->get_id());
 		if (!offset) {
 			RAISE_ERROR("variable does not exist [");

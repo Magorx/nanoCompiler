@@ -156,7 +156,15 @@ private:
 			cur += 2;
 			ADD_TOKEN(T_OP, OPCODE_AND);
 			return true;
-		} else  if (StringView::starts_with(cur, "putn ") || StringView::starts_with(cur, "putn;")) {
+		} else if (StringView::starts_with(cur, "var ")) {
+			cur += 4;
+			ADD_TOKEN(T_OP, OPCODE_VAR);
+			return true;
+		} else if (StringView::starts_with(cur, "func ")) {
+			cur += 5;
+			ADD_TOKEN(T_OP, OPCODE_FUNC);
+			return true;
+		} else if (StringView::starts_with(cur, "putn ") || StringView::starts_with(cur, "putn;")) {
 			cur += 4;
 			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTN);
 			return true;

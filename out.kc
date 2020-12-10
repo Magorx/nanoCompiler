@@ -1,21 +1,35 @@
 
+; ((((a)[op_20])[op_302]([op_302]))[op_300](main))[op_301]((){)
+main:
+
+; (a)=(5)
+push  5
+pop [rvx + 103]
+
 ; e(88)
 push  88
 out_c
 
 ; (a)[op_20](1)
 push  1
-pop [rvx + 105]
+pop [rvx + 108]
+
+; d(a)
+push [rvx + 108]
+out
+
+; d
+push 10
+out_c
 
 ; e(89)
 push  89
 out_c
 
 ; d(a)
-push 
+push [rvx + 103]
 out
 
 ; d
 push 10
 out_c
-AN ERROR OCCURED DURING COMPILATION IUCK

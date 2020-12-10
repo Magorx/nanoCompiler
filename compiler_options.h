@@ -1,30 +1,24 @@
 #ifndef COMPILER_OPTIONS
 #define COMPILER_OPTIONS
 
+#define OPDEF(name, code) name = code,
+
 enum OPERATION_CODE {
-	OPCODE_IF    = '?',
-	OPCODE_WHILE = 'w',
-	OPCODE_FOR   = 'f',
-
-	OPCODE_LE    = 5,
-	OPCODE_GE    = 6,
-	OPCODE_EQ    = 7,
-	OPCODE_NEQ   = 8,
-	OPCODE_OR    = 10,
-	OPCODE_AND   = 11,
-
-	OPCODE_VAR_DEF  = 20,
-
-	OPCODE_IF_CONDITION   = 30,
-	OPCODE_COND_DEPENDENT = 31,
-
-	OPCODE_WHILE_CONDITION   = 34,
-	OPCODE_WHILE_BODY = 35,
-
-	OPCODE_ELEM_PUTN  = 100,
-	OPCODE_ELEM_PUTC  = 101,
-	OPCODE_ELEM_INPUT = 102,
+	#include "opcodes.h"
 };
+
+#undef OPDEF
+#define OPDEF(name, code) case code : return #name + 7;
+
+const char *OPERATION_NAME(const int opcode) {
+	switch(opcode) {
+		#include "opcodes.h"
+
+		default : return nullptr;
+	}
+}
+
+#undef OPDEF
 
 bool is_normal_op(const int op) {
 	return op == '+' || op == '-' ||
