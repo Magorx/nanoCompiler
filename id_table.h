@@ -15,8 +15,8 @@ private:
 	int var_cnt;
 //=============================================================================
 
-	void add_scope(const int offset) {
-		IdTableScope *scope = IdTableScope::NEW(offset);
+	void add_scope(const int offset, const int functive) {
+		IdTableScope *scope = IdTableScope::NEW(offset, functive);
 		data.push_back(scope);
 	}
 
@@ -64,19 +64,44 @@ public:
 
 //=============================================================================
 
-	bool find_id(const StringView *id) const {
-		for (int i = cur_scope; i >= 0; --i) {
-			if (data[i]->find_id(id)) {
-				return true;
+	int find_var(const StringView *id) const {
+		if (!data.size()) {
+			return NOT_FOUND;
+		}
+
+		int offset = NOT_FOUND;
+		int found_index = -1;
+
+		for (int i = cur_scope; i >= 1; --i) {
+			offset = data[i]->find(ID_TYPE_VAR, id);
+			
+			if (data[i]->is_functive()) {
+				return offset;
+			}
+
+			if (offset != NOT_FOUND) {
+				found_index = i;
+				break;
 			}
 		}
 
-		return false;
+		if (offset == NOT_FOUND) {
+			return data[0]->find(ID_TYPE_VAR, id);
+		}
+
+		for (int i = found_index - 1; i >= 1; --i) {
+			offset += data[i]->get_var_cnt();
+			if (data[i]->is_functive()) {
+				break;
+			}
+		}
+
+		return offset;
 	}
 
-	int find(const int type, const StringView *id) const {
+	int find_func(const StringView *id) const { 
 		for (int i = cur_scope; i >= 0; --i) {
-			int offset = data[i]->find(type, id);
+			int offset = data[i]->find(ID_TYPE_FUNC, id);
 			if (offset != NOT_FOUND) {
 				return offset;
 			}
@@ -104,12 +129,16 @@ public:
 		return NOT_FOUND;
 	}
 
-	int get_upper_offset() const {
-		if (!data.size()) {
-			return NOT_FOUND;
+	int get_func_offset() const {
+		int offset = 0;
+		for (int i = cur_scope; i >= 0; --i) {
+			offset += data[i]->get_var_cnt();
+			if (data[i]->is_functive()) {
+				return offset;
+			}
 		}
 
-		return data[data.size() - 1]->get_var_cnt();
+		return offset;
 	}
 
 	const CodeNode *get_arglist(const StringView *id) {
@@ -131,11 +160,11 @@ public:
 		return data[cur_scope]->declare(type, id, arglist);
 	}
 
-	void add_scope() {
+	void add_scope(int functive = 0) {
 		if (!data.size()) {
-			add_scope(0);
+			add_scope(0, functive);
 		} else {
-			add_scope(data[data.size() - 1]->offset + data[data.size() - 1]->size());
+			add_scope(data[data.size() - 1]->offset + data[data.size() - 1]->size(), functive);
 		}
 		cur_scope = (int)data.size() - 1;
 	}

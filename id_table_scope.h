@@ -54,6 +54,7 @@ private:
 // data =======================================================================
 	Vector<IdData> data;
 	int var_cnt;
+	int functive;
 //=============================================================================
 
 
@@ -63,24 +64,26 @@ public:
 	IdTableScope():
 	data(),
 	var_cnt(0),
+	functive(0),
 	offset(0)
 	{}
 
 	~IdTableScope() {}
 
-	void ctor(const int offset_ = 0) {
+	void ctor(const int offset_ = 0, const int functive_ = 0) {
 		data.ctor();
 		offset = offset_;
 		var_cnt = 0;
+		functive = functive_;
 	}
 
-	static IdTableScope *NEW(const int offset_ = 0) {
+	static IdTableScope *NEW(const int offset_ = 0, const int functive_ = 0) {
 		IdTableScope *cake = (IdTableScope*) calloc(1, sizeof(IdTableScope));
 		if (!cake) {
 			return nullptr;
 		}
 
-		cake->ctor(offset_);
+		cake->ctor(offset_, functive_);
 		return cake;
 	}
 
@@ -160,6 +163,10 @@ public:
 
 	int size() {
 		return (int)data.size();
+	}
+
+	int is_functive() {
+		return functive;
 	}
 
 	void dump() {

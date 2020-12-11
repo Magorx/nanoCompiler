@@ -31,17 +31,28 @@
 	|=============== STL LIBRARY =================|
 	\*===========================================*/
 
-	func sum[var a][var b] {
-		ret a + b;
+	func sum[var a = x + y][var b = 2 * x] {
+		var c = a + b;
+		printn[c];
+		ret c;
+	}
+
+	func first {
+		var x = 1;
+		var y = 2;
+		sum;
+		ret;
+	}
+
+	func second {
+		var x = 400;
+		var y = 500;
+		sum;
 	}
 
 	func MAIN {
-
-		func factor[var x] {
-			? (x <= 1) {ret x;} : {ret x * factor[x - 1];}
-		}
-
-		printn[factor[@]];
+		first;
+		second;
 	}
 
 }

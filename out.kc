@@ -1,3 +1,5 @@
+push 200
+pop rvx
 call MAIN
 halt
 
@@ -114,98 +116,145 @@ push 4.000000
 swp
 ret
 pop rzx
+push 0
+swp
 ret
 _func_printn_END:
 
-; ((((a)[op_20])[op_305](((b)[op_20])[op_305]([op_305])))[op_300](sum))[op_301]((){)
+; ((((a)[op_20]((x)+(y)))[op_305](((b)[op_20]((2)*(x)))[op_305]([op_305])))[op_300](sum))[op_301]((){)
 jmp _func_sum_END
 _func_sum_BEGIN:
 sum:
 
-; ([op_18]((a)+(b)))[op_202]
+; (c)[op_20]((a)+(b))
 push [rvx + 0]
 push [rvx + 1]
 add
+pop [rvx + 2]
+
+; ((((c)[op_202])[op_306]([op_306]))[op_302](printn))[op_202]
+push [rvx + 2]
+pop [rvx + 3]
+push 0
+push 7777.777000
+sub
+
+pop [rvx + 4]
+push 0
+push 7777.777000
+sub
+
+pop [rvx + 5]
+push rvx
+push 3
+add
+pop rvx
+call printn
+pop rzx
+
+; ([op_18](c))[op_202]
+push [rvx + 2]
 swp
 ret
 pop rzx
+push 0
+swp
 ret
 _func_sum_END:
+
+; (([op_305])[op_300](first))[op_301]((){)
+jmp _func_first_END
+_func_first_BEGIN:
+first:
+
+; (x)[op_20](1)
+push 1.000000
+pop [rvx + 0]
+
+; (y)[op_20](2)
+push 2.000000
+pop [rvx + 1]
+
+; (sum)[op_202]
+push [rvx + 0]
+push [rvx + 1]
+add
+pop [rvx + 2]
+push 2.000000
+push [rvx + 0]
+mul
+pop [rvx + 3]
+push rvx
+push 2
+add
+pop rvx
+call sum
+pop rzx
+
+; ([op_18])[op_202]
+push 0
+swp
+ret
+pop rzx
+push 0
+swp
+ret
+_func_first_END:
+
+; (([op_305])[op_300](second))[op_301]((){)
+jmp _func_second_END
+_func_second_BEGIN:
+second:
+
+; (x)[op_20](400)
+push 400.000000
+pop [rvx + 0]
+
+; (y)[op_20](500)
+push 500.000000
+pop [rvx + 1]
+
+; (sum)[op_202]
+push [rvx + 0]
+push [rvx + 1]
+add
+pop [rvx + 2]
+push 2.000000
+push [rvx + 0]
+mul
+pop [rvx + 3]
+push rvx
+push 2
+add
+pop rvx
+call sum
+pop rzx
+push 0
+swp
+ret
+_func_second_END:
 
 ; (([op_305])[op_300](MAIN))[op_301]((){)
 jmp _func_MAIN_END
 _func_MAIN_BEGIN:
 MAIN:
 
-; ((((x)[op_20])[op_305]([op_305]))[op_300](factor))[op_301]((){)
-jmp _func_factor_END
-_func_factor_BEGIN:
-factor:
-
-; ((x)[op_5](1))[op_15](((){)[op_31]((){))
-if_4_cond:
-push [rvx + 0]
-push 1.000000
-le
-
-push 0
-jne if_4_true
-if_4_false:
-
-; ([op_18]((x)*(((((x)-(1))[op_202])[op_306]([op_306]))[op_302](factor))))[op_202]
-push [rvx + 0]
-push [rvx + 0]
-push 1.000000
-sub
-pop [rvx + 0]
+; (first)[op_202]
 push rvx
 push 0
 add
 pop rvx
-call factor
-mul
+call first
+pop rzx
+
+; (second)[op_202]
+push rvx
+push 0
+add
+pop rvx
+call second
+pop rzx
+push 0
 swp
-ret
-pop rzx
-
-jmp if_4_end
-
-if_4_true:
-
-; ([op_18](x))[op_202]
-push [rvx + 0]
-swp
-ret
-pop rzx
-
-if_4_end:
-ret
-_func_factor_END:
-
-; (((((((f)[op_202])[op_306]([op_306]))[op_302](factor))[op_202])[op_306]([op_306]))[op_302](printn))[op_202]
-in
-pop [rvx + 0]
-push rvx
-push 0
-add
-pop rvx
-call factor
-pop [rvx + 0]
-push 0
-push 7777.777000
-sub
-
-pop [rvx + 1]
-push 0
-push 7777.777000
-sub
-
-pop [rvx + 2]
-push rvx
-push 0
-add
-pop rvx
-call printn
-pop rzx
 ret
 _func_MAIN_END:

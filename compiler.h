@@ -287,10 +287,12 @@ private:
 
 				id_table.declare(ID_TYPE_FUNC, id, node->L->L);
 
-				id_table.add_scope();
+				id_table.add_scope(true);
 				COMPILE_L();
 				COMPILE_R();
 				id_table.remove_scope();
+				fprintf(file, "push 0\n");
+				fprintf(file, "swp\n");
 				fprintf(file, "ret\n");
 				fprintf(file, "_func_");
 				id->print(file);
@@ -392,7 +394,7 @@ private:
 
 		const CodeNode *arglist = node->L;
 
-		if (id_table.find(ID_TYPE_FUNC, id) == NOT_FOUND) {
+		if (id_table.find_func(id) == NOT_FOUND) {
 			RAISE_ERROR("bad func call, func not declared [");
 			id->print();
 			printf("]\n");
@@ -417,32 +419,11 @@ private:
 			const CodeNode *prot = func_arglist->L;
 
 			if (arg->is_op(OPCODE_DEFAULT_ARG)) {
-				compile_default_arg(prot, file);
+				compile_default_arg(arg, prot, file);
 			} else if (arg->is_op(OPCODE_CONTEXT_ARG)) {
-				compile_context_arg(prot, file);
+				compile_context_arg(arg, prot, file);
 			} else if (arg->is_op(OPCODE_EXPR)) {
-				if (!arg->L) {
-					RAISE_ERROR("bad func call, expr node has no expression inside\n");
-					LOG_ERROR_LINE_POS(node);
-					return;
-				}
-				CodeNode *expr = arg->L;
-				id_table.shift_backward();
-				compile(expr, file);
-				id_table.shift_forward();
-
-				if (prot->is_id()) {
-					id_table.declare(ID_TYPE_VAR, prot->get_id());
-					fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->get_id()));
-				} else if (prot->is_op(OPCODE_VAR_DEF)) {
-					id_table.declare(ID_TYPE_VAR, prot->L->get_id());
-					fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->L->get_id()));
-				} else {
-					RAISE_ERROR("bad func call, unexpected PROT type [");
-					printf("%d]\n", prot->get_op());
-					LOG_ERROR_LINE_POS(node);
-					return;
-				}
+				compile_expr_arg(arg, prot, file);
 			}
 
 			arglist = arglist->R;
@@ -451,7 +432,7 @@ private:
 		}
 
 		while (func_arglist && func_arglist->L) {
-			compile_default_arg(func_arglist->L, file);
+			compile_default_arg(func_arglist->L, func_arglist->L, file);
 			func_arglist = func_arglist->R;
 			CHECK_ERROR();
 		}
@@ -459,7 +440,7 @@ private:
 		id_table.remove_scope();
 
 		fprintf(file, "push rvx\n");
-		fprintf(file, "push %d\n", id_table.get_upper_offset());
+		fprintf(file, "push %d\n", id_table.get_func_offset());
 		fprintf(file, "add\n");
 		fprintf(file, "pop rvx\n");
 
@@ -468,20 +449,22 @@ private:
 		fprintf(file, "\n");
 	}
 
-	void compile_default_arg(const CodeNode *prot, FILE *file) {
+	void compile_default_arg(const CodeNode *arg, const CodeNode *prot, FILE *file) {
 		if (prot->is_id()) {
 			id_table.shift_backward();
 			compile_push(prot, file);
 			id_table.shift_forward();
 
 			id_table.declare(ID_TYPE_VAR, prot->get_id());
-			fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->get_id()));
+			fprintf(file, "pop ");
+			compile_variable(prot, file);
+			fprintf(file, "\n");
 		} else if (prot->is_op(OPCODE_VAR_DEF)) {
 			if (!prot->R) {
 				RAISE_ERROR("bad func call, required arg [");
 				prot->L->get_id()->print();
 				printf("] has no default set\n");
-				LOG_ERROR_LINE_POS(prot);
+				LOG_ERROR_LINE_POS(arg);
 				return;
 			}
 
@@ -490,7 +473,9 @@ private:
 			id_table.shift_forward();
 
 			id_table.declare(ID_TYPE_VAR, prot->L->get_id());
-			fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->L->get_id()));
+			fprintf(file, "pop ");
+			compile_variable(prot->L, file);
+			fprintf(file, "\n");
 		} else {
 			RAISE_ERROR("bad func call, unexpected PROT type [");
 			printf("%d]\n", prot->get_op());
@@ -499,25 +484,58 @@ private:
 		}
 	}
 
-	void compile_context_arg(const CodeNode *prot, FILE *file) {
+	void compile_context_arg(const CodeNode *arg, const CodeNode *prot, FILE *file) {
 		if (prot->is_id()) {
 			id_table.shift_backward();
 			compile_push(prot, file);
 			id_table.shift_forward();
 
 			id_table.declare(ID_TYPE_VAR, prot->get_id());
-			fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->get_id()));
+			fprintf(file, "pop ");
+			compile_variable(prot, file);
+			fprintf(file, "\n");
 		} else if (prot->is_op(OPCODE_VAR_DEF)) {
 			id_table.shift_backward();
 			compile_push(prot->L, file);
 			id_table.shift_forward();
 
 			id_table.declare(ID_TYPE_VAR, prot->L->get_id());
-			fprintf(file, "pop [rvx + %d]\n", id_table.find(ID_TYPE_VAR, prot->L->get_id()));
+			fprintf(file, "pop ");
+			compile_variable(prot->L, file);
+			fprintf(file, "\n");
 		} else {
 			RAISE_ERROR("bad func call, unexpected PROT type [");
 			printf("%d]\n", prot->get_op());
-			LOG_ERROR_LINE_POS(prot);
+			LOG_ERROR_LINE_POS(arg);
+			return;
+		}
+	}
+
+	void compile_expr_arg(const CodeNode *arg, const CodeNode *prot, FILE *file) {
+		if (!arg->L) {
+			RAISE_ERROR("bad func call, expr node has no expression inside\n");
+			LOG_ERROR_LINE_POS(arg);
+			return;
+		}
+		CodeNode *expr = arg->L;
+		id_table.shift_backward();
+		compile(expr, file);
+		id_table.shift_forward();
+
+		if (prot->is_id()) {
+			id_table.declare(ID_TYPE_VAR, prot->get_id());
+			fprintf(file, "pop ");
+			compile_variable(prot, file);
+			fprintf(file, "\n");
+		} else if (prot->is_op(OPCODE_VAR_DEF)) {
+			id_table.declare(ID_TYPE_VAR, prot->L->get_id());
+			fprintf(file, "pop ");
+			compile_variable(prot->L, file);
+			fprintf(file, "\n");
+		} else {
+			RAISE_ERROR("bad func call, unexpected PROT type [");
+			printf("%d]\n", prot->get_op());
+			LOG_ERROR_LINE_POS(arg);
 			return;
 		}
 	}
@@ -563,11 +581,17 @@ private:
 			return;
 		}
 
-		int offset = id_table.find(ID_TYPE_VAR, node->get_id());
+		int offset = id_table.find_var(node->get_id());
 
+		// printf("\n\n==================\n");
+		// printf("compile var |");
 		// node->get_id()->print();
-		// printf("| finding\n");
+		// printf("|\n");
+		// printf("~~~~~~~~~~~~~~~~~~\n");
+		// printf("cur id_table:\n");
 		// id_table.dump();
+		// printf("\nfound = %d", offset);
+		// printf("\n==================\n");
 
 		if (offset == NOT_FOUND) {
 			RAISE_ERROR("variable does not exist [");
@@ -611,7 +635,7 @@ private:
 			}
 
 			case ID : {
-				if (id_table.find(ID_TYPE_FUNC, node->get_id()) != NOT_FOUND) {
+				if (id_table.find_func(node->get_id()) != NOT_FOUND) {
 					compile_func_call(node, file);
 				} else {
 					compile_push(node, file);
@@ -713,6 +737,8 @@ public:
 		id_table.dtor();
 		id_table.ctor();
 
+		fprintf(file, "push 200\n");
+		fprintf(file, "pop rvx\n");
 		fprintf(file, "call MAIN\n");
 		fprintf(file, "halt\n");
 
