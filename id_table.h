@@ -64,7 +64,7 @@ public:
 
 //=============================================================================
 
-	int find_var(const StringView *id) const {
+	int find_var(const StringView *id, int *res) const {
 		if (!data.size()) {
 			return NOT_FOUND;
 		}
@@ -76,7 +76,8 @@ public:
 			offset = data[i]->find(ID_TYPE_VAR, id);
 			
 			if (data[i]->is_functive()) {
-				return offset;
+				found_index = i;
+				break;
 			}
 
 			if (offset != NOT_FOUND) {
@@ -85,8 +86,26 @@ public:
 			}
 		}
 
-		if (offset == NOT_FOUND) {
-			return data[0]->find(ID_TYPE_VAR, id);
+		if (offset == NOT_FOUND) { // let's try to find global variable
+			size_t data_size = data.size();
+			for (size_t i = 0; i < data_size; ++i) {
+				if (data[i]->is_functive()) {
+					break;
+				}
+
+				int ret = data[i]->find(ID_TYPE_VAR, id);
+				if (ret != NOT_FOUND) {
+					offset = ret;
+				}
+			}
+
+			*res = offset;
+			return offset == NOT_FOUND ? NOT_FOUND : ID_TYPE_GLOBAL;
+		}
+
+		if (data[found_index]->is_functive()) {
+			*res = offset;
+			return offset;
 		}
 
 		for (int i = found_index - 1; i >= 1; --i) {
@@ -96,7 +115,8 @@ public:
 			}
 		}
 
-		return offset;
+		*res = offset;
+		return offset == NOT_FOUND ? NOT_FOUND : ID_TYPE_FOUND;
 	}
 
 	int find_func(const StringView *id) const { 

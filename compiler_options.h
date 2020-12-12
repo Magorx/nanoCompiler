@@ -1,6 +1,10 @@
 #ifndef COMPILER_OPTIONS
 #define COMPILER_OPTIONS
 
+const int GLOBAL_VARS_OFFSET = 100;
+const int GLOVAL_VARS_MAX_COUNT = 100;
+const int INIT_RVX_OFFSET = GLOBAL_VARS_OFFSET + GLOVAL_VARS_MAX_COUNT;
+
 #define OPDEF(name, code) name = code,
 
 enum OPERATION_CODE {

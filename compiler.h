@@ -432,7 +432,7 @@ private:
 		}
 
 		while (func_arglist && func_arglist->L) {
-			compile_default_arg(func_arglist->L, func_arglist->L, file);
+			compile_default_arg(node, func_arglist->L, file);
 			func_arglist = func_arglist->R;
 			CHECK_ERROR();
 		}
@@ -447,13 +447,24 @@ private:
 		fprintf(file, "call ");
 		id->print(file);
 		fprintf(file, "\n");
+
+		fprintf(file, "push rvx\n");
+		fprintf(file, "push %d\n", id_table.get_func_offset());
+		fprintf(file, "sub\n");
+		fprintf(file, "pop rvx\n");
 	}
 
 	void compile_default_arg(const CodeNode *arg, const CodeNode *prot, FILE *file) {
 		if (prot->is_id()) {
 			id_table.shift_backward();
-			compile_push(prot, file);
+			bool ret = compile_push(prot, file);
 			id_table.shift_forward();
+
+			if (!ret) {
+				RAISE_ERROR("func call arg position:\n");
+				LOG_ERROR_LINE_POS(arg);
+				return;
+			}
 
 			id_table.declare(ID_TYPE_VAR, prot->get_id());
 			fprintf(file, "pop ");
@@ -487,8 +498,14 @@ private:
 	void compile_context_arg(const CodeNode *arg, const CodeNode *prot, FILE *file) {
 		if (prot->is_id()) {
 			id_table.shift_backward();
-			compile_push(prot, file);
+			bool ret = compile_push(prot, file);
 			id_table.shift_forward();
+
+			if (!ret) {
+				RAISE_ERROR("func call arg position:\n");
+				LOG_ERROR_LINE_POS(arg);
+				return;
+			}
 
 			id_table.declare(ID_TYPE_VAR, prot->get_id());
 			fprintf(file, "pop ");
@@ -496,8 +513,14 @@ private:
 			fprintf(file, "\n");
 		} else if (prot->is_op(OPCODE_VAR_DEF)) {
 			id_table.shift_backward();
-			compile_push(prot->L, file);
+			bool ret = compile_push(prot->L, file);
 			id_table.shift_forward();
+
+			if (!ret) {
+				RAISE_ERROR("func call arg position:\n");
+				LOG_ERROR_LINE_POS(arg);
+				return;
+			}
 
 			id_table.declare(ID_TYPE_VAR, prot->L->get_id());
 			fprintf(file, "pop ");
@@ -540,11 +563,12 @@ private:
 		}
 	}
 
-	void compile_push(const CodeNode *node, FILE *file) {
+	bool compile_push(const CodeNode *node, FILE *file) {
 		assert(node);
 		assert(file);
 
 		fprintf(file, "push ");
+		bool result = false;
 		if (node->type == VALUE) {
 			if (node->get_val() < 0) {
 				fprintf(file, "0\npush ");
@@ -556,32 +580,33 @@ private:
 
 				fprintf(file, "\nsub\n");
 			} else {
-				compile_value(node, file);
+				result = compile_value(node, file);
 			}
 		} else if (node->type == ID) {
-			compile_variable(node, file);
+			result = compile_variable(node, file);
 		}
 		fprintf(file, "\n");
+		return result;
 	}
 
-	void compile_value(const CodeNode *node, FILE *file) {
+	bool compile_value(const CodeNode *node, FILE *file) {
 		assert(node);
 		assert(file);
 
 		fprintf(file, "%lf", node->get_val());
+		return true;
 	}
 
-	void compile_variable(const CodeNode *node, FILE *file) {
+	bool compile_variable(const CodeNode *node, FILE *file) {
 		assert(node);
 		assert(file);
 
 		if (!node->is_id()) {
 			RAISE_ERROR("bad compiling type, node is [%d]\n", node->get_type());
 			LOG_ERROR_LINE_POS(node);
-			return;
+			return false;
 		}
 
-		int offset = id_table.find_var(node->get_id());
 
 		// printf("\n\n==================\n");
 		// printf("compile var |");
@@ -590,18 +615,29 @@ private:
 		// printf("~~~~~~~~~~~~~~~~~~\n");
 		// printf("cur id_table:\n");
 		// id_table.dump();
+
+		int offset = 0;
+		int is_found = id_table.find_var(node->get_id(), &offset);
+
 		// printf("\nfound = %d", offset);
 		// printf("\n==================\n");
 
-		if (offset == NOT_FOUND) {
+
+
+		if (is_found == NOT_FOUND) {
 			RAISE_ERROR("variable does not exist [");
 			node->get_id()->print();
 			printf("]\n");
 			LOG_ERROR_LINE_POS(node);
-			return;
+			return false;
 		}
 
-		fprintf(file, "[rvx + %d]", offset);
+		if (is_found == ID_TYPE_GLOBAL) {
+			fprintf(file, "[%d]\n", GLOBAL_VARS_OFFSET + offset);
+		} else {
+			fprintf(file, "[rvx + %d]", offset);
+		}
+		return true;
 	}
 
 	void compile_id(const CodeNode *node, FILE *file) {
@@ -690,7 +726,7 @@ public:
 	}
 
 	void dtor() {
-
+		id_table.dtor();
 	}
 
 	static void DELETE(Compiler *compiler) {
@@ -737,10 +773,8 @@ public:
 		id_table.dtor();
 		id_table.ctor();
 
-		fprintf(file, "push 200\n");
+		fprintf(file, "push %d\n", INIT_RVX_OFFSET);
 		fprintf(file, "pop rvx\n");
-		fprintf(file, "call MAIN\n");
-		fprintf(file, "halt\n");
 
 		compile(prog, file);
 

@@ -39,6 +39,7 @@ int main() {
 
 	CodeNode::DELETE(prog, true, true);
 	file.dtor();
+	comp.dtor();
 
 	printf(".doned.\n");
 #endif

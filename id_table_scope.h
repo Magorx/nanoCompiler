@@ -7,8 +7,10 @@
 #include "code_node.h"
 
 enum ID_TYPE {
-	ID_TYPE_VAR  = 1,
-	ID_TYPE_FUNC = 2,
+	ID_TYPE_VAR    = 1,
+	ID_TYPE_FUNC   = 2,
+	ID_TYPE_GLOBAL = 3,
+	ID_TYPE_FOUND  = 4,
 	NOT_FOUND    = -999999999,
 };
 
