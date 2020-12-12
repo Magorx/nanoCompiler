@@ -9,8 +9,9 @@
 enum ID_TYPE {
 	ID_TYPE_VAR    = 1,
 	ID_TYPE_FUNC   = 2,
-	ID_TYPE_GLOBAL = 3,
-	ID_TYPE_FOUND  = 4,
+	ID_TYPE_STRUCT = 3,
+	ID_TYPE_GLOBAL = 4,
+	ID_TYPE_FOUND  = 5,
 	NOT_FOUND    = -999999999,
 };
 
@@ -120,12 +121,12 @@ public:
 		idat.ctor(type, id, 0);
 
 		size_t data_size = data.size();
-		int func_cnt = 0;
+		int id_offset = 0;
 		for (size_t i = 0; i < data_size; ++i) {
 			if (idat.equal(data[i])) {
-				return data[i].offset - func_cnt;
-			} else if (data[i].type == ID_TYPE_FUNC) {
-				++func_cnt;
+				return id_offset;
+			} else {
+				id_offset += data[i].offset;
 			}
 		}
 
@@ -133,18 +134,18 @@ public:
 	}
 
 	int get_var_cnt() const {
-		return var_cnt;
+		return offset;
 	}
 
-	bool declare(const int type, const StringView *id, const CodeNode *arglist_ = nullptr) {
+	bool declare(const int type, const StringView *id, const int size, const CodeNode *arglist_ = nullptr) {
 		IdData idat = {};
-		idat.ctor(type, id, (int)data.size(), arglist_);
+		idat.ctor(type, id, size, arglist_);
 
 		if (find_id(id)) {
 			return false;
 		} else {
-			var_cnt += type == ID_TYPE_VAR;
 			data.push_back(idat);
+			offset += size;
 			return true;
 		}
 	}

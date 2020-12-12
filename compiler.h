@@ -163,7 +163,7 @@ private:
 					COMPILE_R();
 				}
 
-				bool ret = id_table.declare(ID_TYPE_VAR, node->L->get_id());
+				bool ret = id_table.declare_var(node->L->get_id(), 1);
 				if (!ret) {
 					RAISE_ERROR("Redefinition of the id [");
 					node->L->get_id()->print();
@@ -285,7 +285,7 @@ private:
 				id->print(file);
 				fprintf(file, "_BEGIN:\n");
 
-				id_table.declare(ID_TYPE_FUNC, id, node->L->L);
+				id_table.declare_func(id, node->L->L);
 
 				id_table.add_scope(true);
 				COMPILE_L();
@@ -324,9 +324,9 @@ private:
 						break;
 					}
 
-					id_table.declare(ID_TYPE_VAR, node->L->L->get_id());
+					id_table.declare_var(node->L->L->get_id(), 1);
 				} else if (node->L->is_id()) {
-					id_table.declare(ID_TYPE_VAR, node->L->get_id());
+					id_table.declare_var(node->L->get_id(), 1);
 				} 
 
 				COMPILE_R();
@@ -466,7 +466,7 @@ private:
 				return;
 			}
 
-			id_table.declare(ID_TYPE_VAR, prot->get_id());
+			id_table.declare_var(prot->get_id(), 1);
 			fprintf(file, "pop ");
 			compile_variable(prot, file);
 			fprintf(file, "\n");
@@ -483,7 +483,7 @@ private:
 			compile(prot->R, file);
 			id_table.shift_forward();
 
-			id_table.declare(ID_TYPE_VAR, prot->L->get_id());
+			id_table.declare_var(prot->L->get_id(), 1);
 			fprintf(file, "pop ");
 			compile_variable(prot->L, file);
 			fprintf(file, "\n");
@@ -507,7 +507,7 @@ private:
 				return;
 			}
 
-			id_table.declare(ID_TYPE_VAR, prot->get_id());
+			id_table.declare_var(prot->get_id(), 1);
 			fprintf(file, "pop ");
 			compile_variable(prot, file);
 			fprintf(file, "\n");
@@ -522,7 +522,7 @@ private:
 				return;
 			}
 
-			id_table.declare(ID_TYPE_VAR, prot->L->get_id());
+			id_table.declare_var(prot->L->get_id(), 1);
 			fprintf(file, "pop ");
 			compile_variable(prot->L, file);
 			fprintf(file, "\n");
@@ -546,12 +546,12 @@ private:
 		id_table.shift_forward();
 
 		if (prot->is_id()) {
-			id_table.declare(ID_TYPE_VAR, prot->get_id());
+			id_table.declare_var(prot->get_id(), 1);
 			fprintf(file, "pop ");
 			compile_variable(prot, file);
 			fprintf(file, "\n");
 		} else if (prot->is_op(OPCODE_VAR_DEF)) {
-			id_table.declare(ID_TYPE_VAR, prot->L->get_id());
+			id_table.declare_var(prot->L->get_id(), 1);
 			fprintf(file, "pop ");
 			compile_variable(prot->L, file);
 			fprintf(file, "\n");

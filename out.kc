@@ -90,6 +90,12 @@ jmp if_3_end
 
 if_3_true:
 
+; (e(88))[op_202]
+push 88.000000
+dup
+out_c
+pop rzx
+
 ; (d(C))[op_202]
 push [rvx + 2]
 dup
@@ -108,12 +114,6 @@ if_3_end:
 push 10
 dup
 out_c
-pop rzx
-
-; ([op_18](4))[op_202]
-push 4.000000
-swp
-ret
 pop rzx
 push 0
 swp
@@ -222,12 +222,6 @@ if_6_end:
 push 10
 dup
 out_c
-pop rzx
-
-; ([op_18](4))[op_202]
-push 4.000000
-swp
-ret
 pop rzx
 push 0
 swp
@@ -735,12 +729,109 @@ swp
 ret
 _func_main_sq_END:
 
-; (main_fact)[op_202]
+; (([op_305])[op_300](main_test))[op_301]((){)
+jmp _func_main_test_END
+_func_main_test_BEGIN:
+main_test:
+
+; ((((a)[op_20])[op_305](((b)[op_20])[op_305]([op_305])))[op_300](sum))[op_301]((){)
+jmp _func_sum_END
+_func_sum_BEGIN:
+sum:
+
+; ([op_18]((a)+(b)))[op_202]
+push [rvx + 0]
+push [rvx + 1]
+add
+swp
+ret
+pop rzx
+push 0
+swp
+ret
+_func_sum_END:
+
+; ((((a)[op_20])[op_305]([op_305]))[op_300](val))[op_301]((){)
+jmp _func_val_END
+_func_val_BEGIN:
+val:
+
+; ([op_18](a))[op_202]
+push [rvx + 0]
+swp
+ret
+pop rzx
+push 0
+swp
+ret
+_func_val_END:
+
+; ((((((((((1)[op_202])[op_306]([op_306]))[op_302](val))[op_202])[op_306]((((((2)[op_202])[op_306]([op_306]))[op_302](val))[op_202])[op_306]([op_306])))[op_302](sum))[op_202])[op_306]([op_306]))[op_302](printn))[op_202]
+push 1.000000
+pop [rvx + 0]
+push rvx
+push 0
+add
+pop rvx
+call val
+push rvx
+push 0
+sub
+pop rvx
+pop [rvx + 0]
+push 2.000000
+pop [rvx + 1]
+push rvx
+push 1
+add
+pop rvx
+call val
+push rvx
+push 1
+sub
+pop rvx
+pop [rvx + 1]
+push rvx
+push 0
+add
+pop rvx
+call sum
+push rvx
+push 0
+sub
+pop rvx
+pop [rvx + 0]
+push 0
+push 7777.777000
+sub
+
+pop [rvx + 1]
+push 0
+push 7777.777000
+sub
+
+pop [rvx + 2]
+push rvx
+push 0
+add
+pop rvx
+call printn
+push rvx
+push 0
+sub
+pop rvx
+pop rzx
+push 0
+swp
+ret
+_func_main_test_END:
+
+; (main_test)[op_202]
 push rvx
 push 5
 add
 pop rvx
-call main_fact
+call main_test
 push rvx
 push 5
 sub

@@ -75,12 +75,7 @@ public:
 		for (int i = cur_scope; i >= 1; --i) {
 			offset = data[i]->find(ID_TYPE_VAR, id);
 			
-			if (data[i]->is_functive()) {
-				found_index = i;
-				break;
-			}
-
-			if (offset != NOT_FOUND) {
+			if (data[i]->is_functive() || offset != NOT_FOUND) {
 				found_index = i;
 				break;
 			}
@@ -105,7 +100,7 @@ public:
 
 		if (data[found_index]->is_functive()) {
 			*res = offset;
-			return offset;
+			return offset == NOT_FOUND ? NOT_FOUND : ID_TYPE_FOUND;
 		}
 
 		for (int i = found_index - 1; i >= 1; --i) {
@@ -171,21 +166,29 @@ public:
 		return nullptr;
 	}
 
-	bool declare(const int type, const StringView *id, const CodeNode *arglist = nullptr) {
+	bool declare(const int type, const StringView *id, const int size, const CodeNode *arglist = nullptr) {
 		if (!data.size()) {
 			RAISE_ERROR("no scope to declare a variable in\n");
 			return false;
 		}
 
-		return data[cur_scope]->declare(type, id, arglist);
+		return data[cur_scope]->declare(type, id, size, arglist);
+	}
+
+	bool declare_func(const StringView *id, const CodeNode *arglist) {
+		return declare(ID_TYPE_FUNC, id, 0, arglist);
+	}
+
+	bool declare_var(const StringView *id, const int size, const CodeNode *fields = nullptr) {
+		return declare(ID_TYPE_VAR, id, size, fields);
+	}
+
+	bool declare_struct(const StringView *id, const CodeNode *fields) {
+		return declare(ID_TYPE_STRUCT, id, 0, fields);
 	}
 
 	void add_scope(int functive = 0) {
-		if (!data.size()) {
-			add_scope(0, functive);
-		} else {
-			add_scope(data[data.size() - 1]->offset + data[data.size() - 1]->size(), functive);
-		}
+		add_scope(0, functive);
 		cur_scope = (int)data.size() - 1;
 	}
 

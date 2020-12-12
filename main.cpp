@@ -1,25 +1,16 @@
 #include <cstdlib>
 #include <cstdio>
 
-// TODO GLOBAL VARIABLES
 // TODO ARRAYS
 // TODO FOR
-// TODO 
+// TODO STRUCTURES
 
 #include "general/c/debug.h"
-
-#include "general/constants.h"
 #include "general/warnings.h"
 
 #include "compiler.h"
 
-//#define TEST
-int test();
-
 int main() {
-#ifdef TEST
-	test();
-#else
 	const char *file_name = "prog.wzr";
 
 	File file = {};
@@ -42,10 +33,5 @@ int main() {
 	comp.dtor();
 
 	printf(".doned.\n");
-#endif
-	return 0;
-}
-
-int test() {
 	return 0;
 }

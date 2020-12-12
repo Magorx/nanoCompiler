@@ -18,13 +18,12 @@
 		}
 
 		? (C != -7777.777) {
+			__PUT_CHAR__ 'X';
 			__PUT_NUMBER__ C;
 			__PUT_CHAR__ ' ';
 		}
 
 		__PUT_NUMBER__;
-
-		ret 4;
 	}
 
 	func printc[var A = -7777.777][var B = -7777.777][var C = -7777.777] {
@@ -44,8 +43,6 @@
 		}
 
 		__PUT_NUMBER__;
-
-		ret 4;
 	}
 
 	/*===========================================*\
@@ -105,6 +102,18 @@
 		solve_square[@][@][@];
 	}
 
-	main_fact;
+	func main_test {
+		func sum[var a][var b] {
+			ret a + b;
+		}
+
+		func val[var a] {
+			ret a;
+		}
+
+		printn[sum[val[1]][val[2]]];
+	}
+
+	main_test;
 
 }
