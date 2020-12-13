@@ -113,17 +113,49 @@
 		printn[sum[val[1]][val[2]]];
 	}
 
-	func main {
-		var ptr[1];
-		var somehthing = 999;
+	func sqrt[var x] {
+		ret x ^ 0.5;
+	}
 
-		func change[var ptr][var new_val] {
-			ptr[1] = new_val;
+	func qsort[var arr = arr][var size = size] {
+		var i = 0;
+		var j = 0;
+		var flag = 1;
+
+		>| (i < size && flag) {
+			j = 0;
+			flag = 0;
+			>| (j < size) {
+				? (arr[i] < arr[j]) {
+					var tmp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = tmp;
+					flag = 1;
+				}
+				j = j + 1;
+			}
+			i = i + 1;
+		}
+	}
+
+	func main {
+		var a = 5;
+		var b[10];
+		var c = 999;
+		func d[var a = b][var b = c + a][var c = -1] {
+			printn[a][b][c];
+			ret a + b + c;
 		}
 
-		change[ptr][45];
+		b = a;
+		c = a[2];
+		a = d;
+		b = d[a][b[c]];
+		c = a;
+		a = d[.][c][.];
+		b = c[d[a[b]][]];
+		c = d[a][.];
 
-		printn[somehthing];
 	}
 
 	main;

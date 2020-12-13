@@ -630,8 +630,10 @@ private:
 		}
 
 		compile_expr(arg, file);
+		fprintf(file, "push [rvx + %d]\n", offset);
+		fprintf(file, "add\n");
 		fprintf(file, "pop rax\n");
-		fprintf(file, "push [%d + rax]\n", offset);
+		fprintf(file, "push [rax]\n");
 	}
 
 	bool compile_push(const CodeNode *node, FILE *file) {
@@ -738,7 +740,7 @@ private:
 			fprintf(file, "push [rvx + %d]\n", offset);
 			fprintf(file, "add\n");
 			fprintf(file, "pop rax\n");
-			fprintf(file, "pop [rax + %d]\n", offset);
+			fprintf(file, "pop [rax]\n");
 			return true;
 		} else {
 			RAISE_ERROR("bad compiling type, node is [%d]\n", node->get_type());
