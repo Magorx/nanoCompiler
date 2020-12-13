@@ -114,7 +114,7 @@ public:
 		return offset == NOT_FOUND ? NOT_FOUND : ID_TYPE_FOUND;
 	}
 
-	int find_func(const StringView *id) const { 
+	int find_func(const StringView *id) const {
 		for (int i = cur_scope; i >= 0; --i) {
 			int offset = data[i]->find(ID_TYPE_FUNC, id);
 			if (offset != NOT_FOUND) {
@@ -221,7 +221,7 @@ public:
 		}
 	}
 
-	void dump() {
+	void dump() const {
 		for (size_t i = 0; i < data.size(); ++i) {
 			printf("-----[%lu]\n", i);
 			data[i]->dump();

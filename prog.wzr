@@ -1,5 +1,5 @@
 {
-
+	
 	var P = 1;
 
 	/*===========================================*\
@@ -114,6 +114,39 @@
 		printn[sum[val[1]][val[2]]];
 	}
 
-	main_test;
+	func main_test_cur {
+		func sum[var a][var b] {
+			ret a + b;
+		}
+
+		func val[var a] {
+			ret a;
+		}
+
+		func get_i[var arr][var i] {
+			ret arr[i];
+		}
+
+		var x[10];
+		var a = 10;
+		var b;
+
+		printn[sum[val[1]][val[2]]];
+		printc['-']['-']['-'];
+
+		var i = 0;
+		>| (i < 10) {
+			x[i] = i;
+			i = i + 1;
+		}
+
+		i = 0;
+		>| (i < 10) {
+			printn[get_i[x][i]];
+			i = i + 1;
+		}
+	}
+
+	main_test_cur;
 
 }

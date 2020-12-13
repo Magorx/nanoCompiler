@@ -25,7 +25,9 @@ WHILE ::= >| (EXPR) BLOCK_STATEMENT
 
 // Variables ==================================================================
 
-DEF_VAR ::= "var" {ID | ID = EXPR}
+NEW_VAR_DEF ::= DEF_VAR | DEF_ARR
+DEF_VAR ::= "var" ID {= EXPR}?
+DEF_ARR ::= "var" ID[NUMB] {= EXPR}?
 
 // Math expression ============================================================
 
@@ -38,7 +40,7 @@ MATH_EXPR ::= TERM {[+-]TERM}*
 TERM ::= FACT {{/|*}FACT}*
 
 FACT ::= [+-]FACT | UNIT^FACT | UNIT
-UNIT ::= FUNC_CALL | ID | (EXPR) | ELEM_FUNC |NUMB
+UNIT ::= FUNC_CALL | ID[EXPR] | ID | (EXPR) | ELEM_FUNC |NUMB
 
 // Number & Id ================================================================
 

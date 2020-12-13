@@ -112,13 +112,14 @@ private:
 		IF_PARSED (cur_index, unit_id, parse_ID()) {
 			if (cur->is_op('(')) {
 				NEXT();
-				IF_PARSED (cur_index, bracket_expr, parse_MATH_EXPR()) {
+				IF_PARSED (cur_index, bracket_expr, parse_EXPR()) {
 					if (cur->is_op(')')) {
 						NEXT();
 						unit_id->set_R(bracket_expr);
 						return unit_id;
 					}
 				}
+
 				NEXT();
 				SET_ERR(ERROR_SYNTAX, cur);
 				ParseNode::DELETE(unit_id);
@@ -250,6 +251,55 @@ private:
 		return nullptr;
 	}
 
+	ParseNode *parse_DEF_ARR() {
+		RESET_POINT = cur_index;
+
+		if (!cur->is_op(OPCODE_VAR)) {
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
+		NEXT();
+		IF_PARSED (cur_index, id, parse_ID()) {
+			ParseNode *arr_info = NEW_NODE(OPERATION, OPCODE_ARR_INFO, nullptr, id);
+			ParseNode *arr_def  = NEW_NODE(OPERATION, OPCODE_ARR_DEF, arr_info, nullptr);
+
+			if (cur->is_op('[')) {
+				NEXT();
+
+				IF_PARSED (cur_index, numb, parse_NUMB()) {
+					arr_info->L = numb;
+					if (cur->is_op(']')) {
+						NEXT();
+						return arr_def;
+					}
+				}
+			}
+
+			RESET();
+			ParseNode::DELETE(arr_def, true);
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
+		RESET();
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
+	ParseNode *parse_NEW_VAR_DEF() {
+		IF_PARSED (cur_index, arr, parse_DEF_ARR()) {
+			return arr;
+		}
+
+		IF_PARSED (cur_index, var, parse_DEF_VAR()) {
+			return var;
+		}
+
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
 	ParseNode *parse_MATH_EXPR() {
 		IF_PARSED (cur_index, term, parse_TERM()) {
 			while (is_sign(cur)) {
@@ -364,6 +414,16 @@ private:
 		}
 
 		IF_PARSED (cur_index, logic_expr_node, parse_LOGIC_EXPR()) {
+			if (cur->is_op('=')) {
+				NEXT();
+
+				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
+					return NEW_NODE(OPERATION, '=', logic_expr_node, expr_node);
+				}
+
+				PREV();
+			}
+
 			return logic_expr_node;
 		}
 
@@ -462,7 +522,7 @@ private:
 	}
 
 	ParseNode *parse_STATEMENT() {
-		IF_PARSED (cur_index, var_def, parse_DEF_VAR()) {
+		IF_PARSED (cur_index, var_def, parse_NEW_VAR_DEF()) {
 			if (!cur->is_op(';')) {
 				ParseNode::DELETE(var_def, true);
 				SET_ERR(ERROR_SYNTAX, cur);
@@ -590,7 +650,7 @@ private:
 	}
 
 	ParseNode *parse_ARG_DECL() {
-		IF_PARSED (cur_index, var_def, parse_DEF_VAR()) {
+		IF_PARSED (cur_index, var_def, parse_NEW_VAR_DEF()) {
 			return var_def;
 		}
 
