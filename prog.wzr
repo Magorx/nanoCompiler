@@ -18,7 +18,6 @@
 		}
 
 		? (C != -7777.777) {
-			__PUT_CHAR__ 'X';
 			__PUT_NUMBER__ C;
 			__PUT_CHAR__ ' ';
 		}
@@ -114,39 +113,19 @@
 		printn[sum[val[1]][val[2]]];
 	}
 
-	func main_test_cur {
-		func sum[var a][var b] {
-			ret a + b;
+	func main {
+		var ptr[1];
+		var somehthing = 999;
+
+		func change[var ptr][var new_val] {
+			ptr[1] = new_val;
 		}
 
-		func val[var a] {
-			ret a;
-		}
+		change[ptr][45];
 
-		func get_i[var arr][var i] {
-			ret arr[i];
-		}
-
-		var x[10];
-		var a = 10;
-		var b;
-
-		printn[sum[val[1]][val[2]]];
-		printc['-']['-']['-'];
-
-		var i = 0;
-		>| (i < 10) {
-			x[i] = i;
-			i = i + 1;
-		}
-
-		i = 0;
-		>| (i < 10) {
-			printn[get_i[x][i]];
-			i = i + 1;
-		}
+		printn[somehthing];
 	}
 
-	main_test_cur;
+	main;
 
 }

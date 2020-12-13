@@ -202,6 +202,8 @@ private:
 				int offset = 0;
 				id_table.find_var(arr_name->get_id(), &offset);
 				fprintf(file, "push %d\n", offset);
+				fprintf(file, "push rvx\n");
+				fprintf(file, "add\n");
 				fprintf(file, "pop [rvx + %d]\n", offset);
 
 				break;
@@ -733,6 +735,8 @@ private:
 			fprintf(file, "push rbx\n");
 
 			compile_expr(arg, file);
+			fprintf(file, "push [rvx + %d]\n", offset);
+			fprintf(file, "add\n");
 			fprintf(file, "pop rax\n");
 			fprintf(file, "pop [rax + %d]\n", offset);
 			return true;
