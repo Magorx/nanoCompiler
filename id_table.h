@@ -187,6 +187,14 @@ public:
 		return declare(ID_TYPE_STRUCT, id, 0, fields);
 	}
 
+	bool add_buffer_zone(const int zone_size) {
+		if (!data.size()) {
+			RAISE_ERROR("adding buffer zone with on scopes alive\n");
+			return false;
+		}
+		return data[cur_scope]->add_buffer_zone(zone_size);
+	}
+
 	void add_scope(int functive = 0) {
 		add_scope(0, functive);
 		cur_scope = (int)data.size() - 1;

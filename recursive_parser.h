@@ -605,22 +605,6 @@ private:
 	}
 
 	ParseNode *parse_STATEMENT() {
-		IF_PARSED (cur_index, delim_stmt, parse_DELIMITED_STMT()) {
-			if (!cur->is_op(';')) {
-				ParseNode::DELETE(delim_stmt, true);
-				SET_ERR(ERROR_SYNTAX, cur);
-				return nullptr;
-			} else {
-				NEXT();
-
-				if (delim_stmt->is_op(OPCODE_VAR_DEF) || delim_stmt->is_op(OPCODE_ARR_DEF)) {
-					return NEW_NODE(OPERATION, ';', delim_stmt, nullptr);
-				} else {
-					return NEW_NODE(OPERATION, ';', NEW_NODE(OPERATION, OPCODE_EXPR, delim_stmt, nullptr), nullptr);
-				}
-			}
-		}
-
 		IF_PARSED (cur_index, func_decl, parse_FUNC_DECL()) {
 			return NEW_NODE(OPERATION, ';', func_decl, nullptr);
 		}
@@ -635,6 +619,22 @@ private:
 
 		IF_PARSED (cur_index, for_node, parse_FOR()) {
 			return NEW_NODE(OPERATION, ';', for_node, nullptr);
+		}
+
+		IF_PARSED (cur_index, delim_stmt, parse_DELIMITED_STMT()) {
+			if (!cur->is_op(';')) {
+				ParseNode::DELETE(delim_stmt, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			} else {
+				NEXT();
+
+				if (delim_stmt->is_op(OPCODE_VAR_DEF) || delim_stmt->is_op(OPCODE_ARR_DEF)) {
+					return NEW_NODE(OPERATION, ';', delim_stmt, nullptr);
+				} else {
+					return NEW_NODE(OPERATION, ';', NEW_NODE(OPERATION, OPCODE_EXPR, delim_stmt, nullptr), nullptr);
+				}
+			}
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);

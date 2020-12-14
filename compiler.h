@@ -91,7 +91,7 @@ private:
 				fprintf(file, "\n");
 
 				fprintf(file, "push ");
-				compile_lvalue(node->L, file);
+				compile_lvalue(node->L, file, true);
 				fprintf(file, "\n");
 
 				break;
@@ -190,7 +190,7 @@ private:
 					break;
 				}
 				
-				bool ret = id_table.declare_var(arr_name->get_id(), (int) node->L->L->get_val());
+				bool ret = id_table.declare_var(arr_name->get_id(), 1);
 				if (!ret) {
 					RAISE_ERROR("Redefinition of the id [");
 					arr_name->get_id()->print();
@@ -198,6 +198,7 @@ private:
 					LOG_ERROR_LINE_POS(node);
 					break;
 				}
+				id_table.add_buffer_zone((int) node->L->L->get_val());
 
 				int offset = 0;
 				id_table.find_var(arr_name->get_id(), &offset);
@@ -643,13 +644,13 @@ private:
 		}
 
 		CodeNode *id = node->R;
-		CodeNode *arg = node->L->L;
-		if (!arg->is_op(OPCODE_EXPR)) {
-			RAISE_ERROR("bad arr call, argument is not an expr [");
-			printf("%d]\n", node->get_op());
-			LOG_ERROR_LINE_POS(node);
-			return;
-		}
+		CodeNode *args = node->L;
+		// if (!arg->is_op(OPCODE_EXPR)) {
+		// 	RAISE_ERROR("bad arr call, argument is not an expr [");
+		// 	printf("%d]\n", node->get_op());
+		// 	LOG_ERROR_LINE_POS(node);
+		// 	return;
+		// }
 
 		int offset = 0;
 		int ret = id_table.find_var(id->get_id(), &offset);
@@ -661,11 +662,16 @@ private:
 			return;
 		}
 
-		compile_expr(arg, file);
 		fprintf(file, "push [rvx + %d]\n", offset);
-		fprintf(file, "add\n");
-		fprintf(file, "pop rax\n");
-		fprintf(file, "push [rax]\n");
+
+		while (args && args->L) {
+			CodeNode *arg = args->L;
+			compile_expr(arg, file);
+			fprintf(file, "add\n");
+			fprintf(file, "pop rax\n");
+			fprintf(file, "push [rax + 1]\n");
+			args = args->R;
+		}
 	}
 
 	bool compile_push(const CodeNode *node, FILE *file) {
@@ -739,13 +745,7 @@ private:
 			return true;
 		} else if (node->is_op(OPCODE_FUNC_CALL) && id_table.find_func(node->R->get_id()) == NOT_FOUND) { // so that's an array
 			CodeNode *id  = node->R;
-			CodeNode *arg = node->L->L;
-			if (!arg || !arg->is_op(OPCODE_EXPR)) {
-				RAISE_ERROR("bad arr call, argument is not an expr [");
-				printf("%d]\n", node->get_op());
-				LOG_ERROR_LINE_POS(node);
-				return false;
-			}
+			CodeNode *args = node->L;
 
 			int offset = 0;
 			int ret = id_table.find_var(id->get_id(), &offset);
@@ -759,19 +759,35 @@ private:
 
 			// we are called by assign, so there's 'pop ' already written in assembler, let's fix it
 			if (for_asgn_dup) {
-				fprintf(file, "0\n");
-				fprintf(file, "pop rzx\n");
-				fprintf(file, "push [rax + %d]\n", offset);
+				fprintf(file, "[rcx]\n");
+				//fprintf(file, "pop rzx\n");
+				// fprintf(file, "push [rax + %d + 1]\n", offset);
 				return true;
 			}
 
 			fprintf(file, "rbx\n");
 			fprintf(file, "push rbx\n");
 
-			compile_expr(arg, file);
-			fprintf(file, "push [rvx + %d]\n", offset);
-			fprintf(file, "add\n");
+			fprintf(file, "push rvx + %d\n", offset);
 			fprintf(file, "pop rax\n");
+			while (args && args->L) {
+				fprintf(file, "push [rax]\n");
+				CodeNode *arg = args->L;
+				compile_expr(arg, file);
+				// TODO wtf is this... it works... so let it be... for 2d arrs... but not anyhow more...
+				//if (args->R->L) {
+					fprintf(file, "push 1\n");
+					fprintf(file, "add\n");
+				//}
+				// -------------------------------------------------------------------------------------
+				fprintf(file, "add\n");
+				fprintf(file, "pop rax\n");
+				//fprintf(file, "push [rax]\n");
+				args = args->R;
+			};
+
+			fprintf(file, "push rax\n");
+			fprintf(file, "pop rcx\n");
 			fprintf(file, "pop [rax]\n");
 			return true;
 		} else {

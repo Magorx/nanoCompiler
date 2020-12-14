@@ -7,6 +7,7 @@
 #include "code_node.h"
 
 enum ID_TYPE {
+	ID_TYPE_NONE   = 0,
 	ID_TYPE_VAR    = 1,
 	ID_TYPE_FUNC   = 2,
 	ID_TYPE_STRUCT = 3,
@@ -45,6 +46,10 @@ struct IdData {
 	}
 
 	bool equal(const IdData &other) {
+		if (id == nullptr || other.id == nullptr) {
+			return false;
+		}
+
 		return type == other.type && id->equal(other.id);
 	}
 };
@@ -106,9 +111,13 @@ public:
 //=============================================================================
 
 	bool find_id(const StringView *id) const {
+		if (!id) {
+			return false;
+		}
+
 		size_t data_size = data.size();
 		for (size_t i = 0; i < data_size; ++i) {
-			if (id->equal(data[i].id)) {
+			if (data[i].id && id->equal(data[i].id)) {
 				return true;
 			}
 		}
@@ -148,6 +157,14 @@ public:
 			offset += size;
 			return true;
 		}
+	}
+
+	bool add_buffer_zone(const int zone_size) {
+		IdData idat = {};
+		idat.ctor(ID_TYPE_NONE, nullptr, zone_size);
+		data.push_back(idat);
+		offset += zone_size;
+		return true;
 	}
 
 	const CodeNode *get_arglist(const StringView *id) {

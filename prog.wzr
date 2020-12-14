@@ -170,15 +170,35 @@
 		printn_arr;
 		_n;
 	}
+
+	func init_2d[var arr][var h][var w][var data] {
+		var offset = 0;
+		>> (var i = 0 | i < h | i = i + 1) {
+			arr[i] = data + offset;
+			offset = offset + w;
+		}
+		ret arr;
+	}
 	
 	func main {
-		var a = 0;
-		>> (var i = 0 | a < 10 | i = i + 1) {
-			printn[i];
-			a = a + 0.5;
+		var n = 15;
+		var a[15];
+		var a_data[225];
+		init_2d[a][15][15][a_data];
+
+		>> (var i = 0 | i < n | i = i + 1) {
+			>> (var j = 0 | j < n | j = j + 1) {
+				a[i][j] = i + j;
+			}
 		}
+
+		>> (var i = 0 | i < n | i = i + 1) {
+			printn_arr[a[i]][n];
+			_n;
+		}
+
 	}
 
-	main_sort;
+	main;
 
 }

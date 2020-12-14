@@ -135,11 +135,11 @@ push 0
 je while_1_end
 
 ; (d((((i)[op_202])[op_306]([op_306]))[op_302](arr)))[op_202]
-push [rvx + 2]
 push [rvx + 0]
+push [rvx + 2]
 add
 pop rax
-push [rax]
+push [rax + 1]
 dup
 out
 pop rzx
@@ -162,11 +162,11 @@ jmp while_1_cond
 while_1_end:
 
 ; (d((((i)[op_202])[op_306]([op_306]))[op_302](arr)))[op_202]
-push [rvx + 2]
 push [rvx + 0]
+push [rvx + 2]
 add
 pop rax
-push [rax]
+push [rax + 1]
 dup
 out
 pop rzx
@@ -970,16 +970,16 @@ je while_3_end
 
 ; (((((i)[op_202])[op_306]([op_306]))[op_302](arr))<((((j)[op_202])[op_306]([op_306]))[op_302](arr)))[op_15]([op_31]((){))
 if_13_cond:
+push [rvx + 0]
 push [rvx + 2]
-push [rvx + 0]
 add
 pop rax
-push [rax]
+push [rax + 1]
+push [rvx + 0]
 push [rvx + 3]
-push [rvx + 0]
 add
 pop rax
-push [rax]
+push [rax + 1]
 lt
 
 push 0
@@ -991,34 +991,34 @@ jmp if_13_end
 if_13_true:
 
 ; (tmp)[op_20]((((i)[op_202])[op_306]([op_306]))[op_302](arr))
-push [rvx + 2]
 push [rvx + 0]
+push [rvx + 2]
 add
 pop rax
-push [rax]
+push [rax + 1]
 pop [rvx + 5]
 
 ; (((((i)[op_202])[op_306]([op_306]))[op_302](arr))=((((j)[op_202])[op_306]([op_306]))[op_302](arr)))[op_202]
-push [rvx + 3]
 push [rvx + 0]
+push [rvx + 3]
 add
 pop rax
-push [rax]
+push [rax + 1]
 pop rbx
 push rbx
+push rvx + 0
+pop rax
+push [rax]
 push [rvx + 2]
-push [rvx + 0]
+push 1
+add
 add
 pop rax
+push rax
+pop rcx
 pop [rax]
 
-push rbx
-push rbx
-push [rvx + 2]
-push [rvx + 0]
-add
-pop rax
-pop [rax]
+push [rcx]
 
 pop rzx
 
@@ -1026,19 +1026,19 @@ pop rzx
 push [rvx + 5]
 pop rbx
 push rbx
+push rvx + 0
+pop rax
+push [rax]
 push [rvx + 3]
-push [rvx + 0]
+push 1
+add
 add
 pop rax
+push rax
+pop rcx
 pop [rax]
 
-push rbx
-push rbx
-push [rvx + 3]
-push [rvx + 0]
-add
-pop rax
-pop [rax]
+push [rcx]
 
 pop rzx
 
@@ -1093,10 +1093,10 @@ pop [rvx + 1]
 
 ; (n)[op_20](f)
 in
-pop [rvx + 101]
+pop [rvx + 102]
 
 ; ((size)=(n))[op_202]
-push [rvx + 101]
+push [rvx + 102]
 pop [rvx + 0]
 push [rvx + 0]
 pop rzx
@@ -1105,12 +1105,12 @@ pop rzx
 
 for_1_init_block:
 push 0.000000
-pop [rvx + 102]
+pop [rvx + 103]
 
 for_1_start:
 
 for_1_cond:
-push [rvx + 102]
+push [rvx + 103]
 push [rvx + 0]
 lt
 
@@ -1121,26 +1121,26 @@ je for_1_end
 in
 pop rbx
 push rbx
-push [rvx + 102]
-push [rvx + 1]
+push rvx + 1
+pop rax
+push [rax]
+push [rvx + 103]
+push 1
+add
 add
 pop rax
+push rax
+pop rcx
 pop [rax]
 
-push rbx
-push rbx
-push [rvx + 102]
-push [rvx + 1]
-add
-pop rax
-pop [rax]
+push [rcx]
 
 pop rzx
-push [rvx + 102]
+push [rvx + 103]
 push 1.000000
 add
-pop [rvx + 102]
-push [rvx + 102]
+pop [rvx + 103]
+push [rvx + 103]
 pop rzx
 jmp for_1_cond
 
@@ -1148,44 +1148,44 @@ for_1_end:
 
 ; (qsort)[op_202]
 push [rvx + 1]
-pop [rvx + 102]
-push [rvx + 0]
 pop [rvx + 103]
+push [rvx + 0]
+pop [rvx + 104]
 push rvx
-push 102
+push 103
 add
 pop rvx
 call qsort
 push rvx
-push 102
+push 103
 sub
 pop rvx
 pop rzx
 
 ; (printn_arr)[op_202]
 push [rvx + 1]
-pop [rvx + 102]
-push [rvx + 0]
 pop [rvx + 103]
+push [rvx + 0]
+pop [rvx + 104]
 push rvx
-push 102
+push 103
 add
 pop rvx
 call printn_arr
 push rvx
-push 102
+push 103
 sub
 pop rvx
 pop rzx
 
 ; (_n)[op_202]
 push rvx
-push 102
+push 103
 add
 pop rvx
 call _n
 push rvx
-push 102
+push 103
 sub
 pop rvx
 pop rzx
@@ -1194,82 +1194,266 @@ swp
 ret
 _func_main_sort_END:
 
-; (([op_305])[op_300](main))[op_301]((){)
-jmp _func_main_END
-_func_main_BEGIN:
-main:
+; ((((arr)[op_20])[op_305](((h)[op_20])[op_305](((w)[op_20])[op_305](((data)[op_20])[op_305]([op_305])))))[op_300](init_2d))[op_301]((){)
+jmp _func_init_2d_END
+_func_init_2d_BEGIN:
+init_2d:
 
-; (a)[op_20](0)
+; (offset)[op_20](0)
 push 0.000000
-pop [rvx + 0]
+pop [rvx + 4]
 
-; ((((i)[op_20](0))[op_18]((a)<(10)))[op_18]((i)=((i)+(1))))[op_17]((){)
+; ((((i)[op_20](0))[op_18]((i)<(h)))[op_18]((i)=((i)+(1))))[op_17]((){)
 
 for_2_init_block:
 push 0.000000
-pop [rvx + 1]
+pop [rvx + 5]
 
 for_2_start:
 
 for_2_cond:
-push [rvx + 0]
-push 10.000000
+push [rvx + 5]
+push [rvx + 1]
 lt
 
 push 0
 je for_2_end
 
-; ((((i)[op_202])[op_306]([op_306]))[op_302](printn))[op_202]
-push [rvx + 1]
-pop [rvx + 2]
-push 0
-push 7777.777000
-sub
+; (((((i)[op_202])[op_306]([op_306]))[op_302](arr))=((data)+(offset)))[op_202]
+push [rvx + 3]
+push [rvx + 4]
+add
+pop rbx
+push rbx
+push rvx + 0
+pop rax
+push [rax]
+push [rvx + 5]
+push 1
+add
+add
+pop rax
+push rax
+pop rcx
+pop [rax]
 
-pop [rvx + 3]
-push 0
-push 7777.777000
-sub
+push [rcx]
 
+pop rzx
+
+; ((offset)=((offset)+(w)))[op_202]
+push [rvx + 4]
+push [rvx + 2]
+add
 pop [rvx + 4]
-push rvx
-push 2
-add
-pop rvx
-call printn
-push rvx
-push 2
-sub
-pop rvx
+push [rvx + 4]
 pop rzx
-
-; ((a)=((a)+(0.5)))[op_202]
-push [rvx + 0]
-push 0.500000
-add
-pop [rvx + 0]
-push [rvx + 0]
-pop rzx
-push [rvx + 1]
+push [rvx + 5]
 push 1.000000
 add
-pop [rvx + 1]
-push [rvx + 1]
+pop [rvx + 5]
+push [rvx + 5]
 pop rzx
 jmp for_2_cond
 
 for_2_end:
+
+; ([op_19](arr))[op_202]
+push [rvx + 0]
+swp
+ret
+pop rzx
+push 0
+swp
+ret
+_func_init_2d_END:
+
+; (([op_305])[op_300](main))[op_301]((){)
+jmp _func_main_END
+_func_main_BEGIN:
+main:
+
+; (n)[op_20](15)
+push 15.000000
+pop [rvx + 0]
+
+; ((15)[op_22](a))[op_21]
+push 1
+push rvx
+add
+pop [rvx + 1]
+
+; ((225)[op_22](a_data))[op_21]
+push 17
+push rvx
+add
+pop [rvx + 17]
+
+; ((((a)[op_202])[op_306](((15)[op_202])[op_306](((15)[op_202])[op_306](((a_data)[op_202])[op_306]([op_306])))))[op_302](init_2d))[op_202]
+push [rvx + 1]
+pop [rvx + 243]
+push 15.000000
+pop [rvx + 244]
+push 15.000000
+pop [rvx + 245]
+push [rvx + 17]
+pop [rvx + 246]
+push rvx
+push 243
+add
+pop rvx
+call init_2d
+push rvx
+push 243
+sub
+pop rvx
+pop rzx
+
+; ((((i)[op_20](0))[op_18]((i)<(n)))[op_18]((i)=((i)+(1))))[op_17]((){)
+
+for_3_init_block:
+push 0.000000
+pop [rvx + 243]
+
+for_3_start:
+
+for_3_cond:
+push [rvx + 243]
+push [rvx + 0]
+lt
+
+push 0
+je for_3_end
+
+; ((((j)[op_20](0))[op_18]((j)<(n)))[op_18]((j)=((j)+(1))))[op_17]((){)
+
+for_4_init_block:
+push 0.000000
+pop [rvx + 244]
+
+for_4_start:
+
+for_4_cond:
+push [rvx + 244]
+push [rvx + 0]
+lt
+
+push 0
+je for_4_end
+
+; (((((i)[op_202])[op_306](((j)[op_202])[op_306]([op_306])))[op_302](a))=((i)+(j)))[op_202]
+push [rvx + 243]
+push [rvx + 244]
+add
+pop rbx
+push rbx
+push rvx + 1
+pop rax
+push [rax]
+push [rvx + 243]
+push 1
+add
+add
+pop rax
+push [rax]
+push [rvx + 244]
+push 1
+add
+add
+pop rax
+push rax
+pop rcx
+pop [rax]
+
+push [rcx]
+
+pop rzx
+push [rvx + 244]
+push 1.000000
+add
+pop [rvx + 244]
+push [rvx + 244]
+pop rzx
+jmp for_4_cond
+
+for_4_end:
+push [rvx + 243]
+push 1.000000
+add
+pop [rvx + 243]
+push [rvx + 243]
+pop rzx
+jmp for_3_cond
+
+for_3_end:
+
+; ((((i)[op_20](0))[op_18]((i)<(n)))[op_18]((i)=((i)+(1))))[op_17]((){)
+
+for_5_init_block:
+push 0.000000
+pop [rvx + 243]
+
+for_5_start:
+
+for_5_cond:
+push [rvx + 243]
+push [rvx + 0]
+lt
+
+push 0
+je for_5_end
+
+; (((((((i)[op_202])[op_306]([op_306]))[op_302](a))[op_202])[op_306](((n)[op_202])[op_306]([op_306])))[op_302](printn_arr))[op_202]
+push [rvx + 1]
+push [rvx + 243]
+add
+pop rax
+push [rax + 1]
+pop [rvx + 244]
+push [rvx + 0]
+pop [rvx + 245]
+push rvx
+push 244
+add
+pop rvx
+call printn_arr
+push rvx
+push 244
+sub
+pop rvx
+pop rzx
+
+; (_n)[op_202]
+push rvx
+push 244
+add
+pop rvx
+call _n
+push rvx
+push 244
+sub
+pop rvx
+pop rzx
+push [rvx + 243]
+push 1.000000
+add
+pop [rvx + 243]
+push [rvx + 243]
+pop rzx
+jmp for_5_cond
+
+for_5_end:
 push 0
 swp
 ret
 _func_main_END:
 
-; (main_sort)[op_202]
+; (main)[op_202]
 push rvx
 push 5
 add
 pop rvx
-call main_sort
+call main
 push rvx
 push 5
 sub

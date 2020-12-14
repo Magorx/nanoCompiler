@@ -31,7 +31,7 @@ run_: all
 comp: all
 	kasm out.kc out.tf
 
-comp_run: comp
+comp_run: comp out.kc
 	kspu out.tf
 
 crun:
