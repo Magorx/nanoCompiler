@@ -301,6 +301,24 @@ private:
 				break;
 			}
 
+			case OPCODE_ELEM_MALLOC : {
+				if (node->R) {
+					COMPILE_R();
+				} else {
+					fprintf(file, "push rmx\n");
+					break;
+				}
+				
+				fprintf(file, "pop rax\n");
+				fprintf(file, "push rmx\n");
+				fprintf(file, "push rmx\n");
+				fprintf(file, "push rax\n");
+				fprintf(file, "add\n");
+				fprintf(file, "pop rmx\n");
+
+				break;
+			}
+
 			case OPCODE_ELEM_INPUT : {
 				fprintf(file, "in\n");
 
@@ -934,6 +952,8 @@ public:
 
 		fprintf(file, "push %d\n", INIT_RVX_OFFSET);
 		fprintf(file, "pop rvx\n");
+		fprintf(file, "push %d\n", INIT_RMX_OFFSET);
+		fprintf(file, "pop rmx\n");
 
 		compile(prog, file);
 

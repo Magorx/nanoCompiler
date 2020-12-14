@@ -694,7 +694,7 @@ private:
 	}
 
 	ParseNode *parse_ELEM_FUNC() {
-		if (cur->is_op(OPCODE_ELEM_PUTN) || cur->is_op(OPCODE_ELEM_PUTC)) {
+		if (cur->is_op(OPCODE_ELEM_PUTN) || cur->is_op(OPCODE_ELEM_PUTC) || cur->is_op(OPCODE_ELEM_MALLOC)) {
 			int op = cur->get_op();
 			NEXT();
 

@@ -171,32 +171,29 @@
 		_n;
 	}
 
-	func init_2d[var arr][var h][var w][var data] {
-		var offset = 0;
+	func init_2d[var h][var w] {
+		var arr = #h;
+		var arr_data = #(h * w);
 		>> (var i = 0 | i < h | i = i + 1) {
-			arr[i] = data + offset;
-			offset = offset + w;
+			arr[i] = arr_data + w * i;
 		}
+
 		ret arr;
 	}
 	
 	func main {
-		var n = 15;
-		var a[15];
-		var a_data[225];
-		init_2d[a][15][15][a_data];
-
-		>> (var i = 0 | i < n | i = i + 1) {
-			>> (var j = 0 | j < n | j = j + 1) {
-				a[i][j] = i + j;
+		var arr = init_2d[10][10];
+		printn[arr];
+		>> (var i = 0 | i < 10 | i = i + 1) {
+			>> (var j = 0 | j < 10 | j = j + 1) {
+				arr[i][j] = i + j;
 			}
 		}
 
-		>> (var i = 0 | i < n | i = i + 1) {
-			printn_arr[a[i]][n];
+		>> (var row = 0 | row < 10 | row = row + 1) {
+			printn_arr[arr[row]][10];
 			_n;
 		}
-
 	}
 
 	main;

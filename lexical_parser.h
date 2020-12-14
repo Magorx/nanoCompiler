@@ -128,6 +128,10 @@ private:
 			cur += 1;
 			ADD_TOKEN(T_OP, OPCODE_ELEM_INPUT);
 			return true;
+		} else if (*cur == '#') {
+			cur += 1;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_MALLOC);
+			return true;
 		} else if (StringView::starts_with(cur, ">|")) {
 			cur += 2;
 			ADD_TOKEN(T_OP, OPCODE_WHILE);
