@@ -1,12 +1,184 @@
 {
-	var P = 0;
+	
+	var P = 1;
 
-	func main {
-		>> (var i = 0 | i < 5 | i = i + 1) {
-			__PUT_NUMBER__ i;
+	/*===========================================*\
+	|=============== STL LIBRARY =================|
+	\*===========================================*/
+
+	func printn[var A = -7777.777][var B = -7777.777][var C = -7777.777] {
+		? (A != -7777.777) {
+			__PUT_NUMBER__ A;
+			__PUT_CHAR__ ' ';
+		}
+
+		? (B != -7777.777) {
+			__PUT_NUMBER__ B;
+			__PUT_CHAR__ ' ';
+		}
+
+		? (C != -7777.777) {
+			__PUT_NUMBER__ C;
+			__PUT_CHAR__ ' ';
+		}
+
+		__PUT_NUMBER__;
+	}
+
+	func printn_arr[var arr = arr][var size = size] {
+		var i = 0;
+		>| (i < size - 1) {
+			__PUT_NUMBER__ arr[i];
+			__PUT_CHAR__ ' ';
+			i = i + 1;
+		}
+		__PUT_NUMBER__ arr[i];
+	}
+
+	func _n __PUT_NUMBER__;
+
+	func printc[var A = -7777.777][var B = -7777.777][var C = -7777.777] {
+		? (A != -7777.777) {
+			__PUT_CHAR__ A;
+			__PUT_CHAR__ ' ';
+		}
+
+		? (B != -7777.777) {
+			__PUT_CHAR__ B;
+			__PUT_CHAR__ ' ';
+		}
+
+		? (C != -7777.777) {
+			__PUT_CHAR__ C;
+			__PUT_CHAR__ ' ';
+		}
+
+		__PUT_NUMBER__;
+	}
+
+	/*===========================================*\
+	|=============== STL LIBRARY =================|
+	\*===========================================*/
+
+	func main_fact {
+		func fact[var x] ? (x <= 1) ret 1; : ret x * fact[x - 1];
+		printn[fact[@]];
+	}
+
+	var INF = 3;
+	var TWO = 2;
+	var ONE = 1;
+	var NON = 0;
+
+	func solve_square[a][b][c] {
+		? (a == 0) {
+			? (b == 0) {
+				? (c == 0) {
+					printc['i']['n']['f'];
+					ret INF;
+				} : {
+					printc['n']['o']['n'];
+					ret NON;
+				}
+			} : {
+				var x = -c / b;
+				printc['o']['n']['e'];
+				printn[x];
+				ret x;
+			}
+		} : {
+			var d = b^2 - 4*a*c;
+			? (d < 0) {
+				printc['n']['o']['n'];
+				ret NON;
+			}
+
+			? (d == 0) {
+				printc['o']['n']['e'];
+				var x = -b / (2 * a);
+				printn[x];
+				ret ONE;
+			}
+
+			var sq = d^0.5;
+			var x1 = (-b + sq) / (2 * a);
+			var x2 = (-b + sq) / (2 * a);
+
+			printc['t']['w']['o'];
+			printn[x1][x2];
 		}
 	}
 
-	main;
+	func main_sq {
+		solve_square[@][@][@];
+	}
+
+	func main_test {
+		func sum[var a][var b] {
+			ret a + b;
+		}
+
+		func val[var a] {
+			ret a;
+		}
+
+		printn[sum[val[1]][val[2]]];
+	}
+
+	func sqrt[var x] {
+		ret x ^ 0.5;
+	}
+
+	func qsort[var arr = arr][var size = size] {
+		var i = 0;
+		var j = 0;
+		var flag = 1;
+
+		/*
+			i = 0;
+			>| (i < size) { printn[arr[i]]; i = i + 1; }
+		*/
+
+		i = 0;
+		>| (i < size && flag) {
+			j = 0;
+			flag = 0;
+			>| (j < size) {
+				? (arr[i] < arr[j]) {
+					var tmp = arr[i];
+					arr[i] = arr[j];
+					arr[j] = tmp;
+					flag = 1;
+				}
+				j = j + 1;
+			}
+			i = i + 1;
+		}
+	}
+
+	func main_sort {
+		var size = 100;
+		var arr[100];
+		
+		var n = @;
+		size = n;
+
+		>> (var i = 0 | i < size | i = i + 1) arr[i] = @;
+
+		qsort;
+
+		printn_arr;
+		_n;
+	}
+	
+	func main {
+		var a = 0;
+		>> (var i = 0 | a < 10 | i = i + 1) {
+			printn[i];
+			a = a + 0.5;
+		}
+	}
+
+	main_sort;
 
 }

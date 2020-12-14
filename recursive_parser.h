@@ -538,6 +538,7 @@ private:
 		NEXT();
 
 		IF_PARSED (cur_index, init_block, parse_DELIMITED_STMT()) {
+
 			if (!cur->is_op('|')) {
 				ParseNode::DELETE(init_block, true);
 				SET_ERR(ERROR_SYNTAX, cur);
@@ -556,7 +557,7 @@ private:
 				NEXT();
 
 				IF_PARSED (cur_index, act_block, parse_DELIMITED_STMT()) {
-					ParseNode *for_upper_info = NEW_NODE(OPERATION, OPCODE_FOR_INFO, for_info, NEW_NODE(OPERATION, OPCODE_EXPR, act_block, nullptr));
+					ParseNode *for_upper_info = NEW_NODE(OPERATION, OPCODE_FOR_INFO, for_info, act_block);
 
 					if (!cur->is_op(')')) {
 						ParseNode::DELETE(for_upper_info, true);
@@ -611,7 +612,12 @@ private:
 				return nullptr;
 			} else {
 				NEXT();
-				return NEW_NODE(OPERATION, ';', delim_stmt, nullptr);
+
+				if (delim_stmt->is_op(OPCODE_VAR_DEF) || delim_stmt->is_op(OPCODE_ARR_DEF)) {
+					return NEW_NODE(OPERATION, ';', delim_stmt, nullptr);
+				} else {
+					return NEW_NODE(OPERATION, ';', NEW_NODE(OPERATION, OPCODE_EXPR, delim_stmt, nullptr), nullptr);
+				}
 			}
 		}
 
@@ -813,7 +819,7 @@ private:
 			return NEW_NODE(OPERATION, OPCODE_DEFAULT_ARG, nullptr, nullptr);
 		}
 
-		IF_PARSED (cur_index, expr_node, parse_EXPR()) {
+		IF_PARSED (cur_index, expr_node, parse_DELIMITED_STMT()) {
 			return NEW_NODE(OPERATION, OPCODE_EXPR, expr_node, nullptr);
 		}
 

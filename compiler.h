@@ -424,7 +424,12 @@ private:
 	}
 
 	void compile_expr(const CodeNode *node, FILE *file, const bool to_pop = false) {
-		COMPILE_L();
+		if (node->is_op(OPCODE_EXPR)) {
+			COMPILE_L();
+		} else {
+			compile(node, file);
+		}
+
 		if (to_pop) {
 			fprintf(file, "pop rzx\n");
 		}
