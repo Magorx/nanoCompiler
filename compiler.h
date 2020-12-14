@@ -232,6 +232,33 @@ private:
 				break;
 			}
 
+			case OPCODE_FOR : {
+				int cur_for_cnt = ++for_cnt;
+				if (!node->L || !node->R || !node->L->L || !node->L->R || !node->L->L->L || !node->L->L->R) {
+					RAISE_ERROR("bad for node, something is missing\n");
+					break;
+				}
+				
+				id_table.add_scope();
+				fprintf(file, "\nfor_%d_init_block:\n", cur_for_cnt);
+				compile(node->L->L->L, file);
+
+				fprintf(file, "\nfor_%d_start:\n", cur_for_cnt);
+				fprintf(file, "\nfor_%d_cond:\n", cur_for_cnt);
+				compile(node->L->L->R, file);
+				fprintf(file, "\npush 0\n");
+				fprintf(file, "je for_%d_end\n", cur_for_cnt);
+
+				compile(node->R, file);
+
+				compile_expr(node->L->R, file, true);
+				fprintf(file, "jmp for_%d_cond\n", cur_for_cnt);
+				fprintf(file, "\nfor_%d_end:\n", cur_for_cnt);
+
+				id_table.remove_scope();
+				break;
+			}
+
 			case OPCODE_COND_DEPENDENT : {
 				int cur_if_cnt = if_cnt;
 				fprintf(file, "if_%d_false:\n", cur_if_cnt);

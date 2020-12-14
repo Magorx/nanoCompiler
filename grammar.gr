@@ -16,12 +16,14 @@ ARG_CALL     ::= \nothing | . | EXPR
 // Statements =================================================================
 
 BLOCK_STATEMENT ::= STATEMENT | { BLOCK_STATEMENT* }
-STATEMENT       ::= {DEF_VAR | ASGN | ELEM_FUNC | EXPR} ; | IF | WHILE | FUNC_DECL
+STATEMENT       ::=  DELIMITED_STMT; | IF | WHILE | FOR | FUNC_DECL
+DELIMITED_STMT  ::= DEF_VAR | ASGN | ELEM_FUNC | EXPR
 
 ELEM_FUNC ::= {putn EXPR | putc EXPR | @}
 
 IF    ::= ? (EXPR) BLOCK_STATEMENT {: BLOCK_STATEMENT}?
 WHILE ::= >| (EXPR) BLOCK_STATEMENT
+FOR   ::= >> (STATEMENT | STATEMENT | STATEMENT) BLOCK_STATEMENT
 
 // Variables ==================================================================
 

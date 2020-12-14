@@ -521,15 +521,97 @@ private:
 		return nullptr;
 	}
 
-	ParseNode *parse_STATEMENT() {
+	ParseNode *parse_FOR() {
+		RESET_POINT = cur_index;
+
+		if (!cur->is_op(OPCODE_FOR)) {
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+		NEXT();
+
+		if (!cur->is_op('(')) {
+			RESET();
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+		NEXT();
+
+		IF_PARSED (cur_index, init_block, parse_DELIMITED_STMT()) {
+			if (!cur->is_op('|')) {
+				ParseNode::DELETE(init_block, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			}
+			NEXT();
+
+			IF_PARSED (cur_index, cond_block, parse_DELIMITED_STMT()) {
+				ParseNode *for_info  = NEW_NODE(OPERATION, OPCODE_FOR_INFO, init_block, cond_block);
+
+				if (!cur->is_op('|')) {
+					ParseNode::DELETE(for_info, true);
+					SET_ERR(ERROR_SYNTAX, cur);
+					return nullptr;
+				}
+				NEXT();
+
+				IF_PARSED (cur_index, act_block, parse_DELIMITED_STMT()) {
+					ParseNode *for_upper_info = NEW_NODE(OPERATION, OPCODE_FOR_INFO, for_info, NEW_NODE(OPERATION, OPCODE_EXPR, act_block, nullptr));
+
+					if (!cur->is_op(')')) {
+						ParseNode::DELETE(for_upper_info, true);
+						SET_ERR(ERROR_SYNTAX, cur);
+						return nullptr;
+					}
+					NEXT();
+
+					IF_PARSED (cur_index, body_block, parse_BLOCK_STATEMENT()) {
+						ParseNode *for_node = NEW_NODE(OPERATION, OPCODE_FOR, for_upper_info, body_block);
+						return for_node;
+					}
+
+					ParseNode::DELETE(for_upper_info, true);
+					SET_ERR(ERROR_SYNTAX, cur);
+					return nullptr;
+				}
+
+				ParseNode::DELETE(for_info, true);
+				SET_ERR(ERROR_SYNTAX, cur);
+				return nullptr;
+			}
+
+			ParseNode::DELETE(init_block, true);
+			SET_ERR(ERROR_SYNTAX, cur);
+			return nullptr;
+		}
+
+		RESET();
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
+	ParseNode *parse_DELIMITED_STMT() {
 		IF_PARSED (cur_index, var_def, parse_NEW_VAR_DEF()) {
+			return var_def;
+		}
+
+		IF_PARSED (cur_index, expr_node, parse_EXPR()) {
+			return expr_node;
+		}
+
+		SET_ERR(ERROR_SYNTAX, cur);
+		return nullptr;
+	}
+
+	ParseNode *parse_STATEMENT() {
+		IF_PARSED (cur_index, delim_stmt, parse_DELIMITED_STMT()) {
 			if (!cur->is_op(';')) {
-				ParseNode::DELETE(var_def, true);
+				ParseNode::DELETE(delim_stmt, true);
 				SET_ERR(ERROR_SYNTAX, cur);
 				return nullptr;
 			} else {
 				NEXT();
-				return NEW_NODE(OPERATION, ';', var_def, nullptr);
+				return NEW_NODE(OPERATION, ';', delim_stmt, nullptr);
 			}
 		}
 
@@ -545,15 +627,8 @@ private:
 			return NEW_NODE(OPERATION, ';', while_node, nullptr);
 		}
 
-		IF_PARSED (cur_index, expr_node, parse_EXPR()) {
-			if (!cur->is_op(';')) {
-				ParseNode::DELETE(expr_node, true);
-				SET_ERR(ERROR_SYNTAX, cur);
-				return nullptr;
-			} else {
-				NEXT();
-				return NEW_NODE(OPERATION, ';', NEW_NODE(OPERATION, OPCODE_EXPR, expr_node, nullptr), nullptr);
-			}
+		IF_PARSED (cur_index, for_node, parse_FOR()) {
+			return NEW_NODE(OPERATION, ';', for_node, nullptr);
 		}
 
 		SET_ERR(ERROR_SYNTAX, cur);

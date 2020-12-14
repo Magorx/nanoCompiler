@@ -132,6 +132,10 @@ private:
 			cur += 2;
 			ADD_TOKEN(T_OP, OPCODE_WHILE);
 			return true;
+		} else if (StringView::starts_with(cur, ">>")) {
+			cur += 2;
+			ADD_TOKEN(T_OP, OPCODE_FOR);
+			return true;
 		} else if (StringView::starts_with(cur, "for ")) {
 			cur += 4;
 			ADD_TOKEN(T_OP, OPCODE_FOR);
