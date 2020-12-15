@@ -10,28 +10,50 @@
 
 #include "compiler.h"
 
-int main() {
-	const char *file_name = "prog.wzr";
+int main(const int argc, const char **argv) {
+	const char *input_file  = "prog.ctx";
+	const char *output_file = "out.kc";
+	int verbosity = 0;
+	
+	if (argc > 1 && strcmp(argv[1], ".")) {
+		input_file = argv[1];
+	}
+	
+	if (argc > 2 && strcmp(argv[2], ".")) {
+		output_file = argv[2];
+	}
+
+	if (argc > 3 && !strcmp(argv[3], "-v")) {
+		verbosity = 1; 
+	}
 
 	File file = {};
-	file.ctor(file_name);
+	file.ctor(input_file);
 	if (!file.data) {
-		ANNOUNCE("ERR", "compiler", "problems with input file [%s]", file_name);
-		return 0;
+		ANNOUNCE("ERR", "kncc", "problems with input file [%s]", input_file);
+		return -1;
 	}
 
 	Compiler comp = {};
 	comp.ctor();
 	CodeNode *prog = comp.read_to_nodes(&file);
 
-	// prog->gv_dump();
+	if (!prog) {
+		ANNOUNCE("ERR", "kncc", "problems with parsing [%s]", input_file);
+		return -1;
+	}
 
-	comp.compile(prog, "out.kc");
+	if (verbosity) prog->gv_dump();
+
+	if (!comp.compile(prog, output_file)) {
+		ANNOUNCE("ERR", "kncc", "problems with compiling [%s]", input_file);
+		return -1;
+	}
 
 	CodeNode::DELETE(prog, true, true);
 	file.dtor();
 	comp.dtor();
 
-	printf(".doned.\n");
+	// printf(".doned.\n");
 	return 0;
 }

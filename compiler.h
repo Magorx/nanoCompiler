@@ -325,6 +325,62 @@ private:
 				break;
 			}
 
+			case OPCODE_ELEM_G_INIT : {
+				if (!node->R || !node->L) {
+					RAISE_ERROR("graphics initialization is invalid without paramets");
+					break;
+				}
+				
+				COMPILE_L();
+				fprintf(file, "dup\n");
+				fprintf(file, "pop rax\n");
+				COMPILE_R();
+				fprintf(file, "dup\n");
+				fprintf(file, "pop rbx\n");
+				fprintf(file, "g_init\n");
+				fprintf(file, "push rax\n");
+				fprintf(file, "push rbx\n");
+				fprintf(file, "mul\n");
+
+				break;
+			}
+
+			case OPCODE_ELEM_G_DRAW_TICK : {
+				fprintf(file, "g_draw\n");
+				fprintf(file, "push 0\n");
+
+				break;
+			}
+
+			case OPCODE_ELEM_G_PUT_PIXEL : {
+				if (!node->R || !node->L) {
+					RAISE_ERROR("graphics pixel put is invalid without paramets");
+					break;
+				}
+				
+				COMPILE_L();
+				fprintf(file, "pop rax\n");
+				COMPILE_R();
+				fprintf(file, "dup\n");
+				fprintf(file, "pop (rax)\n");
+
+				break;
+			}
+
+			case OPCODE_ELEM_G_FILL : {
+				if (node->R) {
+					COMPILE_R();
+				} else {
+					fprintf(file, "push 256\n");
+					break;
+				}
+
+				fprintf(file, "dup\n");
+				fprintf(file, "g_fill\n");
+
+				break;
+			}
+
 			case OPCODE_RET : {
 				if (!node->R) {
 					fprintf(file, "push 0\n");
@@ -956,13 +1012,14 @@ public:
 		fprintf(file, "pop rmx\n");
 
 		compile(prog, file);
+		fclose(file);
 
 		if (ANNOUNCEMENT_ERROR) {
 			fprintf(file, "AN ERROR OCCURED DURING COMPILATION IUCK\n");
-			ANNOUNCE("ERR", "compiler", "An error occured during compilation\n");
+			ANNOUNCE("ERR", "kncc", "An error occured during compilation");
+			return false;
 		}
-		fclose(file);
-
+		
 		return true;
 	}
 

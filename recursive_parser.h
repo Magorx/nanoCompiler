@@ -694,7 +694,18 @@ private:
 	}
 
 	ParseNode *parse_ELEM_FUNC() {
-		if (cur->is_op(OPCODE_ELEM_PUTN) || cur->is_op(OPCODE_ELEM_PUTC) || cur->is_op(OPCODE_ELEM_MALLOC)) {
+
+		// 0 args
+		if (cur->is_op(OPCODE_ELEM_INPUT) || cur->is_op(OPCODE_ELEM_EXIT) || cur->is_op(OPCODE_ELEM_G_DRAW_TICK)) {
+			int op = cur->get_op();
+			NEXT();
+			return NEW_NODE(OPERATION, op, nullptr, nullptr);
+		}
+
+		// 0-1 arg;
+		if (cur->is_op(OPCODE_ELEM_PUTN)   || cur->is_op(OPCODE_ELEM_PUTC) || 
+			cur->is_op(OPCODE_ELEM_MALLOC) || cur->is_op(OPCODE_RET) || cur->is_op(OPCODE_ELEM_G_FILL)) {
+
 			int op = cur->get_op();
 			NEXT();
 
@@ -705,26 +716,27 @@ private:
 			return NEW_NODE(OPERATION, op, nullptr, nullptr);
 		}
 
-		if (cur->is_op(OPCODE_ELEM_INPUT)) {
+		// 2 args;
+		if (cur->is_op(OPCODE_ELEM_G_INIT) || cur->is_op(OPCODE_ELEM_G_PUT_PIXEL)) {
+			int op = cur->get_op();
 			NEXT();
-			return NEW_NODE(OPERATION, OPCODE_ELEM_INPUT, nullptr, nullptr);
-		}
-
-		if (cur->is_op(OPCODE_ELEM_EXIT)) {
-			NEXT();
-			return NEW_NODE(OPERATION, OPCODE_ELEM_EXIT, nullptr, nullptr);
-		}
-
-		if (cur->is_op(OPCODE_RET)) {
-			NEXT();
-			ParseNode *ret = NEW_NODE(OPERATION, OPCODE_RET, nullptr, nullptr);
-
-			IF_PARSED (cur_index, expr_node, parse_EXPR()) {
-				ret->R = expr_node;
+			IF_PARSED (cur_index, arg1, parse_EXPR()) {
+				IF_PARSED (cur_index, arg2, parse_EXPR()) {
+					return NEW_NODE(OPERATION, op, arg1, arg2);
+				}
 			}
-
-			return ret;
 		}
+
+		// if (cur->is_op(OPCODE_RET)) {
+		// 	NEXT();
+		// 	ParseNode *ret = NEW_NODE(OPERATION, OPCODE_RET, nullptr, nullptr);
+
+		// 	IF_PARSED (cur_index, expr_node, parse_EXPR()) {
+		// 		ret->R = expr_node;
+		// 	}
+
+		// 	return ret;
+		// }
 
 		SET_ERR(ERROR_SYNTAX, cur);
 		return nullptr;

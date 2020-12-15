@@ -184,6 +184,18 @@ private:
 			cur += 4;
 			ADD_TOKEN(T_OP, OPCODE_ELEM_EXIT);
 			return true;
+		} else if (StringView::starts_with(cur, "__G_INIT__ ")) {
+			cur += 11;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_G_INIT);
+			return true;
+		} else if (StringView::starts_with(cur, "__G_TICK__ ") || StringView::starts_with(cur, "__G_TICK__;")) {
+			cur += 10;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_G_DRAW_TICK);
+			return true;
+		} else if (StringView::starts_with(cur, "__G_FILL__ ") || StringView::starts_with(cur, "__G_FILL__;")) {
+			cur += 10;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_G_FILL);
+			return true;
 		} else if (StringView::starts_with(cur, "__PUT_NUMBER__ ") || StringView::starts_with(cur, "__PUT_NUMBER__;")) {
 			cur += 14;
 			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTN);
@@ -191,6 +203,10 @@ private:
 		} else if (StringView::starts_with(cur, "__PUT_CHAR__ ") || StringView::starts_with(cur, "__PUT_CHAR__;")) {
 			cur += 12;
 			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTC);
+			return true;
+		} else if (StringView::starts_with(cur, "__PUT_PIXEL__ ")) {
+			cur += 13;
+			ADD_TOKEN(T_OP, OPCODE_ELEM_G_PUT_PIXEL);
 			return true;
 		} else {
 			return false;
