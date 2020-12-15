@@ -1,4 +1,4 @@
-CUR_PROG = ncc
+CUR_PROG = kncc
 
 ifndef VERBOSE
 .SILENT:
@@ -15,10 +15,10 @@ WARNINGS = -Wall -Wextra -Wno-multichar
 STANDARD =  
 CFLAGS = $(STANDARD) $(WARNINGS) -lm -std=c++17
 
-all: ncc
+all: kncc
 
-ncc: main.cpp compiler.h id_table_scope.h id_table.h compiler_options.h recursive_parser.h lexical_parser.h lex_token.h code_node.h $(GC)/announcement.h
-	$(CPP) $(CFLAGS) main.cpp -o ncc
+kncc: main.cpp compiler.h id_table_scope.h id_table.h compiler_options.h recursive_parser.h lexical_parser.h lex_token.h code_node.h $(GC)/announcement.h
+	$(CPP) $(CFLAGS) main.cpp -o kncc
 
 run: all
 	./$(CUR_PROG)

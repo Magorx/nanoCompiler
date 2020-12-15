@@ -1,9 +1,0 @@
-{
-	func main {
-		__G_INIT__ 10 10;
-		__PUT_PIXEL__ 15 'X';
-		__G_TICK__;
-	}
-
-	main;
-}
