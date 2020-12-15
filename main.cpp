@@ -40,6 +40,8 @@ int main(const int argc, const char **argv) {
 
 	if (!prog) {
 		ANNOUNCE("ERR", "kncc", "problems with parsing [%s]", input_file);
+		file.dtor();
+		comp.dtor();
 		return -1;
 	}
 
@@ -47,6 +49,9 @@ int main(const int argc, const char **argv) {
 
 	if (!comp.compile(prog, output_file)) {
 		ANNOUNCE("ERR", "kncc", "problems with compiling [%s]", input_file);
+		CodeNode::DELETE(prog, true, true);
+		file.dtor();
+		comp.dtor();
 		return -1;
 	}
 
