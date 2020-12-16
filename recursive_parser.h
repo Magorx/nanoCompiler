@@ -399,11 +399,16 @@ private:
 			ParseNode *id = NEW_NODE(ID, cur->data.id, nullptr, nullptr);
 			NEXT();
 
-			if (cur->is_op('=')) {
+			if (cur->is_op('=') || cur->is_op(OPCODE_ASGN_ADD)
+								|| cur->is_op(OPCODE_ASGN_SUB)
+								|| cur->is_op(OPCODE_ASGN_MUL)
+								|| cur->is_op(OPCODE_ASGN_DIV)
+								|| cur->is_op(OPCODE_ASGN_POW)) {
+				int op = cur->get_op();
 				NEXT();
 
 				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
-					return NEW_NODE(OPERATION, '=', id, expr_node);
+					return NEW_NODE(OPERATION, op, id, expr_node);
 				}
 
 				PREV();
@@ -414,11 +419,16 @@ private:
 		}
 
 		IF_PARSED (cur_index, logic_expr_node, parse_LOGIC_EXPR()) {
-			if (cur->is_op('=')) {
+			if (cur->is_op('=') || cur->is_op(OPCODE_ASGN_ADD)
+								|| cur->is_op(OPCODE_ASGN_SUB)
+								|| cur->is_op(OPCODE_ASGN_MUL)
+								|| cur->is_op(OPCODE_ASGN_DIV)
+								|| cur->is_op(OPCODE_ASGN_POW)) {
+				int op = cur->get_op();
 				NEXT();
 
 				IF_PARSED (cur_index, expr_node, parse_EXPR()) {
-					return NEW_NODE(OPERATION, '=', logic_expr_node, expr_node);
+					return NEW_NODE(OPERATION, op, logic_expr_node, expr_node);
 				}
 
 				PREV();
@@ -592,6 +602,11 @@ private:
 	}
 
 	ParseNode *parse_DELIMITED_STMT() {
+		if (cur->is_op(OPCODE_BREAK)) {
+			NEXT();
+			return NEW_NODE(OPERATION, OPCODE_BREAK, nullptr, nullptr);
+		}
+
 		IF_PARSED (cur_index, var_def, parse_NEW_VAR_DEF()) {
 			return var_def;
 		}
@@ -629,7 +644,7 @@ private:
 			} else {
 				NEXT();
 
-				if (delim_stmt->is_op(OPCODE_VAR_DEF) || delim_stmt->is_op(OPCODE_ARR_DEF)) {
+				if (delim_stmt->is_op(OPCODE_VAR_DEF) || delim_stmt->is_op(OPCODE_ARR_DEF) || delim_stmt->is_op(OPCODE_BREAK)) {
 					return NEW_NODE(OPERATION, ';', delim_stmt, nullptr);
 				} else {
 					return NEW_NODE(OPERATION, ';', NEW_NODE(OPERATION, OPCODE_EXPR, delim_stmt, nullptr), nullptr);

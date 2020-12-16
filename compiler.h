@@ -3,6 +3,7 @@
 
 #include "general/c/announcement.h"
 #include "general/cpp/file.hpp"
+#include "general/cpp/vector.hpp"
 
 #include <cassert>
 
@@ -13,7 +14,7 @@
 #include "id_table.h"
 
 //=============================================================================
-// Compiler ==================================================================
+// Compiler ===================================================================
 
 class Compiler {
 private:
@@ -21,13 +22,36 @@ private:
 	char *prog_text;
 	RecursiveParser rec_parser;
 	LexicalParser   lex_parser;
+	
 	IdTable 		id_table;
+	Vector<Cycle> cycles_end_stack;
 
 
 	int if_cnt;
 	int while_cnt;
 	int for_cnt;
 //=============================================================================
+	void fprintf_asgn_additional_operation(FILE *file, const int op) {
+		switch (op) {
+			case OPCODE_ASGN_ADD :
+				fprintf(file, "add\n");
+				break;
+			case OPCODE_ASGN_SUB :
+				fprintf(file, "sub\n");
+				break;
+			case OPCODE_ASGN_MUL :
+				fprintf(file, "mul\n");
+				break;
+			case OPCODE_ASGN_DIV :
+				fprintf(file, "div\n");
+				break;
+			case OPCODE_ASGN_POW :
+				fprintf(file, "pow\n");
+				break;
+			default:
+				RAISE_ERROR("bad asgn operation, HOW\n");
+		}		
+	}
 	void compile_operation(const CodeNode *node, FILE *file) {
 		assert(node);
 		assert(file);
@@ -86,6 +110,28 @@ private:
 
 			case '=' : {
 				COMPILE_R();
+				fprintf(file, "pop ");
+				compile_lvalue(node->L, file);
+				fprintf(file, "\n");
+
+				fprintf(file, "push ");
+				compile_lvalue(node->L, file, true);
+				fprintf(file, "\n");
+
+				break;
+			}
+			case OPCODE_ASGN_ADD :
+			case OPCODE_ASGN_SUB :
+			case OPCODE_ASGN_MUL :
+			case OPCODE_ASGN_DIV :
+			case OPCODE_ASGN_POW : {
+				fprintf(file, "push ");
+				compile_lvalue(node->L, file, false, true);
+				fprintf(file, "\n");
+
+				COMPILE_R();
+				fprintf_asgn_additional_operation(file, node->get_op());
+
 				fprintf(file, "pop ");
 				compile_lvalue(node->L, file);
 				fprintf(file, "\n");
@@ -173,7 +219,7 @@ private:
 
 				if (node->R) {
 					fprintf(file, "pop ");
-					compile_lvalue(node->L, file);
+					compile_lvalue(node->L, file, false, false, true);
 					fprintf(file, "\n");
 				}
 
@@ -211,13 +257,40 @@ private:
 
 			case OPCODE_WHILE : {
 				int cur_while_cnt = ++while_cnt;
+
+				cycles_end_stack.push_back(Cycle(CYCLE_TYPE_WHILE, cur_while_cnt));
 				fprintf(file, "while_%d_cond:\n", cur_while_cnt);
+
 				COMPILE_L();
 				fprintf(file, "\npush 0\n");
 				fprintf(file, "je while_%d_end\n", cur_while_cnt);
+
 				COMPILE_R();
 				fprintf(file, "jmp while_%d_cond\n", cur_while_cnt);
+
 				fprintf(file, "\nwhile_%d_end:\n", cur_while_cnt);
+				cycles_end_stack.pop_back();
+				break;
+			}
+
+			case OPCODE_BREAK : {
+				if (!cycles_end_stack.size()) {
+					RAISE_ERROR("You can't use |< outside of the loop\n");
+					LOG_ERROR_LINE_POS(node);
+					break;
+				}
+
+				Cycle cur_cycle = cycles_end_stack[cycles_end_stack.size() - 1];
+				if (cur_cycle.type == CYCLE_TYPE_WHILE) {
+					fprintf(file, "jmp while_%d_end\n", cur_cycle.number);
+				} else if (cur_cycle.type == CYCLE_TYPE_FOR) {
+					fprintf(file, "jmp for_%d_end\n", cur_cycle.number);
+				} else {
+					RAISE_ERROR("What cycle are you using??\n");
+					LOG_ERROR_LINE_POS(node);
+					break;
+				}
+
 				break;
 			}
 
@@ -234,6 +307,8 @@ private:
 
 			case OPCODE_FOR : {
 				int cur_for_cnt = ++for_cnt;
+				cycles_end_stack.push_back(Cycle(CYCLE_TYPE_FOR, cur_for_cnt));
+
 				if (!node->L || !node->R || !node->L->L || !node->L->R || !node->L->L->L || !node->L->L->R) {
 					RAISE_ERROR("bad for node, something is missing\n");
 					break;
@@ -253,8 +328,9 @@ private:
 
 				compile_expr(node->L->R, file, true);
 				fprintf(file, "jmp for_%d_cond\n", cur_for_cnt);
+				
 				fprintf(file, "\nfor_%d_end:\n", cur_for_cnt);
-
+				cycles_end_stack.pop_back();
 				id_table.remove_scope();
 				break;
 			}
@@ -613,7 +689,7 @@ private:
 
 			id_table.declare_var(prot->get_id(), 1);
 			fprintf(file, "pop ");
-			compile_lvalue(prot, file);
+			compile_lvalue(prot, file, false, false, true);
 			fprintf(file, "\n");
 		} else if (prot->is_op(OPCODE_VAR_DEF)) {
 			if (!prot->R) {
@@ -630,7 +706,7 @@ private:
 
 			id_table.declare_var(prot->L->get_id(), 1);
 			fprintf(file, "pop ");
-			compile_lvalue(prot->L, file);
+			compile_lvalue(prot->L, file, false, false, true);
 			fprintf(file, "\n");
 		} else {
 			RAISE_ERROR("bad func call, unexpected PROT type [");
@@ -654,7 +730,7 @@ private:
 
 			id_table.declare_var(prot->get_id(), 1);
 			fprintf(file, "pop ");
-			compile_lvalue(prot, file);
+			compile_lvalue(prot, file, false, false, true);
 			fprintf(file, "\n");
 		} else if (prot->is_op(OPCODE_VAR_DEF)) {
 			id_table.shift_backward();
@@ -669,7 +745,7 @@ private:
 
 			id_table.declare_var(prot->L->get_id(), 1);
 			fprintf(file, "pop ");
-			compile_lvalue(prot->L, file);
+			compile_lvalue(prot->L, file, false, false, true);
 			fprintf(file, "\n");
 		} else {
 			RAISE_ERROR("bad func call, unexpected PROT type [");
@@ -693,12 +769,12 @@ private:
 		if (prot->is_id()) {
 			id_table.declare_var(prot->get_id(), 1);
 			fprintf(file, "pop ");
-			compile_lvalue(prot, file);
+			compile_lvalue(prot, file, false, false, true);
 			fprintf(file, "\n");
 		} else if (prot->is_op(OPCODE_VAR_DEF)) {
 			id_table.declare_var(prot->L->get_id(), 1);
 			fprintf(file, "pop ");
-			compile_lvalue(prot->L, file);
+			compile_lvalue(prot->L, file, false, false, true);
 			fprintf(file, "\n");
 		} else {
 			RAISE_ERROR("bad func call, unexpected PROT type [");
@@ -767,7 +843,7 @@ private:
 				result = compile_value(node, file);
 			}
 		} else if (node->type == ID) {
-			result = compile_lvalue(node, file);
+			result = compile_lvalue(node, file, false, false, true);
 		}
 		fprintf(file, "\n");
 		return result;
@@ -781,11 +857,20 @@ private:
 		return true;
 	}
 
-	bool compile_lvalue(const CodeNode *node, FILE *file, const bool for_asgn_dup = false) {
+	bool compile_lvalue(const CodeNode *node, FILE *file, 
+						const bool for_asgn_dup = false, 
+						const bool to_push = false, 
+						const bool initialization = false) {
 		assert(node);
 		assert(file);
 
 		if (node->is_id()) {
+			if (!initialization && node->get_id()->starts_with("_") && !node->get_id()->starts_with("_)")) {
+				RAISE_ERROR("_varname is a constant, dont change it please: [");
+				node->get_id()->print();
+				printf("]\n");
+				LOG_ERROR_LINE_POS(node);
+			}
 			// printf("\n\n==================\n");
 			// printf("compile var |");
 			// node->get_id()->print();
@@ -820,6 +905,13 @@ private:
 			CodeNode *id  = node->R;
 			CodeNode *args = node->L;
 
+			if (!initialization && id->get_id()->starts_with("_") && !id->get_id()->starts_with("_)")) {
+				RAISE_ERROR("_varname is a constant, dont change it please: [");
+				node->get_id()->print();
+				printf("]\n");
+				LOG_ERROR_LINE_POS(node);
+			}
+
 			int offset = 0;
 			int ret = id_table.find_var(id->get_id(), &offset);
 			if (ret == NOT_FOUND) {
@@ -838,8 +930,13 @@ private:
 				return true;
 			}
 
-			fprintf(file, "rbx\n");
-			fprintf(file, "push rbx\n");
+			if (to_push) {
+				fprintf(file, "0\n");
+				fprintf(file, "pop rzx\n");
+			} else {
+				fprintf(file, "rbx\n");
+				fprintf(file, "push rbx\n");
+			}
 
 			fprintf(file, "push rvx + %d\n", offset);
 			fprintf(file, "pop rax\n");
@@ -861,7 +958,11 @@ private:
 
 			fprintf(file, "push rax\n");
 			fprintf(file, "pop rcx\n");
-			fprintf(file, "pop [rax]\n");
+			if (to_push) {
+				fprintf(file, "push [rax]\n");
+			} else {
+				fprintf(file, "pop [rax]\n");
+			}
 			return true;
 		} else {
 			RAISE_ERROR("bad compiling type, node is [%d]\n", node->get_type());
@@ -930,6 +1031,7 @@ public:
 	rec_parser(),
 	lex_parser(),
 	id_table(),
+	cycles_end_stack(),
 	if_cnt(0),
 	while_cnt(0),
 	for_cnt(0)
@@ -941,6 +1043,8 @@ public:
 		prog_text = nullptr;
 		rec_parser.ctor();
 		lex_parser.ctor();
+
+		cycles_end_stack.ctor();
 
 		if_cnt    = 0;
 		while_cnt = 0;
@@ -1004,6 +1108,8 @@ public:
 		for_cnt   = 0;
 		id_table.dtor();
 		id_table.ctor();
+		cycles_end_stack.dtor();
+		cycles_end_stack.ctor();
 
 		fprintf(file, "push %d\n", INIT_RVX_OFFSET);
 		fprintf(file, "pop rvx\n");

@@ -6,14 +6,34 @@ const int GLOBAL_VARS_MAX_COUNT = 100;
 const int INIT_RVX_OFFSET = GLOBAL_VARS_OFFSET + GLOBAL_VARS_MAX_COUNT;
 const int INIT_RMX_OFFSET = 1000;
 
-#define OPDEF(name, code) name = code,
+enum CYCLES_TYPE {
+	CYCLE_TYPE_WHILE = 1,
+	CYCLE_TYPE_FOR   = 2
+};
+
+struct Cycle {
+	int type;
+	int number;
+
+	Cycle() :
+	type(0),
+	number(0)
+	{}
+
+	Cycle(int type_, int number_) :
+	type(type_),
+	number(number_)
+	{}
+};
+
+#define OPDEF(name, code, ign1, ign2, ign3) name = code,
 
 enum OPERATION_CODE {
 	#include "opcodes.h"
 };
 
 #undef OPDEF
-#define OPDEF(name, code) case code : return #name + 7;
+#define OPDEF(name, code, ign1, ign2, ign3) case code : return #name + 7;
 
 const char *OPERATION_NAME(const int opcode) {
 	switch(opcode) {

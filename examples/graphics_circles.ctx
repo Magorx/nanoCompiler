@@ -96,7 +96,7 @@
 		>> (var i = 0 | i < _SCREEN_H | i = i + 1) {
 			>> (var j = 0 | j < _SCREEN_W | j = j + 1) {
 				var dist = ((x - i)^2 + (y - j)^2) ^ 0.5;
-				? (dist < r) put_pxl[i][j];
+				? (dist < r) put_pxl[i][j]; sd
 			}
 		}
 	}

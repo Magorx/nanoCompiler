@@ -1,9 +1,12 @@
 #include <cstdlib>
 #include <cstdio>
 
-// TODO ARRAYS
-// TODO FOR
-// TODO STRUCTURES
+// TODO FIX FUNCS REDIFINITION
+// TODO RANDOM
+// TODO INCLUDE
+// TODO RAYTRACER
+// TODO %
+
 
 #include "general/c/debug.h"
 #include "general/warnings.h"

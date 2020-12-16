@@ -119,6 +119,13 @@ private:
 		ADD_TOKEN(T_ID, id);
 	}
 
+	#define OPDEF(name, code, str, key_1, key_2)                                               \
+		else if (StringView::starts_with(cur, key_1) || StringView::starts_with(cur, key_2)) { \
+			ADD_TOKEN(T_OP, name);                                                             \
+			cur += strlen(str);                                                                \
+			return true;                                                                       \
+		}
+
 	bool try_collect_long_op() {
 		if (*cur == '\'' && three_available() && (*(cur + 2) == '\'')) {
 			ADD_TOKEN(T_NUMBER, (double) *(cur + 1));
@@ -127,101 +134,24 @@ private:
 		} else if (StringView::starts_with(cur, "~")) {
 			cur += 1; // I am ignoring it with purpose!
 			return true;
-		} else if (StringView::starts_with(cur, "?")) {
-			cur += 1;
-			ADD_TOKEN(T_OP, OPCODE_IF);
-			return true;
-		} else if (*cur == '@') {
-			cur += 1;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_INPUT);
-			return true;
-		} else if (*cur == '#') {
-			cur += 1;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_MALLOC);
-			return true;
-		} else if (StringView::starts_with(cur, ">|")) {
-			cur += 2;
-			ADD_TOKEN(T_OP, OPCODE_WHILE);
-			return true;
-		} else if (StringView::starts_with(cur, ">>")) {
-			cur += 2;
-			ADD_TOKEN(T_OP, OPCODE_FOR);
-			return true;
-		} else if (StringView::starts_with(cur, "for ")) {
-			cur += 4;
-			ADD_TOKEN(T_OP, OPCODE_FOR);
-			return true;
-		} else if (StringView::starts_with(cur, "<=")) {
-			cur += 2;
-			ADD_TOKEN(T_OP, OPCODE_LE);
-			return true;
-		} else if (StringView::starts_with(cur, ">=")) {
-			cur += 2;
-			ADD_TOKEN(T_OP, OPCODE_GE);
-			return true;
-		} else if (StringView::starts_with(cur, "==")) {
-			cur += 2;
-			ADD_TOKEN(T_OP, OPCODE_EQ);
-			return true;
-		} else if (StringView::starts_with(cur, "!=")) {
-			cur += 2;
-			ADD_TOKEN(T_OP, OPCODE_NEQ);
-			return true;
-		} else if (StringView::starts_with(cur, "||")) {
-			cur += 2;
-			ADD_TOKEN(T_OP, OPCODE_OR);
-			return true;
-		} else if (StringView::starts_with(cur, "&&")) {
-			cur += 2;
-			ADD_TOKEN(T_OP, OPCODE_AND);
-			return true;
-		} else if (StringView::starts_with(cur, "var ")) {
-			cur += 4;
-			ADD_TOKEN(T_OP, OPCODE_VAR);
-			return true;
-		} else if (StringView::starts_with(cur, "func ")) {
-			cur += 5;
-			ADD_TOKEN(T_OP, OPCODE_FUNC);
-			return true;
-		} else if (StringView::starts_with(cur, "ret ")|| StringView::starts_with(cur, "ret;")) {
-			cur += 3;
-			ADD_TOKEN(T_OP, OPCODE_RET);
-			return true;
-		} else if (StringView::starts_with(cur, "exit ")|| StringView::starts_with(cur, "exit;")) {
-			cur += 4;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_EXIT);
-			return true;
-		} else if (StringView::starts_with(cur, "__G_INIT__ ")) {
-			cur += 11;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_G_INIT);
-			return true;
-		} else if (StringView::starts_with(cur, "__G_TICK__ ") || StringView::starts_with(cur, "__G_TICK__;")) {
-			cur += 10;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_G_DRAW_TICK);
-			return true;
-		} else if (StringView::starts_with(cur, "__G_FILL__ ") || StringView::starts_with(cur, "__G_FILL__;")) {
-			cur += 10;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_G_FILL);
-			return true;
-		} else if (StringView::starts_with(cur, "__PUT_NUMBER__ ") || StringView::starts_with(cur, "__PUT_NUMBER__;")) {
-			cur += 14;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTN);
-			return true;
-		} else if (StringView::starts_with(cur, "__PUT_CHAR__ ") || StringView::starts_with(cur, "__PUT_CHAR__;")) {
-			cur += 12;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_PUTC);
-			return true;
-		} else if (StringView::starts_with(cur, "__PUT_PIXEL__ ")) {
-			cur += 13;
-			ADD_TOKEN(T_OP, OPCODE_ELEM_G_PUT_PIXEL);
-			return true;
-		} else {
+		} 
+
+		#include "opcodes.h"
+
+		else {
 			return false;
 		}
 	}
 
+	#undef OPDEF
+
 	void parse() {
 		while(*cur) {
+			if (*cur == '\n') {
+				++line;
+				cur_line = cur + 1;
+			}
+
 			if (skip_mode) {
 				if (skip_mode == 1 && one_available()) { // check the end of the comment
 					if (*cur == '\n') {
@@ -248,10 +178,6 @@ private:
 			}
 
 			if (isspace(*cur)) { // skip spaces
-				if (*cur == '\n') {
-					++line;
-					cur_line = cur + 1;
-				}
 				++cur;
 				continue;
 			}

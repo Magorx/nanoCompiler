@@ -34,7 +34,8 @@ DEF_ARR ::= "var" ID[NUMB] {= EXPR}?
 
 // Math expression ============================================================
 
-EXPR ::= LOGIC_EXPR | ID = EXPR
+EXPR ::= LOGIC_EXPR | ASGN
+ASGN ::= ID = EXPR | ID += EXPR | ID -= EXPR | ID *= EXPR | ID /= EXPR | ID ^= EXPR
 
 LOGIC_EXPR ::= AND_EXPR {|| AND_EXPR}*
 AND_EXPR ::= COND {&& COND}*
@@ -43,7 +44,7 @@ MATH_EXPR ::= TERM {[+-]TERM}*
 TERM ::= FACT {{/|*}FACT}*
 
 FACT ::= [+-]FACT | UNIT^FACT | UNIT
-UNIT ::= FUNC_CALL | ID[EXPR] | ID | (EXPR) | ELEM_FUNC |NUMB
+UNIT ::= FUNC_CALL | ID[EXPR] | ID | (EXPR) | ELEM_FUNC | NUMB
 
 // Number & Id ================================================================
 

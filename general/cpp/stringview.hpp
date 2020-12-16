@@ -85,9 +85,13 @@ public:
 	}
 
 	static bool starts_with(const char *first, const char *second) {
+		if (!first || !second) {
+			return false;
+		}
+
 		size_t len_1 = strlen(first);
 		size_t len_2 = strlen(second);
-		return len_1 < len_2 ? false : memcmp(first, second, len_2) == 0;
+		return len_1 < len_2 || (!len_2) ? false : memcmp(first, second, len_2) == 0;
 	}
 
 	bool is_null() const {
@@ -101,6 +105,10 @@ public:
 	}
 
 	bool starts_with(const char *other) {
+		if (!other) {
+			return false;
+		}
+
 		size_t len_1 = size;
 		size_t len_2 = strlen(other);
 		return len_1 < len_2 ? false : memcmp(buffer, other, len_2) == 0;
