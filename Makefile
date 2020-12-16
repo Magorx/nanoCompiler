@@ -17,6 +17,9 @@ CFLAGS = $(STANDARD) $(WARNINGS) -lm -std=c++17
 
 all: kncc
 
+update: all
+	mv $(CUR_PROG) bin
+
 kncc: main.cpp compiler.h id_table_scope.h id_table.h compiler_options.h recursive_parser.h lexical_parser.h lex_token.h code_node.h $(GC)/announcement.h
 	$(CPP) $(CFLAGS) main.cpp -o kncc
 

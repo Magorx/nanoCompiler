@@ -35,6 +35,10 @@ private:
 		return c == '+' || c == '-';
 	}
 
+	bool one_available() {
+		return *cur;
+	}
+
 	bool two_available() {
 		return *cur && *(cur + 1);
 	}
@@ -119,6 +123,9 @@ private:
 		if (*cur == '\'' && three_available() && (*(cur + 2) == '\'')) {
 			ADD_TOKEN(T_NUMBER, (double) *(cur + 1));
 			cur += 3;
+			return true;
+		} else if (StringView::starts_with(cur, "~")) {
+			cur += 1; // I am ignoring it with purpose!
 			return true;
 		} else if (StringView::starts_with(cur, "?")) {
 			cur += 1;
@@ -215,6 +222,31 @@ private:
 
 	void parse() {
 		while(*cur) {
+			if (skip_mode) {
+				if (skip_mode == 1 && one_available()) { // check the end of the comment
+					if (*cur == '\n') {
+						skip_mode = 0;
+					}
+				}
+
+				if (skip_mode == 2 && two_available()) { // check the end of the comment
+					if (*cur == '*' && *(cur + 1) == '/') {
+						++cur;
+						skip_mode = 0;
+					}
+				}
+
+				if (skip_mode == 3 && two_available()) { // check the end of the comment
+					if (*cur == '<' && *(cur + 1) == '/') {
+						++cur;
+						skip_mode = 0;
+					}
+				}
+
+				++cur;
+				continue;
+			}
+
 			if (isspace(*cur)) { // skip spaces
 				if (*cur == '\n') {
 					++line;
@@ -224,21 +256,22 @@ private:
 				continue;
 			}
 
-			if (skip_mode) {
-				if (two_available()) { // check the end of the comment
-					if (*cur == '*' && *(cur + 1) == '/') {
-						++cur;
-						skip_mode = 0;
-					}
-				}
-				++cur;
-				continue;
-			}
-
 			if (two_available()) {
-				if (*cur == '/' && *(cur + 1) == '*') {
+				if (*cur == '/' && *(cur + 1) == '/') {
 					++cur;
 					skip_mode = 1;
+					continue;
+				}
+
+				if (*cur == '/' && *(cur + 1) == '*') {
+					++cur;
+					skip_mode = 2;
+					continue;
+				}
+
+				if (*cur == '/' && *(cur + 1) == '>') {
+					++cur;
+					skip_mode = 3;
 					continue;
 				}
 			}
