@@ -73,9 +73,7 @@
 		ret arr;
 	}
 
-	func g_init[var width][var height] {
-		_SCREEN_W = width;
-		_SCREEN_H = height;
+	func g_init {
 		__G_INIT__ _SCREEN_W _SCREEN_H;
 	}
 
@@ -96,26 +94,30 @@
 		>> (var i = 0 | i < _SCREEN_H | i = i + 1) {
 			>> (var j = 0 | j < _SCREEN_W | j = j + 1) {
 				var dist = ((x - i)^2 + (y - j)^2) ^ 0.5;
-				? (dist < r) put_pxl[i][j]; sd
+				? (dist < r) put_pxl[i][j];
 			}
 		}
 	}
 
 	func main {
-		g_init[80][25];
+		var x = 15;
+		printn[_SCREEN_W][_SCREEN_H];
+		var y = 30;
+		printn[x][y];
+		//g_init;
 
-		var r  = 10;
-		var tc = -r;
-		>| (tc < _SCREEN_W + r) {
-			tc = tc + 1;
-
-			draw_circle[10][tc][10]['F'];
-			g_tick;
-			draw_circle[10][tc - 1][r]['.'];
-		} 
-		g_tick;
+		/*>| (1) {
+			var max_r = % 1 15;
+			var x = % 0 _SCREEN_W;
+			var y = % 0 _SCREEN_H;
+			>> (var r = 0 | r < max_r | r += 1) {
+				draw_circle[x][y][r][% 'a' 'z'];
+				//g_tick;
+			}
+		}*/
 	}
 
-	main;
+	printn[main][1];
+	@;
 
 }

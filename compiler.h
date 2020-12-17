@@ -350,6 +350,14 @@ private:
 				break;
 			}
 
+			case OPCODE_ELEM_RANDOM : {
+				//fprintf(file, "push\n");
+				COMPILE_L();
+				COMPILE_R();
+				fprintf(file, "bin_op $\n");
+				break;
+			}
+
 			case OPCODE_ELEM_PUTN : {
 				if (node->R) {
 					COMPILE_R();
@@ -500,7 +508,7 @@ private:
 				id->print(file);
 				fprintf(file, "_%d_BEGIN:\n", offset);
 
-				id_table.add_scope(true);
+				id_table.add_scope(FUNC_SCOPE);
 				COMPILE_L();
 				COMPILE_R();
 				id_table.remove_scope();
@@ -642,7 +650,7 @@ private:
 		//=====================================================================
 		// here we definetly will compile a function
 
-		id_table.add_scope();
+		id_table.add_scope(ARG_SCOPE);
 
 		while (arglist && func_arglist && arglist->L && func_arglist->L) {
 			const CodeNode *arg  = arglist->L;
@@ -880,19 +888,19 @@ private:
 				printf("]\n");
 				LOG_ERROR_LINE_POS(node);
 			}
-			// printf("\n\n==================\n");
-			// printf("compile var |");
-			// node->get_id()->print();
-			// printf("|\n");
-			// printf("~~~~~~~~~~~~~~~~~~\n");
-			// printf("cur id_table:\n");
-			// id_table.dump();
+			printf("\n\n==================\n");
+			printf("compile var |");
+			node->get_id()->print();
+			printf("|\n");
+			printf("~~~~~~~~~~~~~~~~~~\n");
+			printf("cur id_table:\n");
+			id_table.dump();
 
 			int offset = 0;
 			int is_found = id_table.find_var(node->get_id(), &offset);
 
-			// printf("\nfound = %d", offset);
-			// printf("\n==================\n");
+			printf("\nfound = %d", offset);
+			printf("\n==================\n");
 
 
 

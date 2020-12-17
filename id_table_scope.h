@@ -13,7 +13,12 @@ enum ID_TYPE {
 	ID_TYPE_STRUCT = 3,
 	ID_TYPE_GLOBAL = 4,
 	ID_TYPE_FOUND  = 5,
-	NOT_FOUND    = -999999999,
+	NOT_FOUND      = -999999999,
+};
+
+enum SCOPE_TYPE {
+	ARG_SCOPE  = 1,
+	FUNC_SCOPE = 2,
 };
 
 struct IdData {
@@ -136,6 +141,7 @@ public:
 				if (type == ID_TYPE_FUNC) {
 					return data[i].offset;
 				}
+
 				return id_offset;
 			} else {
 				id_offset += data[i].offset;
@@ -157,7 +163,9 @@ public:
 			return false;
 		} else {
 			data.push_back(idat);
-			offset += size;
+			if (type != ID_TYPE_FUNC) {
+				offset += size;
+			}
 			return true;
 		}
 	}

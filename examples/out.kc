@@ -1,0 +1,707 @@
+push 200
+pop rvx
+push 1000
+pop rmx
+
+; (GLOBAL_UNDESTURBENCE_CHECKER)[op_20](7.77778e+06)
+push 7777777.000000
+pop [100]
+
+
+; ((((A)[op_20](-7777.78))[op_305](((B)[op_20](-7777.78))[op_305](((C)[op_20](-7777.78))[op_305]([op_305]))))[op_300](printn))[op_301]((){)
+jmp _func_printn_1_END
+_func_printn_1_BEGIN:
+printn_1:
+
+; ((A)[op_8](-7777.78))[op_12]([op_31]((){))
+if_1_cond:
+push [rvx + 0]
+push 0
+push 7777.777000
+sub
+
+neq
+
+push 0
+jne if_1_true
+if_1_false:
+
+jmp if_1_end
+
+if_1_true:
+
+; (d(A))[op_202]
+push [rvx + 0]
+dup
+out
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+if_1_end:
+
+; ((B)[op_8](-7777.78))[op_12]([op_31]((){))
+if_2_cond:
+push [rvx + 1]
+push 0
+push 7777.777000
+sub
+
+neq
+
+push 0
+jne if_2_true
+if_2_false:
+
+jmp if_2_end
+
+if_2_true:
+
+; (d(B))[op_202]
+push [rvx + 1]
+dup
+out
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+if_2_end:
+
+; ((C)[op_8](-7777.78))[op_12]([op_31]((){))
+if_3_cond:
+push [rvx + 2]
+push 0
+push 7777.777000
+sub
+
+neq
+
+push 0
+jne if_3_true
+if_3_false:
+
+jmp if_3_end
+
+if_3_true:
+
+; (d(C))[op_202]
+push [rvx + 2]
+dup
+out
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+if_3_end:
+
+; (d)[op_202]
+push 10
+dup
+out_c
+pop rzx
+push 0
+swp
+ret
+_func_printn_1_END:
+
+; ((((arr)[op_20](arr))[op_305](((size)[op_20](size))[op_305]([op_305])))[op_300](printn_arr))[op_301]((){)
+jmp _func_printn_arr_1_END
+_func_printn_arr_1_BEGIN:
+printn_arr_1:
+
+; (i)[op_20](0)
+push 0.000000
+pop [rvx + 2]
+
+; ((i)<((size)-(1)))[op_13]((){)
+while_1_cond:
+push [rvx + 2]
+push [rvx + 1]
+push 1.000000
+sub
+lt
+
+push 0
+je while_1_end
+
+; (d((((i)[op_202])[op_306]([op_306]))[op_302](arr)))[op_202]
+push [rvx + 0]
+push [rvx + 2]
+add
+pop rax
+push [rax + 1]
+dup
+out
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+; ((i)=((i)+(1)))[op_202]
+push [rvx + 2]
+push 1.000000
+add
+pop [rvx + 2]
+push [rvx + 2]
+pop rzx
+jmp while_1_cond
+
+while_1_end:
+
+; (d((((i)[op_202])[op_306]([op_306]))[op_302](arr)))[op_202]
+push [rvx + 0]
+push [rvx + 2]
+add
+pop rax
+push [rax + 1]
+dup
+out
+pop rzx
+push 0
+swp
+ret
+_func_printn_arr_1_END:
+
+; (([op_305])[op_300](_n))[op_301]()
+jmp _func__n_1_END
+_func__n_1_BEGIN:
+_n_1:
+
+; (d)[op_202]
+push 10
+dup
+out_c
+pop rzx
+push 0
+swp
+ret
+_func__n_1_END:
+
+; ((((A)[op_20](-7777.78))[op_305](((B)[op_20](-7777.78))[op_305](((C)[op_20](-7777.78))[op_305]([op_305]))))[op_300](printc))[op_301]((){)
+jmp _func_printc_1_END
+_func_printc_1_BEGIN:
+printc_1:
+
+; ((A)[op_8](-7777.78))[op_12]([op_31]((){))
+if_4_cond:
+push [rvx + 0]
+push 0
+push 7777.777000
+sub
+
+neq
+
+push 0
+jne if_4_true
+if_4_false:
+
+jmp if_4_end
+
+if_4_true:
+
+; (e(A))[op_202]
+push [rvx + 0]
+dup
+out_c
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+if_4_end:
+
+; ((B)[op_8](-7777.78))[op_12]([op_31]((){))
+if_5_cond:
+push [rvx + 1]
+push 0
+push 7777.777000
+sub
+
+neq
+
+push 0
+jne if_5_true
+if_5_false:
+
+jmp if_5_end
+
+if_5_true:
+
+; (e(B))[op_202]
+push [rvx + 1]
+dup
+out_c
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+if_5_end:
+
+; ((C)[op_8](-7777.78))[op_12]([op_31]((){))
+if_6_cond:
+push [rvx + 2]
+push 0
+push 7777.777000
+sub
+
+neq
+
+push 0
+jne if_6_true
+if_6_false:
+
+jmp if_6_end
+
+if_6_true:
+
+; (e(C))[op_202]
+push [rvx + 2]
+dup
+out_c
+pop rzx
+
+; (e(32))[op_202]
+push 32.000000
+dup
+out_c
+pop rzx
+
+if_6_end:
+
+; (d)[op_202]
+push 10
+dup
+out_c
+pop rzx
+push 0
+swp
+ret
+_func_printc_1_END:
+
+; ((((x)[op_20])[op_305]([op_305]))[op_300](abs))[op_301]((){)
+jmp _func_abs_1_END
+_func_abs_1_BEGIN:
+abs_1:
+
+; ((x)[op_6](0))[op_12](()[op_31]())
+if_7_cond:
+push [rvx + 0]
+push 0.000000
+ge
+
+push 0
+jne if_7_true
+if_7_false:
+
+; ([op_17](-(x)))[op_202]
+push 0
+push [rvx + 0]
+sub
+swp
+ret
+pop rzx
+
+jmp if_7_end
+
+if_7_true:
+
+; ([op_17](x))[op_202]
+push [rvx + 0]
+swp
+ret
+pop rzx
+
+if_7_end:
+push 0
+swp
+ret
+_func_abs_1_END:
+
+; (_SCREEN_W)[op_20](80)
+push 80.000000
+pop [106]
+
+
+; (_SCREEN_H)[op_20](30)
+push 30.000000
+pop [107]
+
+
+; ((((h)[op_20])[op_305](((w)[op_20])[op_305]([op_305])))[op_300](init_2d))[op_301]((){)
+jmp _func_init_2d_1_END
+_func_init_2d_1_BEGIN:
+init_2d_1:
+
+; (arr)[op_20](g(h))
+push [rvx + 0]
+pop rax
+push rmx
+push rmx
+push rax
+add
+pop rmx
+pop [rvx + 2]
+
+; (arr_data)[op_20](g((h)*(w)))
+push [rvx + 0]
+push [rvx + 1]
+mul
+pop rax
+push rmx
+push rmx
+push rax
+add
+pop rmx
+pop [rvx + 3]
+
+; ((((i)[op_20](0))[op_16]((i)<(h)))[op_16]((i)=((i)+(1))))[op_14]((){)
+
+for_1_init_block:
+push 0.000000
+pop [rvx + 4]
+
+for_1_start:
+
+for_1_cond:
+push [rvx + 4]
+push [rvx + 0]
+lt
+
+push 0
+je for_1_end
+
+; (((((i)[op_202])[op_306]([op_306]))[op_302](arr))=((arr_data)+((w)*(i))))[op_202]
+push [rvx + 3]
+push [rvx + 1]
+push [rvx + 4]
+mul
+add
+pop rbx
+push rbx
+push rvx + 2
+pop rax
+push [rax]
+push [rvx + 4]
+push 1
+add
+add
+pop rax
+push rax
+pop rcx
+pop [rax]
+
+push [rcx]
+
+pop rzx
+push [rvx + 4]
+push 1.000000
+add
+pop [rvx + 4]
+push [rvx + 4]
+pop rzx
+jmp for_1_cond
+
+for_1_end:
+
+; ([op_17](arr))[op_202]
+push [rvx + 2]
+swp
+ret
+pop rzx
+push 0
+swp
+ret
+_func_init_2d_1_END:
+
+; (([op_305])[op_300](g_init))[op_301]((){)
+jmp _func_g_init_1_END
+_func_g_init_1_BEGIN:
+g_init_1:
+
+; ((_SCREEN_W)n(_SCREEN_H))[op_202]
+push [106]
+
+dup
+pop rax
+push [107]
+
+dup
+pop rbx
+g_init
+push rax
+push rbx
+mul
+pop rzx
+push 0
+swp
+ret
+_func_g_init_1_END:
+
+; (([op_305])[op_300](g_tick))[op_301]((){)
+jmp _func_g_tick_1_END
+_func_g_tick_1_BEGIN:
+g_tick_1:
+
+; (q)[op_202]
+g_draw
+push 0
+pop rzx
+push 0
+swp
+ret
+_func_g_tick_1_END:
+
+; (((x)[op_305]((y)[op_305]((c)[op_305]([op_305]))))[op_300](put_pxl))[op_301]((){)
+jmp _func_put_pxl_1_END
+_func_put_pxl_1_BEGIN:
+put_pxl_1:
+
+; (pos)[op_20](((x)*(_SCREEN_W))+(y))
+push [rvx + 0]
+push [106]
+
+mul
+push [rvx + 1]
+add
+pop [rvx + 3]
+
+; ([op_17]((pos)s(c)))[op_202]
+push [rvx + 3]
+pop rax
+push [rvx + 2]
+dup
+pop (rax)
+swp
+ret
+pop rzx
+push 0
+swp
+ret
+_func_put_pxl_1_END:
+
+; (((x)[op_305]((y)[op_305]((r)[op_305](((c)[op_20](35))[op_305]([op_305])))))[op_300](draw_circle))[op_301]((){)
+jmp _func_draw_circle_1_END
+_func_draw_circle_1_BEGIN:
+draw_circle_1:
+
+; ((((i)[op_20](0))[op_16]((i)<(_SCREEN_H)))[op_16]((i)=((i)+(1))))[op_14]((){)
+
+for_2_init_block:
+push 0.000000
+pop [rvx + 4]
+
+for_2_start:
+
+for_2_cond:
+push [rvx + 4]
+push [107]
+
+lt
+
+push 0
+je for_2_end
+
+; ((((j)[op_20](0))[op_16]((j)<(_SCREEN_W)))[op_16]((j)=((j)+(1))))[op_14]((){)
+
+for_3_init_block:
+push 0.000000
+pop [rvx + 5]
+
+for_3_start:
+
+for_3_cond:
+push [rvx + 5]
+push [106]
+
+lt
+
+push 0
+je for_3_end
+
+; (dist)[op_20](((((x)-(i))^(2))+(((y)-(j))^(2)))^(0.5))
+push [rvx + 0]
+push [rvx + 4]
+sub
+push 2.000000
+pow
+push [rvx + 1]
+push [rvx + 5]
+sub
+push 2.000000
+pow
+add
+push 0.500000
+pow
+pop [rvx + 6]
+
+; ((dist)<(r))[op_12]([op_31]())
+if_8_cond:
+push [rvx + 6]
+push [rvx + 2]
+lt
+
+push 0
+jne if_8_true
+if_8_false:
+
+jmp if_8_end
+
+if_8_true:
+
+; ((((i)[op_202])[op_306](((j)[op_202])[op_306]([op_306])))[op_302](put_pxl))[op_202]
+push [rvx + 4]
+pop [rvx + 7]
+push [rvx + 5]
+pop [rvx + 8]
+push [rvx + 3]
+pop [rvx + 9]
+push rvx
+push 7
+add
+pop rvx
+call put_pxl_1
+push rvx
+push 7
+sub
+pop rvx
+pop rzx
+
+if_8_end:
+push [rvx + 5]
+push 1.000000
+add
+pop [rvx + 5]
+push [rvx + 5]
+pop rzx
+jmp for_3_cond
+
+for_3_end:
+push [rvx + 4]
+push 1.000000
+add
+pop [rvx + 4]
+push [rvx + 4]
+pop rzx
+jmp for_2_cond
+
+for_2_end:
+push 0
+swp
+ret
+_func_draw_circle_1_END:
+
+; (([op_305])[op_300](main))[op_301]((){)
+jmp _func_main_1_END
+_func_main_1_BEGIN:
+main_1:
+
+; (x)[op_20](15)
+push 15.000000
+pop [rvx + 0]
+
+; ((((_SCREEN_W)[op_202])[op_306](((_SCREEN_H)[op_202])[op_306]([op_306])))[op_302](printn))[op_202]
+push [106]
+
+pop [rvx + 1]
+push [107]
+
+pop [rvx + 2]
+push 0
+push 7777.777000
+sub
+
+pop [rvx + 3]
+push rvx
+push 1
+add
+pop rvx
+call printn_1
+push rvx
+push 1
+sub
+pop rvx
+pop rzx
+
+; (y)[op_20](30)
+push 30.000000
+pop [rvx + 1]
+
+; ((((x)[op_202])[op_306](((y)[op_202])[op_306]([op_306])))[op_302](printn))[op_202]
+push [rvx + 0]
+pop [rvx + 2]
+push [rvx + 1]
+pop [rvx + 3]
+push 0
+push 7777.777000
+sub
+
+pop [rvx + 4]
+push rvx
+push 2
+add
+pop rvx
+call printn_1
+push rvx
+push 2
+sub
+pop rvx
+pop rzx
+push 0
+swp
+ret
+_func_main_1_END:
+
+; ((((main)[op_202])[op_306](((1)[op_202])[op_306]([op_306])))[op_302](printn))[op_202]
+push rvx
+push 0
+add
+pop rvx
+call main_1
+push rvx
+push 0
+sub
+pop rvx
+pop [rvx + 0]
+push 1.000000
+pop [rvx + 1]
+push 0
+push 7777.777000
+sub
+
+pop [rvx + 2]
+push rvx
+push 0
+add
+pop rvx
+call printn_1
+push rvx
+push 0
+sub
+pop rvx
+pop rzx
+
+; (f)[op_202]
+in
+pop rzx

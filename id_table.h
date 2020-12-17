@@ -64,6 +64,28 @@ public:
 
 //=============================================================================
 
+	int find_first_functive() const {
+		const int data_size = (int) data.size();
+		for (int i = 0; i < data_size; ++i) {
+			if (data[i]->is_functive() == FUNC_SCOPE) {
+				return i;
+			}
+		}
+
+		return data_size;
+	}
+
+	int find_last_functive() const {
+		const int data_size = (int) data.size();
+		for (int i = data_size - 1; i >= 0; --i) {
+			if (data[i]->is_functive() == FUNC_SCOPE) {
+				return i;
+			}
+		}
+
+		return 0;
+	}
+
 	int find_var(const StringView *id, int *res) const {
 		if (!data.size()) {
 			return NOT_FOUND;
@@ -71,47 +93,50 @@ public:
 
 		int offset = NOT_FOUND;
 		int found_index = -1;
+		int first_functive = find_first_functive();
+		int last_functive  = find_last_functive();
 
 		for (int i = cur_scope; i >= 0; --i) {
 			offset = data[i]->find(ID_TYPE_VAR, id);
-			
-			if (data[i]->is_functive() || offset != NOT_FOUND) {
+			if (offset != NOT_FOUND && (i < first_functive || i >= last_functive)) {
 				found_index = i;
 				break;
 			}
 		}
 
-		if (offset == NOT_FOUND) { // let's try to find global variable
-			size_t data_size = data.size();
-			for (size_t i = 0; i < data_size; ++i) {
-				if (data[i]->is_functive()) {
-					break;
-				}
+		if (offset == NOT_FOUND) {
+			return NOT_FOUND;
+		}
 
-				int ret = data[i]->find(ID_TYPE_VAR, id);
-				if (ret != NOT_FOUND) {
-					offset = ret;
+		if (data[found_index]->is_functive() == ARG_SCOPE) {
+			bool to_add_offset = false;
+			for (int i = found_index - 1; i >= 0; --i) {
+				if (data[i]->is_functive() == FUNC_SCOPE) {
+					to_add_offset = true;
+				}
+			}
+
+			if (found_index > last_functive && to_add_offset) {
+				for (int i = found_index - 1; i >= last_functive; --i) {
+					offset += data[i]->get_var_cnt();
 				}
 			}
 
 			*res = offset;
-			return offset == NOT_FOUND ? NOT_FOUND : ID_TYPE_GLOBAL;
+			return ID_TYPE_FOUND;
 		}
 
-		if (data[found_index]->is_functive()) {
+		if (found_index < first_functive) {
 			*res = offset;
-			return offset == NOT_FOUND ? NOT_FOUND : ID_TYPE_FOUND;
+			return ID_TYPE_GLOBAL;
 		}
 
-		for (int i = found_index - 1; i >= 0; --i) {
+		for (int i = found_index - 1; i >= last_functive; --i) {
 			offset += data[i]->get_var_cnt();
-			if (data[i]->is_functive()) {
-				break;
-			}
 		}
 
 		*res = offset;
-		return offset == NOT_FOUND ? NOT_FOUND : ID_TYPE_FOUND;
+		return ID_TYPE_FOUND;
 	}
 
 	int find_func(const StringView *id) const {
@@ -153,7 +178,7 @@ public:
 			}
 		}
 
-		return offset;
+		return 0;
 	}
 
 	const CodeNode *get_arglist(const StringView *id) {

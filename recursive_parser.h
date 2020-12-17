@@ -732,7 +732,7 @@ private:
 		}
 
 		// 2 args;
-		if (cur->is_op(OPCODE_ELEM_G_INIT) || cur->is_op(OPCODE_ELEM_G_PUT_PIXEL)) {
+		if (cur->is_op(OPCODE_ELEM_G_INIT) || cur->is_op(OPCODE_ELEM_G_PUT_PIXEL) || cur->is_op(OPCODE_ELEM_RANDOM)) {
 			int op = cur->get_op();
 			NEXT();
 			IF_PARSED (cur_index, arg1, parse_EXPR()) {

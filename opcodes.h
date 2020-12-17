@@ -33,7 +33,8 @@ OPDEF(OPCODE_ELEM_PUTN   , 100, "__PUT_NUMBER__", "__PUT_NUMBER__ ", "__PUT_NUMB
 OPDEF(OPCODE_ELEM_PUTC   , 101, "__PUT_CHAR__"  , "__PUT_CHAR__"   , "__PUT_CHAR__;"  )
 OPDEF(OPCODE_ELEM_INPUT  , 102, "@", "@", "")
 OPDEF(OPCODE_ELEM_MALLOC , 103, "#", "#", "")
-OPDEF(OPCODE_ELEM_EXIT   , 104, "exit", "exit ", "exit;")
+OPDEF(OPCODE_ELEM_RANDOM , 104, "%", "%", "")
+OPDEF(OPCODE_ELEM_EXIT   , 105, "exit", "exit ", "exit;")
 
 OPDEF(OPCODE_ELEM_G_INIT      , 110, "__G_INIT__", "__G_INIT__ ", "")
 OPDEF(OPCODE_ELEM_G_DRAW_ON   , 111, "", "", "")

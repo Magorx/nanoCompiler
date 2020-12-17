@@ -1,7 +1,6 @@
 #include <cstdlib>
 #include <cstdio>
 
-// TODO FIX FUNCS REDIFINITION
 // TODO RANDOM
 // TODO INCLUDE
 // TODO RAYTRACER
