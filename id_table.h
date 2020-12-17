@@ -72,7 +72,7 @@ public:
 		int offset = NOT_FOUND;
 		int found_index = -1;
 
-		for (int i = cur_scope; i >= 1; --i) {
+		for (int i = cur_scope; i >= 0; --i) {
 			offset = data[i]->find(ID_TYPE_VAR, id);
 			
 			if (data[i]->is_functive() || offset != NOT_FOUND) {
@@ -103,7 +103,7 @@ public:
 			return offset == NOT_FOUND ? NOT_FOUND : ID_TYPE_FOUND;
 		}
 
-		for (int i = found_index - 1; i >= 1; --i) {
+		for (int i = found_index - 1; i >= 0; --i) {
 			offset += data[i]->get_var_cnt();
 			if (data[i]->is_functive()) {
 				break;
@@ -175,8 +175,8 @@ public:
 		return data[cur_scope]->declare(type, id, size, arglist);
 	}
 
-	bool declare_func(const StringView *id, const CodeNode *arglist) {
-		return declare(ID_TYPE_FUNC, id, 0, arglist);
+	bool declare_func(const StringView *id, const CodeNode *arglist, const int offset = 0) {
+		return declare(ID_TYPE_FUNC, id, offset, arglist);
 	}
 
 	bool declare_var(const StringView *id, const int size, const CodeNode *fields = nullptr) {
@@ -227,6 +227,10 @@ public:
 		} else {
 			return false;
 		}
+	}
+
+	int size() {
+		return (int) data.size();
 	}
 
 	void dump() const {

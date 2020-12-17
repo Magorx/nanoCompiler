@@ -88,12 +88,20 @@
 		ret p;
 	}
 
+	func val[var x] ret x;
+
 	func main {
-		var a = 4;
-		var b = 5;
-		var c = 7;
+		func main[var a] {
+			func sum[var a][var b] {
+				ret val[a] + val[b];
+			}
+			
+			ret sum[val[a]][val[10]];
+		}
+		printn[main[2]];
+		ret 999;
 	}
 
-	main;
-
+	printn[main];
 }
+

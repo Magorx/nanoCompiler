@@ -483,14 +483,22 @@ private:
 				}
 
 				StringView *id = node->L->R->get_id();
+				if (id_table.find_in_upper_scope(ID_TYPE_FUNC, id) != NOT_FOUND) {
+					RAISE_ERROR("Redifenition of function [");
+					id->print();
+					printf("]\n");
+					LOG_ERROR_LINE_POS(node);
+				}
+
+				id_table.declare_func(id, node->L->L, id_table.size());
+				int offset = id_table.find_func(id);
+
 				fprintf(file, "jmp _func_");
 				id->print(file);
-				fprintf(file, "_END\n");
+				fprintf(file, "_%d_END\n", offset);
 				fprintf(file, "_func_");
 				id->print(file);
-				fprintf(file, "_BEGIN:\n");
-
-				id_table.declare_func(id, node->L->L);
+				fprintf(file, "_%d_BEGIN:\n", offset);
 
 				id_table.add_scope(true);
 				COMPILE_L();
@@ -501,7 +509,7 @@ private:
 				fprintf(file, "ret\n");
 				fprintf(file, "_func_");
 				id->print(file);
-				fprintf(file, "_END:\n");
+				fprintf(file, "_%d_END:\n", offset);
 				break;
 			}
 
@@ -509,7 +517,7 @@ private:
 				COMPILE_L();
 
 				node->R->get_id()->print(file);
-				fprintf(file, ":\n");
+				fprintf(file, "_%d:\n", id_table.find_func(node->R->get_id()));
 				break;
 			}
 
@@ -615,7 +623,8 @@ private:
 
 		const CodeNode *arglist = node->L;
 
-		if (id_table.find_func(id) == NOT_FOUND) {
+		int func_offset = 0;
+		if ((func_offset = id_table.find_func(id)) == NOT_FOUND) {
 			RAISE_ERROR("bad func call, func not declared [");
 			id->print();
 			printf("]\n");
@@ -667,7 +676,7 @@ private:
 
 		fprintf(file, "call ");
 		id->print(file);
-		fprintf(file, "\n");
+		fprintf(file, "_%d\n", func_offset);
 
 		fprintf(file, "push rvx\n");
 		fprintf(file, "push %d\n", id_table.get_func_offset());

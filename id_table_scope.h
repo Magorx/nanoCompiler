@@ -133,6 +133,9 @@ public:
 		int id_offset = 0;
 		for (size_t i = 0; i < data_size; ++i) {
 			if (idat.equal(data[i])) {
+				if (type == ID_TYPE_FUNC) {
+					return data[i].offset;
+				}
 				return id_offset;
 			} else {
 				id_offset += data[i].offset;
