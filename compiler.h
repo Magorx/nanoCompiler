@@ -249,7 +249,10 @@ private:
 				int offset = 0;
 				id_table.find_var(arr_name->get_id(), &offset);
 				fprintf(file, "push rvx + %d\n", offset);
-				fprintf(file, "add\n");
+				//fprintf(file, "add\n");
+				// fprintf(file, "dup\n");
+				// fprintf(file, "out\n");
+				// fprintf(file, "out_n\n");
 				fprintf(file, "pop [rvx + %d]\n", offset);
 
 				break;
@@ -294,6 +297,27 @@ private:
 				break;
 			}
 
+			case OPCODE_CONTINUE : {
+				if (!cycles_end_stack.size()) {
+					RAISE_ERROR("You can't use |< outside of the loop\n");
+					LOG_ERROR_LINE_POS(node);
+					break;
+				}
+
+				Cycle cur_cycle = cycles_end_stack[cycles_end_stack.size() - 1];
+				if (cur_cycle.type == CYCLE_TYPE_WHILE) {
+					fprintf(file, "jmp while_%d_cond\n", cur_cycle.number);
+				} else if (cur_cycle.type == CYCLE_TYPE_FOR) {
+					fprintf(file, "jmp for_%d_action\n", cur_cycle.number);
+				} else {
+					RAISE_ERROR("What cycle are you using??\n");
+					LOG_ERROR_LINE_POS(node);
+					break;
+				}
+
+				break;
+			}
+
 			case OPCODE_IF : {
 				int cur_if_cnt = ++if_cnt;
 				fprintf(file, "if_%d_cond:\n", cur_if_cnt);
@@ -326,6 +350,7 @@ private:
 
 				compile(node->R, file);
 
+				fprintf(file, "for_%d_action:\n", cur_for_cnt);
 				compile_expr(node->L->R, file, true);
 				fprintf(file, "jmp for_%d_cond\n", cur_for_cnt);
 				
@@ -870,7 +895,7 @@ private:
 		assert(node);
 		assert(file);
 
-		fprintf(file, "%lf", node->get_val());
+		fprintf(file, "%.7lg", node->get_val());
 		return true;
 	}
 
@@ -888,19 +913,19 @@ private:
 				printf("]\n");
 				LOG_ERROR_LINE_POS(node);
 			}
-			printf("\n\n==================\n");
-			printf("compile var |");
-			node->get_id()->print();
-			printf("|\n");
-			printf("~~~~~~~~~~~~~~~~~~\n");
-			printf("cur id_table:\n");
-			id_table.dump();
+			// printf("\n\n==================\n");
+			// printf("compile var |");
+			// node->get_id()->print();
+			// printf("|\n");
+			// printf("~~~~~~~~~~~~~~~~~~\n");
+			// printf("cur id_table:\n");
+			// id_table.dump();
 
 			int offset = 0;
 			int is_found = id_table.find_var(node->get_id(), &offset);
 
-			printf("\nfound = %d", offset);
-			printf("\n==================\n");
+			// printf("\nfound = %d", offset);
+			// printf("\n==================\n");
 
 
 

@@ -1,6 +1,7 @@
 {
 	
 	var GLOBAL_UNDESTURBENCE_CHECKER = 7777777;
+	var _SYMBOL_SIZE_Y_FIXING_COEF = 1.52;
 
 	/*===========================================*\
 	|=============== STL LIBRARY =================|
@@ -90,34 +91,30 @@
 	|=============== STL LIBRARY =================|
 	\*===========================================*/
 
-	func draw_circle[x][y][r][var c = '#'] {
+	func draw_circle[x][y][r][c] {
 		>> (var i = 0 | i < _SCREEN_H | i = i + 1) {
 			>> (var j = 0 | j < _SCREEN_W | j = j + 1) {
-				var dist = ((x - i)^2 + (y - j)^2) ^ 0.5;
+				var dist = ((x - i)^2 + ((y - j) / _SYMBOL_SIZE_Y_FIXING_COEF)^2) ^ 0.5;
 				? (dist < r) put_pxl[i][j];
 			}
 		}
 	}
 
 	func main {
-		var x = 15;
-		printn[_SCREEN_W][_SCREEN_H];
-		var y = 30;
-		printn[x][y];
-		//g_init;
+		g_init;
 
-		/*>| (1) {
-			var max_r = % 1 15;
-			var x = % 0 _SCREEN_W;
-			var y = % 0 _SCREEN_H;
-			>> (var r = 0 | r < max_r | r += 1) {
-				draw_circle[x][y][r][% 'a' 'z'];
-				//g_tick;
+		>| (1) {
+			var max_r = % 1 15; // random
+			var y = % 0 _SCREEN_W;
+			var x = % 0 _SCREEN_H;
+			>> (var r = max_r | r > 0 | r -= 1) {
+				var c = % 0 11;
+				draw_circle;
+				g_tick;
 			}
-		}*/
+		}
 	}
 
-	printn[main][1];
-	@;
+	printn[main];
 
 }

@@ -33,8 +33,8 @@ private:
 	int            ERROR;
 	const Token   *ERRPOS;
 //=============================================================================
-	#define NEXT() ++cur_index; cur = &(*expr)[cur_index]
-	#define PREV() --cur_index; cur = &(*expr)[cur_index]
+	#define NEXT()  ++cur_index;       cur = &(*expr)[cur_index]
+	#define PREV()  --cur_index;       cur = &(*expr)[cur_index]
 	#define SETI(ind) cur_index = ind; cur = &(*expr)[cur_index]
 
 	#define RESET_POINT int ENTER_INDEX
@@ -605,6 +605,11 @@ private:
 		if (cur->is_op(OPCODE_BREAK)) {
 			NEXT();
 			return NEW_NODE(OPERATION, OPCODE_BREAK, nullptr, nullptr);
+		}
+
+		if (cur->is_op(OPCODE_CONTINUE)) {
+			NEXT();
+			return NEW_NODE(OPERATION, OPCODE_CONTINUE, nullptr, nullptr);
 		}
 
 		IF_PARSED (cur_index, var_def, parse_NEW_VAR_DEF()) {

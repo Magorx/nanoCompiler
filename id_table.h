@@ -173,7 +173,7 @@ public:
 		int offset = 0;
 		for (int i = cur_scope; i >= 0; --i) {
 			offset += data[i]->get_var_cnt();
-			if (data[i]->is_functive()) {
+			if (data[i]->is_functive() == FUNC_SCOPE) {
 				return offset;
 			}
 		}

@@ -91,15 +91,12 @@
 	func val[var x] ret x;
 
 	func main {
-		func main[var a] {
-			func sum[var a][var b] {
-				ret val[a] + val[b];
-			}
-			
-			ret sum[val[a]][val[10]];
+		var a = 0;
+		>| (a < 10) {
+			a += 1;
+			? (a < 5) <<;
+			__PUT_NUMBER__ a;
 		}
-		printn[main[2]];
-		ret 0;
 	}
 
 	printn[main];
