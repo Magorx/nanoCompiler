@@ -19,4 +19,7 @@ Hurray, our programm is alive!
 <img src="pics/1.jpg">
 <img src="pics/2.jpg">
 <img src="pics/3.jpg">
-<img src="pics/4.jpg">
+<img src="pics/4.jpg">  
+The only thing left to mention here: if a variable name starts with '_' (underscore), it becomes a constant
+
+Check out examples of programms in examples folder! And yeah, there you can find a first ray-tracer ever written in Context!
