@@ -9,7 +9,7 @@ The language is made as a joke in term of syntax and some over architecture deci
 
 ## How to use
 Just run ```make``` to compiler ```kncc``` - kNanoContextCompiler that will compile programms into assembler  
-Call ```kncc input_filename``` to get default output file name or  ```kncc input_filename output_filename``` to compile input_file into asm file called as output_filename  
+Call ```kncc input_filename``` to get default output file name or  ```kncc input_filename output_filename``` to compile input_file into asm file called output_filename  
 Let's assume we ran ```kncc prog.ctx out.kc```. So ```out.kc``` is now a file with assembler for SPU from dependencies. Let's compile it into a bytecode now (check tutorial from SPU page):  
 ```kasm out.kc out.tf```. ```out.tf``` is a machine code for out processor, let's run it:  
 ```kspu out.tf```   
