@@ -4,9 +4,9 @@ ifndef VERBOSE
 .SILENT:
 endif
 
-GENERAL_PREFIX = general
-GC = $(GENERAL_PREFIX)/c
-GCPP = $(GENERAL_PREFIX)/cpp
+G = general
+GC = $(G)/c
+GCPP = $(G)/cpp
 
 CC = gcc
 CPP = g++
@@ -20,8 +20,14 @@ all: kncc
 update: all
 	mv $(CUR_PROG) bin
 
-kncc: main.cpp compiler.h id_table_scope.h id_table.h compiler_options.h recursive_parser.h lexical_parser.h lex_token.h code_node.h $(GC)/announcement.h opcodes.h
-	$(CPP) $(CFLAGS) main.cpp -o kncc
+kncc: main.cpp compiler.o id_table_scope.o id_table.o compiler_options.o recursive_parser.o lexical_parser.o lex_token.o announcement.o code_node.o opcodes.h 
+	$(CPP) $(CFLAGS) main.cpp compiler.o recursive_parser.o code_node.o compiler_options.o lex_token.o lexical_parser.o id_table.o id_table_scope.o $(G)/announcement.o -o kncc
+
+%.o : %.cpp
+	$(CPP) $(C_FLAGS) -c $< -o $@
+
+announcement.o: $(GC)/announcement.h $(GC)/announcement.c
+	make -C general announcement.o
 
 run: all
 	./$(CUR_PROG)
@@ -45,3 +51,6 @@ valg: all
 
 stable: all
 	cp ./$(CUR_PROG) ./bin
+
+clean:
+	rm *.o

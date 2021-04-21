@@ -1,6 +1,7 @@
 #ifndef CPP_FILE_H
 #define CPP_FILE_H
 
+#include <cstdlib>
 #include <cctype>
 #include <sys/stat.h>
 

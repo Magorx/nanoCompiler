@@ -25,5 +25,17 @@ main_cpp: main.cpp general_cpp.h
 	$(CPP) $(CFLAGS) main.cpp -o out
 	./out
 
+%.o : c/%.c
+	@echo !!!
+	$(CPP) $(C_FLAGS) -c $< -o $@
+
+%.o : cpp/%.cpp
+	@echo 123
+	$(CPP) $(C_FLAGS) -c $< -o $@
+
 run: all
 	./$(CUR_PROG)
+	
+clean:
+	rm *.o
+

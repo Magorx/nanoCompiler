@@ -4,11 +4,11 @@
 #include <string.h>
 #include <cstdio>
 
-const char *THE_LAST_ANNOUNCER     = nullptr;
-int         THE_LAST_ANNOUNCER_LEN = 0 ;
+extern const char *THE_LAST_ANNOUNCER;
+extern int         THE_LAST_ANNOUNCER_LEN;
 
-const char *THE_LAST_CODE          = nullptr;
-int         THE_LAST_CODE_LEN      = 0 ;
+extern const char *THE_LAST_CODE;
+extern int         THE_LAST_CODE_LEN;
 
 
 #define ANNOUNCEMENT(fileptr, code, announcer, format, ...)                                               \
@@ -57,7 +57,7 @@ int         THE_LAST_CODE_LEN      = 0 ;
 #define ANNOUNCE(code, announcer, format, ...) ANNOUNCEMENT(stdout, code, announcer, format "\n", __VA_ARGS__)
 
 
-const char *ANNOUNCEMENT_ERROR = nullptr;
+extern const char *ANNOUNCEMENT_ERROR;
 #define RAISE_ERROR(err_format, ...) ANNOUNCEMENT_ERROR = (const char*) err_format; ANNOUNCEMENT(stderr, "ERR", __FUNCTION__, err_format, __VA_ARGS__)
 
 #define RAISE_ERROR_SYNTAX(string, pos)                                                   \
