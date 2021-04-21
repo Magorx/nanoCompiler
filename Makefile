@@ -20,7 +20,7 @@ all: kncc
 update: all
 	mv $(CUR_PROG) bin
 
-kncc: main.cpp compiler.h id_table_scope.h id_table.h compiler_options.h recursive_parser.h lexical_parser.h lex_token.h code_node.h $(GC)/announcement.h
+kncc: main.cpp compiler.h id_table_scope.h id_table.h compiler_options.h recursive_parser.h lexical_parser.h lex_token.h code_node.h $(GC)/announcement.h opcodes.h
 	$(CPP) $(CFLAGS) main.cpp -o kncc
 
 run: all
@@ -42,3 +42,6 @@ crun:
 
 valg: all
 	valgrind --leak-check=full --show-leak-kinds=all -s ./$(CUR_PROG)
+
+stable: all
+	cp ./$(CUR_PROG) ./bin

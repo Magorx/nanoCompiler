@@ -1,12 +1,6 @@
 #include <cstdlib>
 #include <cstdio>
 
-// TODO RANDOM
-// TODO INCLUDE
-// TODO RAYTRACER
-// TODO %
-
-
 #include "general/c/debug.h"
 #include "general/warnings.h"
 
@@ -32,7 +26,7 @@ int main(const int argc, const char **argv) {
 	File file = {};
 	file.ctor(input_file);
 	if (!file.data) {
-		ANNOUNCE("ERR", "kncc", "problems with input file [%s]", input_file);
+		ANNOUNCE("ERR", "kncc", "can't find input file [%s]", input_file);
 		return -1;
 	}
 
@@ -41,7 +35,7 @@ int main(const int argc, const char **argv) {
 	CodeNode *prog = comp.read_to_nodes(&file);
 
 	if (!prog) {
-		ANNOUNCE("ERR", "kncc", "problems with parsing [%s]", input_file);
+		ANNOUNCE("ERR", "kncc", "can't parse input file [%s]", input_file);
 		file.dtor();
 		comp.dtor();
 		return -1;
@@ -50,7 +44,7 @@ int main(const int argc, const char **argv) {
 	if (verbosity) prog->gv_dump();
 
 	if (!comp.compile(prog, output_file)) {
-		ANNOUNCE("ERR", "kncc", "problems with compiling [%s]", input_file);
+		ANNOUNCE("ERR", "kncc", "can't compile input file [%s]", input_file);
 		CodeNode::DELETE(prog, true, true);
 		file.dtor();
 		comp.dtor();

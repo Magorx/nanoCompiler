@@ -37,7 +37,7 @@ OPDEF(OPCODE_ELEM_MALLOC , 103, "#", "#", "")
 OPDEF(OPCODE_ELEM_RANDOM , 104, "%", "%", "")
 OPDEF(OPCODE_ELEM_EXIT   , 105, "exit", "exit ", "exit;")
 
-OPDEF(OPCODE_ELEM_G_INIT      , 110, "__G_INIT__", "", "")
+OPDEF(OPCODE_ELEM_G_INIT      , 110, "__G_INIT__", "__G_INIT__", "")
 OPDEF(OPCODE_ELEM_G_DRAW_ON   , 111, "", "", "")
 OPDEF(OPCODE_ELEM_G_DRAW_OFF  , 112, "", "", "")
 OPDEF(OPCODE_ELEM_G_DRAW_TICK , 113, "__G_TICK__", "__G_TICK__", "")
