@@ -1,0 +1,12 @@
+{
+	func main_fact { 
+		>> (var q = 0 | q < 1000000 | q += 1) {
+			func fact[var x] ? (x <= 1) ret 1; : ret x * fact[x - 1]; /> you can define funcs inside of other funcs </
+			                                                          /* so that they won't be seen outside         */
+
+			fact[20]; /* prints a double */
+		}
+	}
+
+	main_fact; /* calling main_fact */
+}
